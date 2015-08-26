@@ -34,7 +34,7 @@
           // define render function
           scope.render = function(data){
             // remove all previous items before render
-            svg.selectAll("*").remove();
+            //svg.selectAll("*").remove();
 
             // setup variables
             var width, height, max;
@@ -48,11 +48,10 @@
 
             // set the height based on the calculations above
             svg.attr('height', 400);
-
             //create the rectangles for the bar chart
-            svg.selectAll("circle")
-              .data(data)
-              .enter()
+            var circles = svg.selectAll("circle").data(data);
+						
+            circles.enter()
                 .append("circle")
                 .on("click", function(d, i){return scope.onClick({item: d});})
 								.style("fill", function() {return "rgba(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + ",0.5)"})
@@ -63,6 +62,12 @@
                   return (i+1) * 200;
                 }) // half of the 20 side margin specified above
                 .attr("cy", 200) // height + margin between bars
+                .transition()
+                  .duration(1000) // time of duration
+                  .attr("r", function(d){
+                    return d.size/(max/width);
+                  }); // width based on scale
+							circles
                 .transition()
                   .duration(1000) // time of duration
                   .attr("r", function(d){

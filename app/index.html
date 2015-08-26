@@ -13,7 +13,7 @@
 			<span>{{title}}</span>
 			<div ng-repeat="dmo in dmos">
 				<span>{{dmo.name}} size</span>
-				<input type="text" ng-model="dmo.size"></input>
+				<input type="range" min="0" max="200" ng-model="dmo.size"></input>
 			</div>
 			<dmo-visuals data="dmos" label="name" on-click="d3OnClick(item)"></dmo-visuals>
 		</div>
