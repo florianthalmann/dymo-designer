@@ -1,0 +1,22 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+	<script src="scripts/app.js"></script>
+	<script src="scripts/services/d3.js"></script>
+	<script src="scripts/controllers/demoCtrl.js"></script>
+	<script src="scripts/directives/d3Basic.js"></script>
+</head>
+<body ng-app="dmoDesigner">
+	<div>
+		<div ng-controller="DemoCtrl">
+			<span>{{title}}</span>
+			<div ng-repeat="dmo in dmos">
+				<span>{{dmo.name}} size</span>
+				<input type="text" ng-model="dmo.size"></input>
+			</div>
+			<dmo-visuals data="dmos" label="name" on-click="d3OnClick(item)"></dmo-visuals>
+		</div>
+	</div>
+</body>
+</html>
