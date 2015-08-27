@@ -1,15 +1,30 @@
 * {
-  margin: 0;
-  padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 html, body { height: 100%; }
 
-body {
-  font-family: Avenir Next, Arial, sans-serif;
-  font-size: 24px;
+body, button {
+	font-family: Avenir Next, Arial, sans-serif;
+	font-size: 24px;
 	text-align: center;
-  line-height: 1.2;
-  font-weight: 300;
-  background-color: #fdfdfd;
+	/*line-height: 1.5;*/
+	font-weight: 300;
+	background-color: #fdfdfd;
+	padding:5px 10px;
+}
+
+button {
+	-moz-border-radius:12px;
+	-webkit-border-radius:12px;
+	border-radius:12px;
+	border:1px solid #eeeeee;
+	display:inline-block;
+	/*cursor:pointer;
+	padding:5px 5px;*/
+}
+
+button:hover {
+	background-color:#eeeeee;
 }

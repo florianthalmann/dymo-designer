@@ -46,7 +46,7 @@
 							.on("click", function(d, i){return scope.onClick({item: d});})
 							.style("fill", function() {return "rgba(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + ",0.5)"})
 							.attr("r", 1)
-							.attr("cx", function(d, i){return (i+1) * width/4;})
+							.attr("cx", function(d, i){return (i+1) * width/(data.length+1);})
 							.attr("cy", 200) // height + margin between bars
 							.transition()
 								.duration(0) // time of duration
@@ -56,7 +56,7 @@
 							.transition()
 								.duration(0) // time of duration
 								.attr("r", function(d){return d.size/(1000/width);}) // width based on scale
-								.attr("cx", function(d, i){return (i+1) * width/4;});
+								.attr("cx", function(d, i){return (i+1) * width/(data.length+1);});
 						
 						var text = svg.selectAll("text").data(data);
 						
@@ -64,13 +64,13 @@
 								.append("text")
 								.attr("fill", "#fff")
 								.attr("y", 205)
-								.attr("x", function(d, i){return (i+1) * width/4 - 30;})
+								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})
 								.text(function(d){return d[scope.label];});
 						
 						text
 							.transition()
 								.duration(0) // time of duration
-								.attr("x", function(d, i){return (i+1) * width/4 - 30;})
+								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})
 					};
 				}
 			};

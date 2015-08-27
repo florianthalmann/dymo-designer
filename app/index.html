@@ -5,18 +5,21 @@
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
 	<script src="scripts/app.js"></script>
 	<script src="scripts/services/d3.js"></script>
-	<script src="scripts/controllers/demoCtrl.js"></script>
-	<script src="scripts/directives/d3Basic.js"></script>
+	<script src="scripts/controllers/dmocontroller.js"></script>
+	<script src="scripts/directives/dmovisuals.js"></script>
 </head>
 <body ng-app="dmoDesigner">
 	<div>
-		<div ng-controller="DemoCtrl">
+		<div ng-controller="DmoController">
 			<span>{{title}}</span>
-			<div ng-repeat="dmo in dmos">
-				<span>{{dmo.name}} size</span>
-				<input type="range" min="0" max="200" ng-model="dmo.size"></input>
+			<div>
+				<button ng-click="addDmo()">Add DMO</button>
 			</div>
-			<dmo-visuals data="dmos" label="name" on-click="d3OnClick(item)"></dmo-visuals>
+			<div ng-show="selectedDmo">
+				<span>{{selectedDmo.name}} size</span>
+				<input type="range" min="0" max="200" ng-model="selectedDmo.size"></input>
+			</div>
+			<dmo-visuals data="dmos" label="name" on-click="dmoOnClick(item)"></dmo-visuals>
 		</div>
 	</div>
 </body>
