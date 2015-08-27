@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: Avenir Next, Arial, sans-serif;
+  font-size: 24px;
+	text-align: center;
+  line-height: 1.2;
+  font-weight: 300;
+  background-color: #fdfdfd;
+}
