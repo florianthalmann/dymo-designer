@@ -4,7 +4,6 @@ function OntologyLoader(dmoPath, $scope, $interval) {
 	var multitrackRdfUri = "http://purl.org/ontology/studio/multitrack";
 	var rdfsUri = "http://www.w3.org/2000/01/rdf-schema";
 	
-	var dmos = {}; //dmos at all hierarchy levels for quick access during mapping assignment
 	var features = {};
 	
 	var eventOntology = "http://purl.org/NET/c4dm/event.owl";

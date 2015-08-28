@@ -2,7 +2,7 @@
 	'use strict';
 	
 	angular.module('dmoDesigner.directives')
-		.directive('dmoVisuals', ['d3', function(d3) {
+		.directive('dmoBubbles', ['d3', function(d3) {
 			return {
 				restrict: 'EA',
 				scope: {
@@ -36,7 +36,7 @@
 						// setup variables
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
 						// set the height based on the calculations above
-						svg.attr('height', 400);
+						svg.attr('height', 500);
 						
 						//create the rectangles for the bar chart
 						var circles = svg.selectAll("circle").data(data);
@@ -47,7 +47,7 @@
 							.style("fill", function() {return "rgba(" + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + "," + Math.round(Math.random() * 255) + ",0.5)"})
 							.attr("r", 1)
 							.attr("cx", function(d, i){return (i+1) * width/(data.length+1);})
-							.attr("cy", 200) // height + margin between bars
+							.attr("cy", 250) // height + margin between bars
 							.transition()
 								.duration(0) // time of duration
 								.attr("r", function(d){ return d.size/(1000/width); }); // width based on scale
@@ -63,7 +63,7 @@
 						text.enter()
 								.append("text")
 								.attr("fill", "#fff")
-								.attr("y", 205)
+								.attr("y", 255)
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})
 								.text(function(d){return d[scope.label];});
 						

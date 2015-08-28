@@ -4,22 +4,25 @@
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
 	<script src="scripts/app.js"></script>
-	<script src="scripts/services/d3.js"></script>
+	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/dmocontroller.js"></script>
-	<script src="scripts/directives/dmovisuals.js"></script>
+	<script src="scripts/directives/dmobubbles.js"></script>
+	<script src="scripts/directives/dmograph.js"></script>
 </head>
 <body ng-app="dmoDesigner">
 	<div>
+		<span>DMO Generator</span>
 		<div ng-controller="DmoController">
-			<span>{{title}}</span>
 			<div>
 				<button ng-click="addDmo()">Add DMO</button>
 			</div>
 			<div ng-show="selectedDmo">
 				<span>{{selectedDmo.name}} size</span>
 				<input type="range" min="0" max="200" ng-model="selectedDmo.size"></input>
+				<button ng-click="addChildren()">Add Features</button>
 			</div>
-			<dmo-visuals data="dmos" label="name" on-click="dmoOnClick(item)"></dmo-visuals>
+			<dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+			<!--dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles-->
 		</div>
 	</div>
 </body>

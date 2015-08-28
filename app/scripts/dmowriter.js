@@ -5,24 +5,6 @@ function DmoWriter(dmoPath, $scope, $interval) {
 	var multitrackRdfUri = "http://purl.org/ontology/studio/multitrack";
 	var rdfsUri = "http://www.w3.org/2000/01/rdf-schema";
 	
-	/*this.writeDmo = function(uri) {
-		rdfstore.create(function(err, store) {
-			store.setPrefix("mb", "rdf/mobile.n3#");
-			var graph = store.rdf.createGraph();
-			addDmo(store, graph);
-			addDmo(store, graph);
-			console.log(graph.toNT());
-		});
-	}
-	
-	function addDmo(store, graph) {
-		graph.add(store.rdf.createTriple(
-			store.rdf.createBlankNode(),
-			store.rdf.createNamedNode(RDF_TYPE),
-			store.rdf.createNamedNode("mb:DMO")
-		));
-	}*/
-	
 	this.writeDmo = function(uri) {
 		var writer = N3.Writer({ prefixes: { 'mb': 'rdf/mobile.n3#' } });
 		addDmo(writer);
