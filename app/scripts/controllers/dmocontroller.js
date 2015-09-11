@@ -11,6 +11,7 @@
 			$scope.dmo = null;
 			$scope.dmoGraph = {nodes:[], links:[]};
 			$scope.dmoList = [];
+			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}];
 			
 			$scope.dmoOnClick = function(dmo){
 				$scope.selectedDmo = dmo;
@@ -47,6 +48,10 @@
 			function registerDmo(dmo) {
 				$scope.dmoList.push(dmo);
 				$scope.dmoGraph.nodes.push(dmo);
+				for (var i = 0; i < $scope.parameters.length; i++) {
+					var p = $scope.parameters[i];
+					p.max = Math.max(dmo[p.name], p.max);
+				}
 			}
 			
 			var addSegmentation = function(segments) {
@@ -99,6 +104,8 @@
 			function createNewDmo() {
 				return {
 					name: "dmo" + ($scope.dmoList.length+1),
+					time: Math.random()*10,
+					duration: Math.random()*10,
 					children: []
 				}
 			}
