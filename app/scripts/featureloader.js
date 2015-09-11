@@ -1,35 +1,31 @@
-function OntologyLoader(dmoPath, $scope, $interval) {
+function FeatureLoader($scope, $http) {
 	
 	var mobileRdfUri = "rdf/mobile.n3";
 	var multitrackRdfUri = "http://purl.org/ontology/studio/multitrack";
 	var rdfsUri = "http://www.w3.org/2000/01/rdf-schema";
 	
-	var features = {};
-	
 	var eventOntology = "http://purl.org/NET/c4dm/event.owl";
 	var timelineOntology = "http://purl.org/NET/c4dm/timeline.owl";
 	
-	function loadFeatures(dmo, parameterUri, uri, subsetCondition) {
+	var features = {}
+	
+	this.loadSegmentation = function(uri, labelCondition, callback) {
 		var fileExtension = uri.slice(uri.indexOf('.')+1);
 		if (fileExtension == 'n3') {
-			loadFeaturesFromRdf(dmo, parameterUri, uri, subsetCondition);
+			loadSegmentationFromRdf(uri, labelCondition, callback);
 		} else if (fileExtension == 'json') {
-			loadFeaturesFromJson(dmo, parameterUri, uri, subsetCondition);
+			loadSegmentationFromJson(uri, labelCondition, callback);
 		}
 	}
 		
-	function loadFeaturesFromRdf(dmo, parameterUri, rdfUri, subsetCondition) {
+	function loadSegmentationFromRdf(rdfUri, labelCondition, callback) {
 		if (features[rdfUri]) {
-			setSegmentationFromRdf(dmo, rdfUri, subsetCondition)
+			setSegmentationFromRdf(rdfUri, labelCondition, callback)
 		} else {
-			//console.log("start");
 			$scope.featureLoadingThreads++;
 			$http.get(rdfUri).success(function(data) {
-				//console.log("get");
 				rdfstore.create(function(err, store) {
-					//console.log("create");
 					store.load('text/turtle', data, function(err, results) {
-						//console.log("load");
 						if (err) {
 							console.log(err);
 						}
@@ -44,11 +40,14 @@ function OntologyLoader(dmoPath, $scope, $interval) {
 							var times = [];
 							for (var i = 0; i < results.length; i++) {
 								//insert value/label pairs
-								times.push({ time: toSecondsNumber(results[i].xsdTime.value), label: getValue(results[i].label) });
+								times.push({
+									time: {value: toSecondsNumber(results[i].xsdTime.value)},
+									label: {value: getValue(results[i].label)}
+								});
 							}
 							//save so that file does not have to be read twice
 							features[rdfUri] = times.sort(function(a,b){return a.time - b.time});
-							setSegmentationFromRdf(dmo, rdfUri, subsetCondition);
+							setSegmentationFromRdf(rdfUri, labelCondition, callback);
 							$scope.featureLoadingThreads--;
 							$scope.$apply();
 						});
@@ -58,34 +57,30 @@ function OntologyLoader(dmoPath, $scope, $interval) {
 		}
 	}
 	
-	function setSegmentationFromRdf(dmo, rdfUri, subsetCondition) {
+	function setSegmentationFromRdf(rdfUri, labelCondition, callback) {
 		subset = features[rdfUri];
-		if (subsetCondition) {
-			subset = features[rdfUri].filter(function(x) { return x.label == subsetCondition; });
+		if (labelCondition) {
+			subset = features[rdfUri].filter(function(x) { return x.label == labelCondition; });
 		}
 		subset = subset.map(function(x) { return x.time; });
-		dmo.setSegmentation(subset);
+		callback(subset);
 	}
 	
-	function loadFeaturesFromJson(dmo, parameterUri, jsonUri, subsetCondition) {
-		if (features[jsonUri]) {
-			setSegmentationFromRdf(dmo, jsonUri, subsetCondition)
-		} else {
-			$scope.featureLoadingThreads++;
-			$http.get(jsonUri).success(function(json) {
-				if (json.beat) {
-					json = json.beat[0].data;
-					if (subsetCondition) {
-						json = json.filter(function(x) { return x.label.value == subsetCondition; });
-					}
-					json = json.map(function(x) { return x.time.value; });
+	function loadSegmentationFromJson(jsonUri, labelCondition, callback) {
+		$scope.featureLoadingThreads++;
+		$http.get(jsonUri).success(function(json) {
+			if (json.beat) {
+				json = json.beat[0].data;
+				if (labelCondition) {
+					json = json.filter(function(x) { return x.label.value == labelCondition; });
 				}
-				dmo.setSegmentation(json);
-				
-				$scope.featureLoadingThreads--;
-				$scope.$apply();
-			});
-		}
+				//json = json.map(function(x) { return x.time.value; });
+			}
+			callback(json);
+			
+			$scope.featureLoadingThreads--;
+			//$scope.$apply();
+		});
 	}
 	
 	function loadGraph(dmo, parameterUri, jsonUri) {

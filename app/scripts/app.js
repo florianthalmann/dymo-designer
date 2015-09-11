@@ -12,5 +12,4 @@
 	angular.module('dmoDesigner.controllers', []);
 	angular.module('dmoDesigner.directives', ['d3']);
 
-
 }());

@@ -30,6 +30,9 @@
 					var node = svg.selectAll(".node"),
 						link = svg.selectAll(".link");
 					
+					var nodes = force.nodes(),
+						links = force.links();
+					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
 						return scope.$apply();
@@ -48,6 +51,7 @@
 					
 					// define render function
 					scope.render = function(graph) {
+						console.log(graph);
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
 						var height = 500;
 						svg.attr('height', height);
@@ -57,14 +61,17 @@
 							.nodes(graph.nodes)
 							.links(graph.links);
 						
-						link = link.data(force.links(), function(d) { return d.source.name + "-" + d.target.name; });
-						link.enter().insert("line", ".node").attr('stroke', getRandomRgba(0.1)).style("stroke-width", 1);
+						//console.log(link);
+						var alpha = 0.1;
+						link = link.data(force.links(), function(d) { console.log(d.source.name + "-" + d.target.name); return d.source.name + "-" + d.target.name; });
+						link.enter().insert("line", ".node").attr('stroke', getRandomRgba).style("stroke-width", 1);
 						link.exit().remove();
-							
-						node = node.data(force.nodes(), function(d) { return d.name;});
+						
+						alpha = 0.4;
+						node = node.data(force.nodes(), function(d) { console.log(d.name); return d.name;});
 						node.enter().append("circle")
 							.attr("r", function(d){return d.size/(5000/width)+30})
-							.style("fill", getRandomRgba(0.5))
+							.style("fill", getRandomRgba)
 							.call(force.drag)
 							.on("click", function(d, i){return scope.onClick({item: d});});
 						node
@@ -76,7 +83,7 @@
 						force.start();
 						
 						
-						function getRandomRgba(alpha) {
+						function getRandomRgba() {
 							return "rgba(" + Math.round(Math.random() * 255) + ","
 								+ Math.round(Math.random() * 255) + ","
 								+ Math.round(Math.random() * 255) + ","

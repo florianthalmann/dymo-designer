@@ -1,4 +1,4 @@
-function DmoWriter(dmoPath, $scope, $interval) {
+function DmoWriter(dmoPath) {
 	
 	var RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 	var mobileRdfUri = "rdf/mobile.n3";

@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
 	<script src="scripts/app.js"></script>
+	<script src="scripts/featureloader.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/dmocontroller.js"></script>
 	<script src="scripts/directives/dmobubbles.js"></script>
@@ -17,9 +18,10 @@
 				<button ng-click="addDmo()">Add DMO</button>
 			</div>
 			<div ng-show="selectedDmo">
-				<span>{{selectedDmo.name}} size</span>
-				<input type="range" min="0" max="200" ng-model="selectedDmo.size"></input>
-				<button ng-click="addChildren()">Add Features</button>
+				<span>{{selectedDmo.name}}</span>
+				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
+				<input type="text" ng-model="featureFile"></input-->
+				<button ng-click="addChildrenFromFeatures()">Add Children</button>
 			</div>
 			<dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			<!--dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles-->
