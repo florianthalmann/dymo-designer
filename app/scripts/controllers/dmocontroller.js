@@ -5,6 +5,7 @@
 		.controller('DmoController', ['$scope', '$http', function($scope, $http){
 			
 			$scope.featureFile = 'features/low.json'
+			$scope.labelCondition = '1'
 			$scope.featureLoadingThreads = 0
 			
 			$scope.dmo = null;
@@ -16,7 +17,7 @@
 				$scope.$apply();
 			};
 			
-			var tempGraph = {};
+			var maxDepth = 0;
 			
 			$scope.addDmo = function() {
 				var newDmo = createNewDmo();
@@ -27,10 +28,6 @@
 				} else {
 					addChildDmo($scope.dmo, newDmo);
 				}
-			}
-			
-			function updateGraph() {
-				$scope.dmoGraph = tempGraph;
 			}
 			
 			function setTopLevelDmo(dmo) {
@@ -58,18 +55,40 @@
 					newDmo.time = segments[i].time.value;
 					newDmo.duration = segments[i+1].time.value - newDmo.time;
 					newDmo.segmentLabel = segments[i].label.value;
-					addChildDmo($scope.dmo, newDmo);
+					parent = getSuitableParent(newDmo);
+					addChildDmo(parent, newDmo);
 				}
+				maxDepth++;
+			}
+			
+			function getSuitableParent(dmo) {
+				var nextCandidate = $scope.dmo;
+				var depth = 0;
+				while (depth < maxDepth) {
+					var children = nextCandidate.children;
+					if (children.length > 0) {
+						for (var i = 0; i < children.length; i++) {
+							if (children[i].time <= dmo.time) {
+								nextCandidate = children[i];
+								depth++;
+							} else {
+								break;
+							}
+						}
+					} else {
+						return nextCandidate;
+					}
+				}
+				return nextCandidate;
 			}
 			
 			$scope.addChildrenFromFeatures = function() {
-				new FeatureLoader($scope, $http).loadSegmentation($scope.featureFile, 1, addSegmentation);
+				new FeatureLoader($scope, $http).loadSegmentation($scope.featureFile, $scope.labelCondition, addSegmentation);
 			}
 			
 			function createNewDmo() {
 				return {
 					name: "dmo" + ($scope.dmoList.length+1),
-					size: parseInt(Math.random()*200),
 					children: []
 				}
 			}

@@ -12,8 +12,8 @@
 				},
 				link: function(scope, iElement, iAttrs) {
 					var force = d3.layout.force()
-						.charge(-300)
-						.linkDistance(170)
+						.charge(-50)
+						.linkDistance(50)
 						.on("tick", function() {
 								node.attr("cx", function(d) { return d.x; })
 									.attr("cy", function(d) { return d.y; })
@@ -51,7 +51,6 @@
 					
 					// define render function
 					scope.render = function(graph) {
-						console.log(graph);
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
 						var height = 500;
 						svg.attr('height', height);
@@ -63,21 +62,21 @@
 						
 						//console.log(link);
 						var alpha = 0.1;
-						link = link.data(force.links(), function(d) { console.log(d.source.name + "-" + d.target.name); return d.source.name + "-" + d.target.name; });
+						link = link.data(force.links(), function(d) { return d.source.name + "-" + d.target.name; });
 						link.enter().insert("line", ".node").attr('stroke', getRandomRgba).style("stroke-width", 1);
 						link.exit().remove();
 						
 						alpha = 0.4;
-						node = node.data(force.nodes(), function(d) { console.log(d.name); return d.name;});
+						node = node.data(force.nodes(), function(d) { return d.name;});
 						node.enter().append("circle")
-							.attr("r", function(d){return d.size/(5000/width)+30})
+							.attr("r", getR)
 							.style("fill", getRandomRgba)
 							.call(force.drag)
 							.on("click", function(d, i){return scope.onClick({item: d});});
 						node
 							.transition()
 							.duration(0)
-							.attr("r", function(d){return d.size/(5000/width)+30})
+							.attr("r", getR)
 						node.exit().remove();
 						
 						force.start();
@@ -88,6 +87,13 @@
 								+ Math.round(Math.random() * 255) + ","
 								+ Math.round(Math.random() * 255) + ","
 								+ alpha + ")";
+						}
+						
+						function getR(d) {
+							if (d.duration) {
+								return d.duration*10;
+							}
+							return 10;
 						}
 					};
 				}
