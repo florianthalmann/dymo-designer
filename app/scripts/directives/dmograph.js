@@ -13,7 +13,7 @@
 				link: function(scope, iElement, iAttrs) {
 					var force = d3.layout.force()
 						.charge(-50)
-						.linkDistance(50)
+						.linkDistance(70)
 						.on("tick", function() {
 								node.attr("cx", function(d) { return d.x; })
 									.attr("cy", function(d) { return d.y; })
@@ -91,7 +91,7 @@
 						
 						function getR(d) {
 							if (d.duration) {
-								return d.duration*10;
+								return (Math.log(d.duration+1) / Math.log(2))*10;
 							}
 							return 10;
 						}

@@ -56,6 +56,7 @@
 					newDmo.duration = segments[i+1].time.value - newDmo.time;
 					newDmo.segmentLabel = segments[i].label.value;
 					parent = getSuitableParent(newDmo);
+					updateParentDuration(parent, newDmo);
 					addChildDmo(parent, newDmo);
 				}
 				maxDepth++;
@@ -80,6 +81,15 @@
 					}
 				}
 				return nextCandidate;
+			}
+			
+			function updateParentDuration(parent, newDmo) {
+				if (!parent.time || newDmo.time < parent.time) {
+					parent.time = newDmo.time;
+				}
+				if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
+					parent.duration = (newDmo.time+newDmo.duration) - parent.time;
+				}
 			}
 			
 			$scope.addChildrenFromFeatures = function() {
