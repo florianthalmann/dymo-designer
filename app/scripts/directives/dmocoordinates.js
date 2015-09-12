@@ -15,6 +15,9 @@
 						.append("svg")
 						.attr("width", "100%");
 					
+					var height = 500;
+					var margin = 50;
+					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
 						return scope.$apply();
@@ -36,7 +39,6 @@
 						// setup variables
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
 						// set the height based on the calculations above
-						var height = 500;
 						svg.attr('height', height);
 						
 						//create the rectangles for the bar chart
@@ -46,16 +48,16 @@
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
 						.style("fill", getRandomRgba)
-							.attr("r", getR)
+							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
 							.transition()
-								.duration(0) // time of duration
+								.duration(500) // time of duration
 								.attr("r", getR); // width based on scale
 							
 						circles
 							.transition()
-								.duration(0) // time of duration
+								.duration(500) // time of duration
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
@@ -75,16 +77,19 @@
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
 						
 						function getXValue(d, i) {
-							return 20+(d[scope.$parent.xAxis.name] / scope.$parent.xAxis.max * (width-40));
+							return (margin/2)+(d[scope.$parent.xAxis.name] / scope.$parent.xAxis.max * (width-margin));
 						}
 						
 						function getYValue(d, i) {
-							return (height-20)-(d[scope.$parent.yAxis.name] / scope.$parent.yAxis.max * (height-40));
+							var value = d[scope.$parent.yAxis.name] / scope.$parent.yAxis.max;
+							value = Math.pow(value, 1/3);
+							return (height-(margin/2))-(value * (height-margin));
 						}
 						
 						function getR(d) {
 							if (d.duration) {
-								return (Math.log(d.duration+1) / Math.log(2))*10;
+								return Math.pow(d.duration, 1/3)*10;
+								//return (Math.log(d.duration+1) / Math.log(3))*10;
 							}
 							return 10;
 						}

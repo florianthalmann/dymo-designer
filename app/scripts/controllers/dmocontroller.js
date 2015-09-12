@@ -48,6 +48,10 @@
 			function registerDmo(dmo) {
 				$scope.dmoList.push(dmo);
 				$scope.dmoGraph.nodes.push(dmo);
+				updateMaxes(dmo);
+			}
+			
+			function updateMaxes(dmo) {
 				for (var i = 0; i < $scope.parameters.length; i++) {
 					var p = $scope.parameters[i];
 					p.max = Math.max(dmo[p.name], p.max);
@@ -95,6 +99,7 @@
 				if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
 					parent.duration = (newDmo.time+newDmo.duration) - parent.time;
 				}
+				updateMaxes(parent);
 			}
 			
 			$scope.addChildrenFromFeatures = function() {
