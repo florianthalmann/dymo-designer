@@ -30,6 +30,8 @@
 				<select ng-init="xAxis = parameters[0]" ng-model="xAxis" ng-options="p.name for p in parameters"></select>
 				<span>y-axis:</span>
 				<select ng-init="yAxis = parameters[1]" ng-model="yAxis" ng-options="p.name for p in parameters"></select>
+				<span>size:</span>
+				<select ng-init="size = parameters[1]" ng-model="size" ng-options="p.name for p in parameters"></select>
 			</div>
 			<div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
@@ -37,7 +39,7 @@
 			</div>
 			<!--dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph-->
 			<!--dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles-->
-			<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+			<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" size="size" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 		</div>
 	</div>
 </body>

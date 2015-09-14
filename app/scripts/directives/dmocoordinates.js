@@ -9,6 +9,7 @@
 					data: "=",
 					xaxis: "=",
 					yaxis: "=",
+					size: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -41,6 +42,10 @@
 					}, true);
 					
 					scope.$watch('yaxis', function(newVals, oldVals) {
+						return scope.render(scope.data);
+					}, true);
+					
+					scope.$watch('size', function(newVals, oldVals) {
 						return scope.render(scope.data);
 					}, true);
 					
@@ -97,11 +102,8 @@
 						}
 						
 						function getR(d) {
-							if (d.duration) {
-								return Math.pow(d.duration, 1/3)*10;
-								//return (Math.log(d.duration+1) / Math.log(3))*10;
-							}
-							return 10;
+							var value = d[scope.$parent.size.name] / scope.$parent.size.max;
+							return 1+value*50;//Math.pow(value, 1/3)*50;
 						}
 						
 						function getRandomRgba() {

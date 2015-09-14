@@ -77,7 +77,7 @@ function FeatureLoader($scope, $http) {
 					results = results.filter(function(x) { return x.label.value == labelCondition; });
 				}
 				dmoController.addSegmentation(results);
-			} else if (outputId == "logcentroid") {
+			} else {
 				dmoController.addFeature(outputId, results.data)
 			}
 			$scope.featureLoadingThreads--;
