@@ -7,6 +7,8 @@
 				restrict: 'EA',
 				scope: {
 					data: "=",
+					xaxis: "=",
+					yaxis: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -32,6 +34,14 @@
 					// watch for data changes and re-render
 					scope.$watch('data', function(newVals, oldVals) {
 						return scope.render(newVals);
+					}, true);
+					
+					scope.$watch('xaxis', function(newVals, oldVals) {
+						return scope.render(scope.data);
+					}, true);
+					
+					scope.$watch('yaxis', function(newVals, oldVals) {
+						return scope.render(scope.data);
 					}, true);
 					
 					// define render function

@@ -9,18 +9,18 @@ function FeatureLoader($scope, $http) {
 	
 	var features = {}
 	
-	this.loadSegmentation = function(uri, labelCondition, callback) {
+	this.loadFeature = function(uri, labelCondition, dmoController) {
 		var fileExtension = uri.slice(uri.indexOf('.')+1);
 		if (fileExtension == 'n3') {
-			loadSegmentationFromRdf(uri, labelCondition, callback);
+			loadFeatureFromRdf(uri, labelCondition, dmoController);
 		} else if (fileExtension == 'json') {
-			loadSegmentationFromJson(uri, labelCondition, callback);
+			loadFeatureFromJson(uri, labelCondition, dmoController);
 		}
 	}
 		
-	function loadSegmentationFromRdf(rdfUri, labelCondition, callback) {
+	function loadFeatureFromRdf(rdfUri, labelCondition, dmoController) {
 		if (features[rdfUri]) {
-			setSegmentationFromRdf(rdfUri, labelCondition, callback)
+			setFeatureFromRdf(rdfUri, labelCondition, dmoController)
 		} else {
 			$scope.featureLoadingThreads++;
 			$http.get(rdfUri).success(function(data) {
@@ -47,7 +47,7 @@ function FeatureLoader($scope, $http) {
 							}
 							//save so that file does not have to be read twice
 							features[rdfUri] = times.sort(function(a,b){return a.time - b.time});
-							setSegmentationFromRdf(rdfUri, labelCondition, callback);
+							setFeatureFromRdf(rdfUri, labelCondition, dmoController);
 							$scope.featureLoadingThreads--;
 							$scope.$apply();
 						});
@@ -57,27 +57,29 @@ function FeatureLoader($scope, $http) {
 		}
 	}
 	
-	function setSegmentationFromRdf(rdfUri, labelCondition, callback) {
+	function setFeatureFromRdf(rdfUri, labelCondition, dmoController) {
 		subset = features[rdfUri];
 		if (labelCondition) {
 			subset = features[rdfUri].filter(function(x) { return x.label == labelCondition; });
 		}
 		subset = subset.map(function(x) { return x.time; });
-		callback(subset);
+		dmoController.setSegmentation(subset);
 	}
 	
-	function loadSegmentationFromJson(jsonUri, labelCondition, callback) {
+	function loadFeatureFromJson(jsonUri, labelCondition, dmoController) {
 		$scope.featureLoadingThreads++;
 		$http.get(jsonUri).success(function(json) {
-			if (json.beat) {
-				json = json.beat[0].data;
+			var results = json[Object.keys(json)[1]][0];
+			var outputId = results.annotation_metadata.annotator.output_id;
+			if (outputId == "beats") {
+				results = results.data;
 				if (labelCondition) {
-					json = json.filter(function(x) { return x.label.value == labelCondition; });
+					results = results.filter(function(x) { return x.label.value == labelCondition; });
 				}
-				//json = json.map(function(x) { return x.time.value; });
+				dmoController.addSegmentation(results);
+			} else if (outputId == "logcentroid") {
+				dmoController.addFeature(outputId, results.data)
 			}
-			callback(json);
-			
 			$scope.featureLoadingThreads--;
 			//$scope.$apply();
 		});

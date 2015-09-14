@@ -5,17 +5,18 @@
 
 html, body { height: 100%; }
 
-body, button, input {
+h1, body, button, input, select {
 	font-family: Avenir Next, Arial, sans-serif;
-	font-size: 24px;
+	font-size: 18px;
 	text-align: center;
-	/*line-height: 1.5;*/
 	font-weight: 300;
 	background-color: #fdfdfd;
 	padding:5px 10px;
 }
 
-button {
+h1 { font-size: 200%; }
+
+button, select {
 	-moz-border-radius:12px;
 	-webkit-border-radius:12px;
 	border-radius:12px;
@@ -23,6 +24,10 @@ button {
 	display:inline-block;
 	/*cursor:pointer;
 	padding:5px 5px;*/
+}
+
+select {
+	-webkit-appearance: none;
 }
 
 button:hover {

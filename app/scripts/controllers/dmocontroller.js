@@ -4,7 +4,7 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('DmoController', ['$scope', '$http', function($scope, $http){
 			
-			$scope.featureFile = 'features/low.json'
+			$scope.featureFile = 'features/low_barbeat.json'
 			$scope.labelCondition = '1'
 			$scope.featureLoadingThreads = 0
 			
@@ -29,6 +29,10 @@
 				} else {
 					addChildDmo($scope.dmo, newDmo);
 				}
+			}
+			
+			$scope.addChildrenFromFeatures = function() {
+				new FeatureLoader($scope, $http).loadFeature($scope.featureFile, $scope.labelCondition, this);
 			}
 			
 			function setTopLevelDmo(dmo) {
@@ -58,7 +62,22 @@
 				}
 			}
 			
-			var addSegmentation = function(segments) {
+			$scope.addFeature = function(name, data) {
+				//iterate through all levels and add averages
+				var newParameter = {name:name, max:0};
+				for (var i = 0; i < $scope.dmoList.length; i++) {
+					var laterValues = data.filter(
+						function(x){return x.time.value > $scope.dmoList[i].time}
+					);
+					var closestValue = laterValues[0].value[0];
+					$scope.dmoList[i][name] = closestValue;
+					newParameter.max = Math.max(closestValue, newParameter.max);
+					console.log(closestValue, $scope.dmoList[i], newParameter);
+				}
+				$scope.parameters.push(newParameter);
+			}
+			
+			$scope.addSegmentation = function(segments) {
 				for (var i = 0; i < segments.length-1; i++) {
 					var newDmo = createNewDmo();
 					newDmo.time = segments[i].time.value;
@@ -100,10 +119,6 @@
 					parent.duration = (newDmo.time+newDmo.duration) - parent.time;
 				}
 				updateMaxes(parent);
-			}
-			
-			$scope.addChildrenFromFeatures = function() {
-				new FeatureLoader($scope, $http).loadSegmentation($scope.featureFile, $scope.labelCondition, addSegmentation);
 			}
 			
 			function createNewDmo() {

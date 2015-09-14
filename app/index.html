@@ -13,27 +13,31 @@
 </head>
 <body ng-app="dmoDesigner">
 	<div>
-		<span>DMO Generator</span>
+		<h1>DMO Generator</h1>
 		<div ng-controller="DmoController">
 			<div>
 				<button ng-click="addDmo()">Add DMO</button>
+				<button ng-click="addChildrenFromFeatures()">Add Feature Children</button>
 			</div>
-			<span>x-axis:</span>
-			<select ng-init="xAxis = parameters[0]" ng-model="xAxis" ng-options="p.name for p in parameters"></select>
-			<span>y-axis:</span>
-			<select ng-init="yAxis = parameters[1]" ng-model="yAxis" ng-options="p.name for p in parameters"></select>
-			<div ng-show="selectedDmo">
-				<span>{{selectedDmo.name}}:</span>
-				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
-				<span>file:</span>
+			<div>
+				<span> file:</span>
 				<input type="text" ng-model="featureFile"></input-->
 				<span>condition:</span>
 				<input type="text" ng-model="labelCondition"></input-->
-				<button ng-click="addChildrenFromFeatures()">Add Children</button>
+			</div>
+			<div>
+				<span>x-axis:</span>
+				<select ng-init="xAxis = parameters[0]" ng-model="xAxis" ng-options="p.name for p in parameters"></select>
+				<span>y-axis:</span>
+				<select ng-init="yAxis = parameters[1]" ng-model="yAxis" ng-options="p.name for p in parameters"></select>
+			</div>
+			<div ng-show="selectedDmo">
+				<span>selected: {{selectedDmo.name}}</span>
+				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
 			</div>
 			<!--dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph-->
 			<!--dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles-->
-			<dmo-coordinates data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+			<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 		</div>
 	</div>
 </body>
