@@ -16,7 +16,7 @@ h1, body, button, input, select {
 
 h1 { font-size: 200%; }
 
-button, select {
+button, input, select {
 	-moz-border-radius:12px;
 	-webkit-border-radius:12px;
 	border-radius:12px;

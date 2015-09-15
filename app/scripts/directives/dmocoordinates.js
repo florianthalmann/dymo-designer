@@ -7,10 +7,7 @@
 				restrict: 'EA',
 				scope: {
 					data: "=",
-					xaxis: "=",
-					yaxis: "=",
-					size: "=",
-					color: "=",
+					viewparams: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -39,19 +36,7 @@
 						return scope.render(newVals);
 					}, true);
 					
-					scope.$watch('xaxis', function(newVals, oldVals) {
-						return scope.render(scope.data);
-					}, true);
-					
-					scope.$watch('yaxis', function(newVals, oldVals) {
-						return scope.render(scope.data);
-					}, true);
-					
-					scope.$watch('size', function(newVals, oldVals) {
-						return scope.render(scope.data);
-					}, true);
-					
-					scope.$watch('color', function(newVals, oldVals) {
+					scope.$watch('viewparams', function(newVals, oldVals) {
 						return scope.render(scope.data);
 					}, true);
 					
@@ -85,7 +70,7 @@
 								.attr("cy", getYValue);
 						
 						//only change color if not random or newly random
-						if (scope.color.name != "random" || previousColors != "random") {
+						if (scope.viewparams.color.name != "random" || previousColors != "random") {
 							circles
 								.transition()
 									.duration(500) // time of duration
@@ -93,7 +78,7 @@
 									.style("opacity", 0.4)
 						}
 						
-						previousColors = scope.color.name;
+						previousColors = scope.viewparams.color.name;
 						
 						/*var text = svg.selectAll("text").data(data);
 				
@@ -110,28 +95,29 @@
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
 						
 						function getXValue(d, i) {
-							var value = getVisualValue(d, scope.xaxis);
+							var value = getVisualValue(d, scope.viewparams.xAxis);
 							return (margin/2)+(value * (width-margin));
 						}
 						
 						function getYValue(d, i) {
-							var value = getVisualValue(d, scope.yaxis);
+							var value = getVisualValue(d, scope.viewparams.yAxis);
 							//value = Math.pow(value, 1/3);
 							return (height-(margin/2))-(value * (height-margin));
 						}
 						
 						function getR(d) {
-							var value = getVisualValue(d, scope.size);
+							var value = getVisualValue(d, scope.viewparams.size);
 							return 1+Math.pow(value, 1/2)*50;
 						}
 						
 						function getRgb(d) {
-							return "rgb(" + Math.round((getVisualValue(d, scope.color)) * 255) + ","
-								+ Math.round((1-getVisualValue(d, scope.color)) * 255) + ","
-								+ Math.round(getVisualValue(d, scope.color) * 255) +")";
+							return "rgb(" + Math.round((getVisualValue(d, scope.viewparams.color)) * 255) + ","
+								+ Math.round((1-getVisualValue(d, scope.viewparams.color)) * 255) + ","
+								+ Math.round(getVisualValue(d, scope.viewparams.color) * 255) +")";
 						}
 						
 						function getVisualValue(dmo, parameter) {
+							//console.log(parameter.name);
 							if (parameter.name == "random") {
 								return Math.random();
 							} else {

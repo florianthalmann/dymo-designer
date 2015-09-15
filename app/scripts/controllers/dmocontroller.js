@@ -4,9 +4,9 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('DmoController', ['$scope', '$http', function($scope, $http){
 			
-			$scope.featureFile = 'features/low_barbeat.json'
-			$scope.labelCondition = '1'
-			$scope.featureLoadingThreads = 0
+			$scope.featureFile = 'features/low_barbeat.json';
+			$scope.labelCondition = '1';
+			$scope.featureLoadingThreads = 0;
 			
 			$scope.dmo = null;
 			$scope.dmoGraph = {nodes:[], links:[]};
@@ -14,12 +14,12 @@
 			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}, {name:"random", max:1}];
 			$scope.views = [{name:"axes"}, {name:"graph"}];
 			
+			var maxDepth = 0;
+			
 			$scope.dmoOnClick = function(dmo){
 				$scope.selectedDmo = dmo;
 				$scope.$apply();
 			};
-			
-			var maxDepth = 0;
 			
 			$scope.addDmo = function() {
 				var newDmo = createNewDmo();

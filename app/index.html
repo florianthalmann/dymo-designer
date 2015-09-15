@@ -29,23 +29,23 @@
 			</div>
 			<div>
 				<span>x-axis:</span>
-				<select ng-init="xAxis = parameters[0]" ng-model="xAxis" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.xAxis = parameters[0]" ng-model="viewParams.xAxis" ng-options="p.name for p in parameters"></select>
 				<span> y-axis:</span>
-				<select ng-init="yAxis = parameters[1]" ng-model="yAxis" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.yAxis = parameters[1]" ng-model="viewParams.yAxis" ng-options="p.name for p in parameters"></select>
 				<span> size:</span>
-				<select ng-init="size = parameters[1]" ng-model="size" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.size = parameters[1]" ng-model="viewParams.size" ng-options="p.name for p in parameters"></select>
 				<span> color:</span>
-				<select ng-init="color = parameters[2]" ng-model="color" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.color = parameters[2]" ng-model="viewParams.color" ng-options="p.name for p in parameters"></select>
 			</div>
 			<div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
 				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
 			</div>
-			<div ng-show="selectedView == views[0]">
-				<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" size="size" color="color" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+			<div ng-if="selectedView == views[0]">
+				<dmo-coordinates data="dmoList" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
-			<div ng-show="selectedView == views[1]">
-				<dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+			<div ng-if="selectedView == views[1]">
+				<dmo-graph data="dmoGraph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>

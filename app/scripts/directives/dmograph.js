@@ -7,6 +7,7 @@
 				restrict: 'EA',
 				scope: {
 					data: "=",
+					viewparams: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -33,6 +34,8 @@
 					var nodes = force.nodes(),
 						links = force.links();
 					
+					var previousColors = null;
+					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
 						return scope.$apply();
@@ -49,6 +52,10 @@
 						return scope.render(newVals);
 					}, true);
 					
+					scope.$watch('viewparams', function(newVals, oldVals) {
+						return scope.render(scope.data);
+					}, true);
+					
 					// define render function
 					scope.render = function(graph) {
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
@@ -60,39 +67,58 @@
 							.nodes(graph.nodes)
 							.links(graph.links);
 						
-						//console.log(link);
-						var alpha = 0.1;
 						link = link.data(force.links(), function(d) { return d.source.name + "-" + d.target.name; });
-						link.enter().insert("line", ".node").attr('stroke', getRandomRgba).style("stroke-width", 1);
+						link.enter().insert("line", ".node")
+							.attr("stroke", getRgb)
+							.style("opacity", 0.1)
+							.style("stroke-width", 1);
 						link.exit().remove();
 						
-						alpha = 0.4;
 						node = node.data(force.nodes(), function(d) { return d.name;});
 						node.enter().append("circle")
 							.attr("r", getR)
-							.style("fill", getRandomRgba)
+							.style("fill", getRgb)
+							.style("opacity", 0.4)
 							.call(force.drag)
 							.on("click", function(d, i){return scope.onClick({item: d});});
 						node
 							.transition()
-							.duration(0)
-							.attr("r", getR)
+							.duration(500)
+							.attr("r", getR);
+						
+						//only change color if not random or newly random
+						if (scope.viewparams.color.name != "random" || previousColors != "random") {
+							node
+								.transition()
+									.duration(0) // time of duration
+									.style("fill", getRgb)
+									.style("opacity", 0.4)
+						}
+						
+						previousColors = scope.viewparams.color.name;
+						
 						node.exit().remove();
 						
 						force.start();
 						
-						function getRandomRgba() {
-							return "rgba(" + Math.round(Math.random() * 255) + ","
-								+ Math.round(Math.random() * 255) + ","
-								+ Math.round(Math.random() * 255) + ","
-								+ alpha + ")";
+						function getR(d) {
+							var value = getVisualValue(d, scope.viewparams.size);
+							return 1+Math.pow(value, 1/2)*50;
 						}
 						
-						function getR(d) {
-							if (d.duration) {
-								return (Math.log(d.duration+1) / Math.log(2))*10;
+						function getRgb(d) {
+							return "rgb(" + Math.round((getVisualValue(d, scope.viewparams.color)) * 255) + ","
+								+ Math.round((1-getVisualValue(d, scope.viewparams.color)) * 255) + ","
+								+ Math.round(getVisualValue(d, scope.viewparams.color) * 255) +")";
+						}
+						
+						function getVisualValue(dmo, parameter) {
+							//console.log(parameter.name);
+							if (parameter.name == "random") {
+								return Math.random();
+							} else {
+								return dmo[parameter.name] / parameter.max;
 							}
-							return 10;
 						}
 					};
 				}
