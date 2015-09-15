@@ -17,31 +17,39 @@
 		<div ng-controller="DmoController">
 			<div>
 				<button ng-click="addDmo()">Add DMO</button>
-				<button ng-click="addChildrenFromFeatures()">Add Feature Children</button>
+				<button ng-click="addChildrenFromFeatures()">Add Features</button>
+				<span>view:</span>
+				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 			</div>
 			<div>
-				<span> file:</span>
+				<span>feature file:</span>
 				<input type="text" ng-model="featureFile"></input-->
-				<span>condition:</span>
+				<span> condition:</span>
 				<input type="text" ng-model="labelCondition"></input-->
 			</div>
 			<div>
 				<span>x-axis:</span>
 				<select ng-init="xAxis = parameters[0]" ng-model="xAxis" ng-options="p.name for p in parameters"></select>
-				<span>y-axis:</span>
+				<span> y-axis:</span>
 				<select ng-init="yAxis = parameters[1]" ng-model="yAxis" ng-options="p.name for p in parameters"></select>
-				<span>size:</span>
+				<span> size:</span>
 				<select ng-init="size = parameters[1]" ng-model="size" ng-options="p.name for p in parameters"></select>
-				<span>color:</span>
+				<span> color:</span>
 				<select ng-init="color = parameters[2]" ng-model="color" ng-options="p.name for p in parameters"></select>
 			</div>
 			<div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
 				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
 			</div>
-			<!--dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph-->
-			<!--dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles-->
-			<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" size="size" color="color" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+			<div ng-show="selectedView == views[0]">
+				<dmo-coordinates data="dmoList" xaxis="xAxis" yaxis="yAxis" size="size" color="color" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+			</div>
+			<div ng-show="selectedView == views[1]">
+				<dmo-graph data="dmoGraph" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+			</div>
+			<!--div ng-show="selectedVisuals == views[2]">
+				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
+			</div-->
 		</div>
 	</div>
 </body>

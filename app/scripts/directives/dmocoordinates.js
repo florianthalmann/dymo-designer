@@ -21,6 +21,7 @@
 					
 					var height = 500;
 					var margin = 50;
+					var previousColors = null;
 					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
@@ -51,7 +52,6 @@
 					}, true);
 					
 					scope.$watch('color', function(newVals, oldVals) {
-						console.log(scope.color);
 						return scope.render(scope.data);
 					}, true);
 					
@@ -68,7 +68,8 @@
 						circles.enter()
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
-						.style("fill", getRgba)
+							.style("fill", getRgb)
+							.style("opacity", 0.4)
 							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
@@ -79,10 +80,20 @@
 						circles
 							.transition()
 								.duration(500) // time of duration
-								.style("fill", getRgba)
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
+						
+						//only change color if not random or newly random
+						if (scope.color.name != "random" || previousColors != "random") {
+							circles
+								.transition()
+									.duration(500) // time of duration
+									.style("fill", getRgb)
+									.style("opacity", 0.4)
+						}
+						
+						previousColors = scope.color.name;
 						
 						/*var text = svg.selectAll("text").data(data);
 				
@@ -114,16 +125,13 @@
 							return 1+Math.pow(value, 1/2)*50;
 						}
 						
-						function getRgba(d) {
-							console.log(d, scope.color);
-							return "rgba(" + Math.round(getVisualValue(d, scope.color) * 255) + ","
+						function getRgb(d) {
+							return "rgb(" + Math.round((getVisualValue(d, scope.color)) * 255) + ","
 								+ Math.round((1-getVisualValue(d, scope.color)) * 255) + ","
-								+ Math.round(getVisualValue(d, scope.color) * 255) + ","
-								+ 0.4 + ")";
+								+ Math.round(getVisualValue(d, scope.color) * 255) +")";
 						}
 						
 						function getVisualValue(dmo, parameter) {
-							//console.log(parameter.name, dmo[parameter.name]);
 							if (parameter.name == "random") {
 								return Math.random();
 							} else {

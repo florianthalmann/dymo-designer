@@ -12,6 +12,7 @@
 			$scope.dmoGraph = {nodes:[], links:[]};
 			$scope.dmoList = [];
 			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}, {name:"random", max:1}];
+			$scope.views = [{name:"axes"}, {name:"graph"}];
 			
 			$scope.dmoOnClick = function(dmo){
 				$scope.selectedDmo = dmo;
@@ -74,7 +75,6 @@
 					var closestValue = laterValues[0].value[0];
 					$scope.dmoList[i][name] = closestValue;
 					newParameter.max = Math.max(closestValue, newParameter.max);
-					console.log(closestValue, $scope.dmoList[i], newParameter);
 				}
 				$scope.parameters.splice($scope.parameters.length-1, 0, newParameter);
 			}
