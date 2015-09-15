@@ -10,6 +10,7 @@
 					xaxis: "=",
 					yaxis: "=",
 					size: "=",
+					color: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -49,6 +50,11 @@
 						return scope.render(scope.data);
 					}, true);
 					
+					scope.$watch('color', function(newVals, oldVals) {
+						console.log(scope.color);
+						return scope.render(scope.data);
+					}, true);
+					
 					// define render function
 					scope.render = function(data){
 						// setup variables
@@ -62,7 +68,7 @@
 						circles.enter()
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
-						.style("fill", getRandomRgba)
+						.style("fill", getRgba)
 							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
@@ -73,6 +79,7 @@
 						circles
 							.transition()
 								.duration(500) // time of duration
+								.style("fill", getRgba)
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
@@ -92,25 +99,36 @@
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
 						
 						function getXValue(d, i) {
-							return (margin/2)+(d[scope.$parent.xAxis.name] / scope.$parent.xAxis.max * (width-margin));
+							var value = getVisualValue(d, scope.xaxis);
+							return (margin/2)+(value * (width-margin));
 						}
 						
 						function getYValue(d, i) {
-							var value = d[scope.$parent.yAxis.name] / scope.$parent.yAxis.max;
-							value = Math.pow(value, 1/3);
+							var value = getVisualValue(d, scope.yaxis);
+							//value = Math.pow(value, 1/3);
 							return (height-(margin/2))-(value * (height-margin));
 						}
 						
 						function getR(d) {
-							var value = d[scope.$parent.size.name] / scope.$parent.size.max;
-							return 1+value*50;//Math.pow(value, 1/3)*50;
+							var value = getVisualValue(d, scope.size);
+							return 1+Math.pow(value, 1/2)*50;
 						}
 						
-						function getRandomRgba() {
-							return "rgba(" + Math.round(Math.random() * 255) + ","
-								+ Math.round(Math.random() * 255) + ","
-								+ Math.round(Math.random() * 255) + ","
+						function getRgba(d) {
+							console.log(d, scope.color);
+							return "rgba(" + Math.round(getVisualValue(d, scope.color) * 255) + ","
+								+ Math.round((1-getVisualValue(d, scope.color)) * 255) + ","
+								+ Math.round(getVisualValue(d, scope.color) * 255) + ","
 								+ 0.4 + ")";
+						}
+						
+						function getVisualValue(dmo, parameter) {
+							//console.log(parameter.name, dmo[parameter.name]);
+							if (parameter.name == "random") {
+								return Math.random();
+							} else {
+								return dmo[parameter.name] / parameter.max;
+							}
 						}
 					};
 				}

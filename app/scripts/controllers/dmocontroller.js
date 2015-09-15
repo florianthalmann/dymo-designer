@@ -11,7 +11,7 @@
 			$scope.dmo = null;
 			$scope.dmoGraph = {nodes:[], links:[]};
 			$scope.dmoList = [];
-			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}];
+			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}, {name:"random", max:1}];
 			
 			$scope.dmoOnClick = function(dmo){
 				$scope.selectedDmo = dmo;
@@ -58,7 +58,9 @@
 			function updateMaxes(dmo) {
 				for (var i = 0; i < $scope.parameters.length; i++) {
 					var p = $scope.parameters[i];
-					p.max = Math.max(dmo[p.name], p.max);
+					if (dmo[p.name]) {
+						p.max = Math.max(dmo[p.name], p.max);
+					}
 				}
 			}
 			
@@ -74,7 +76,7 @@
 					newParameter.max = Math.max(closestValue, newParameter.max);
 					console.log(closestValue, $scope.dmoList[i], newParameter);
 				}
-				$scope.parameters.push(newParameter);
+				$scope.parameters.splice($scope.parameters.length-1, 0, newParameter);
 			}
 			
 			$scope.addSegmentation = function(segments) {
