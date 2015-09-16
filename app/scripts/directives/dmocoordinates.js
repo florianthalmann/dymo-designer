@@ -17,7 +17,7 @@
 						.attr("width", "100%");
 					
 					var height = 500;
-					var margin = 50;
+					var padding = 50;
 					var previousColors = null;
 					
 					// on window resize, re-render d3 canvas
@@ -43,9 +43,18 @@
 					// define render function
 					scope.render = function(data){
 						// setup variables
-						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for margins and can be changed
+						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for paddings and can be changed
 						// set the height based on the calculations above
 						svg.attr('height', height);
+						
+						// Scales and axes. Note the inverted domain for the y-scale: bigger is up!
+						var xScale = d3.scale.linear().domain([0, scope.viewparams.xAxis.max]).range([padding, width-padding]),
+						yScale = d3.scale.linear().domain([0, scope.viewparams.yAxis.max]).range([height-padding, padding]),
+						sizeScale = d3.scale.linear().domain([0, scope.viewparams.size.max]).range([20, 100]),
+						colorScale = d3.scale.linear().domain([0, scope.viewparams.color.max]).rangeRound([0, 360]),
+						
+						xAxis = d3.svg.axis().scale(xScale).tickSize(-height).tickSubdivide(true),
+						yAxis = d3.svg.axis().scale(yScale).ticks(4).orient("right");
 						
 						//create the rectangles for the bar chart
 						var circles = svg.selectAll("circle").data(data);
@@ -53,7 +62,7 @@
 						circles.enter()
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
-							.style("fill", getRgb)
+							.style("fill", getHsl)
 							.style("opacity", 0.4)
 							.attr("r", 0)
 							.attr("cx", getXValue)
@@ -74,7 +83,7 @@
 							circles
 								.transition()
 									.duration(500) // time of duration
-									.style("fill", getRgb)
+									.style("fill", getHsl)
 									.style("opacity", 0.4)
 						}
 						
@@ -95,33 +104,35 @@
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
 						
 						function getXValue(d, i) {
-							var value = getVisualValue(d, scope.viewparams.xAxis);
-							return (margin/2)+(value * (width-margin));
+							return xScale(getVisualValue(d, scope.viewparams.xAxis));
 						}
 						
 						function getYValue(d, i) {
-							var value = getVisualValue(d, scope.viewparams.yAxis);
-							//value = Math.pow(value, 1/3);
-							return (height-(margin/2))-(value * (height-margin));
+							return yScale(getVisualValue(d, scope.viewparams.yAxis));
 						}
 						
 						function getR(d) {
-							var value = getVisualValue(d, scope.viewparams.size);
-							return 1+Math.pow(value, 1/2)*50;
+							return sizeScale(getVisualValue(d, scope.viewparams.size));
+						}
+						
+						function getHsl(d) {
+							return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color)) + ", 80%, 50%)";
 						}
 						
 						function getRgb(d) {
-							return "rgb(" + Math.round((getVisualValue(d, scope.viewparams.color)) * 255) + ","
-								+ Math.round((1-getVisualValue(d, scope.viewparams.color)) * 255) + ","
-								+ Math.round(getVisualValue(d, scope.viewparams.color) * 255) +")";
+							var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color)) + ","
+								+ (255-colorScale(getVisualValue(d, scope.viewparams.color))) + ","
+								+ colorScale(getVisualValue(d, scope.viewparams.color)) +")";
+							console.log(color);
+							return color;
 						}
 						
 						function getVisualValue(dmo, parameter) {
 							//console.log(parameter.name);
 							if (parameter.name == "random") {
-								return Math.random();
+								return Math.random() * parameter.max;
 							} else {
-								return dmo[parameter.name] / parameter.max;
+								return dmo[parameter.name];
 							}
 						}
 					};
