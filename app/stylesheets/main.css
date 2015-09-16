@@ -6,7 +6,7 @@
 html, body { height: 100%; }
 
 h1, body, button, input, select {
-	font-family: Avenir Next, Arial, sans-serif;
+	font-family: Avenir Next;
 	font-size: 18px;
 	text-align: center;
 	font-weight: 300;
@@ -32,4 +32,16 @@ select {
 
 button:hover {
 	background-color:#eeeeee;
+}
+
+.xaxis path, .yaxis path,
+.xaxis line, .yaxis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.xaxis text, .yaxis text {
+	font-family: Avenir Next;
+	font-size: 18px;
 }

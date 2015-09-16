@@ -20,6 +20,25 @@
 					var padding = 50;
 					var previousColors = null;
 					
+					// Scales and axes. Note the inverted domain for the y-scale: bigger is up!
+					var xScale = d3.scale.linear(),
+					yScale = d3.scale.linear(),
+					sizeScale = d3.scale.linear().range([20, 100]),
+					colorScale = d3.scale.linear().rangeRound([0, 360]),
+					
+					xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
+					yAxis = d3.svg.axis().scale(yScale).orient("left");
+					
+					svg.append("g")
+						.attr("class", "xaxis")  //Assign "axis" class
+						.attr("transform", "translate(0," + (height - padding) + ")")
+						.call(xAxis);
+				
+					svg.append("g")
+						.attr("class", "yaxis")
+						.attr("transform", "translate(" + padding + ",0)")
+						.call(yAxis);
+					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
 						return scope.$apply();
@@ -47,14 +66,18 @@
 						// set the height based on the calculations above
 						svg.attr('height', height);
 						
-						// Scales and axes. Note the inverted domain for the y-scale: bigger is up!
-						var xScale = d3.scale.linear().domain([0, scope.viewparams.xAxis.max]).range([padding, width-padding]),
-						yScale = d3.scale.linear().domain([0, scope.viewparams.yAxis.max]).range([height-padding, padding]),
-						sizeScale = d3.scale.linear().domain([0, scope.viewparams.size.max]).range([20, 100]),
-						colorScale = d3.scale.linear().domain([0, scope.viewparams.color.max]).rangeRound([0, 360]),
+						// update scales
+						xScale.domain([0, scope.viewparams.xAxis.max]).range([padding, width-padding]);
+						yScale.domain([0, scope.viewparams.yAxis.max]).range([height-padding, padding]);
+						sizeScale.domain([0, scope.viewparams.size.max]);
+						colorScale.domain([0, scope.viewparams.color.max]);
 						
-						xAxis = d3.svg.axis().scale(xScale).tickSize(-height).tickSubdivide(true),
-						yAxis = d3.svg.axis().scale(yScale).ticks(4).orient("right");
+						//update axes
+						svg.selectAll("g.xaxis")
+							.call(xAxis);
+						svg.selectAll("g.yaxis")
+							.call(yAxis);
+						
 						
 						//create the rectangles for the bar chart
 						var circles = svg.selectAll("circle").data(data);
@@ -63,7 +86,7 @@
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
 							.style("fill", getHsl)
-							.style("opacity", 0.4)
+							.style("opacity", 0.3)
 							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
@@ -84,7 +107,7 @@
 								.transition()
 									.duration(500) // time of duration
 									.style("fill", getHsl)
-									.style("opacity", 0.4)
+									.style("opacity", 0.3)
 						}
 						
 						previousColors = scope.viewparams.color.name;

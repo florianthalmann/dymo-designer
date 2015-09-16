@@ -67,16 +67,28 @@
 			
 			$scope.addFeature = function(name, data) {
 				//iterate through all levels and add averages
-				var newParameter = {name:name, max:0};
+				var parameter = getParameter(name);
 				for (var i = 0; i < $scope.dmoList.length; i++) {
 					var laterValues = data.filter(
 						function(x){return x.time.value > $scope.dmoList[i].time}
 					);
 					var closestValue = laterValues[0].value[0];
 					$scope.dmoList[i][name] = closestValue;
-					newParameter.max = Math.max(closestValue, newParameter.max);
+					parameter.max = Math.max(closestValue, parameter.max);
 				}
+			}
+			
+			function getParameter(name) {
+				//if already exists return that
+				for (var i = 0; i < $scope.parameters.length; i++) {
+					if ($scope.parameters[i].name == name) {
+						return $scope.parameters[i];
+					}
+				}
+				//if doesn't exist make a new one
+				var newParameter = {name:name, max:0};
 				$scope.parameters.splice($scope.parameters.length-1, 0, newParameter);
+				return newParameter;
 			}
 			
 			$scope.addSegmentation = function(segments) {
