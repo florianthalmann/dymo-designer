@@ -30,6 +30,27 @@
 				} else {
 					addChildDmo($scope.dmo, newDmo);
 				}
+				//createPitchHelixDmo();
+			}
+			
+			function createPitchHelixDmo() {
+				getParameter("chroma");
+				getParameter("height");
+				var previousDmo = null;
+				for (var i = 0; i < 48; i++) {
+					var currentDmo = createNewDmo(1,1);
+					var cos = Math.cos((i % 12) / 6 * Math.PI);
+					var sin = Math.sin((i % 12) / 6 * Math.PI);
+					currentDmo.chroma = cos+1;
+					currentDmo.height = sin+1+(i/4.5);
+					if (previousDmo) {
+						addChildDmo(previousDmo, currentDmo);
+					} else {
+						setTopLevelDmo(currentDmo);
+					}
+					previousDmo = currentDmo;
+				}
+				console.log($scope.dmoGraph);
 			}
 			
 			$scope.addChildrenFromFeatures = function() {
@@ -135,11 +156,17 @@
 				updateMaxes(parent);
 			}
 			
-			function createNewDmo() {
+			function createNewDmo(time, duration) {
+				if (!time) {
+					time = Math.random();
+				}
+				if (!duration) {
+					duration = Math.random();
+				}
 				return {
 					name: "dmo" + ($scope.dmoList.length+1),
-					time: Math.random()*10,
-					duration: Math.random()*10,
+					time: time,
+					duration: duration,
 					children: []
 				}
 			}

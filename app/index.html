@@ -42,7 +42,7 @@
 				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
 			</div>
 			<div ng-if="selectedView == views[0]">
-				<dmo-coordinates data="dmoList" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+				<dmo-coordinates data="dmoGraph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
 				<dmo-graph data="dmoGraph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-graph>

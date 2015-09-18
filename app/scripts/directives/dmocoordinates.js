@@ -19,11 +19,12 @@
 					var height = 500;
 					var padding = 50;
 					var previousColors = null;
+					var previousRandomValues = {};
 					
 					// Scales and axes. Note the inverted domain for the y-scale: bigger is up!
 					var xScale = d3.scale.linear(),
 					yScale = d3.scale.linear(),
-					sizeScale = d3.scale.linear().range([20, 100]),
+					sizeScale = d3.scale.linear().range([10, 40]),
 					colorScale = d3.scale.linear().rangeRound([0, 360]),
 					
 					xAxis = d3.svg.axis().scale(xScale).orient("bottom"),
@@ -79,8 +80,7 @@
 							.call(yAxis);
 						
 						
-						//create the rectangles for the bar chart
-						var circles = svg.selectAll("circle").data(data);
+						var circles = svg.selectAll("circle").data(data.nodes);
 						
 						circles.enter()
 							.append("circle")
@@ -101,6 +101,31 @@
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
 						
+						circles.exit().remove();
+						
+						var lines = svg.selectAll(".edge").data(data.links);
+						
+						lines.enter()
+							.append("line")
+							.attr("class", "edge")
+							.style("stroke", function(d) { return getHsl(d.target); })
+							.style("opacity", 0.1)
+							.style("stroke-width", 2)
+							.attr("x1", function(d) { return getXValue(d.source); })
+							.attr("y1", function(d) { return getYValue(d.source); })
+							.attr("x2", function(d) { return getXValue(d.target); })
+							.attr("y2", function(d) { return getYValue(d.target); });
+						
+						lines
+							.transition()
+								.duration(500) // time of duration
+								.attr("x1", function(d) { return getXValue(d.source); })
+								.attr("y1", function(d) { return getYValue(d.source); })
+								.attr("x2", function(d) { return getXValue(d.target); })
+								.attr("y2", function(d) { return getYValue(d.target); });
+						
+						lines.exit().remove();
+						
 						//only change color if not random or newly random
 						if (scope.viewparams.color.name != "random" || previousColors != "random") {
 							circles
@@ -108,6 +133,12 @@
 									.duration(500) // time of duration
 									.style("fill", getHsl)
 									.style("opacity", 0.3)
+							
+							lines
+								.transition()
+									.duration(500) // time of duration
+									.style("stroke", function(d) { return getHsl(d.target); })
+									.style("opacity", 0.1)
 						}
 						
 						previousColors = scope.viewparams.color.name;
@@ -127,34 +158,43 @@
 								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
 						
 						function getXValue(d, i) {
-							return xScale(getVisualValue(d, scope.viewparams.xAxis));
+							return xScale(getVisualValue(d, scope.viewparams.xAxis, "x"));
 						}
 						
 						function getYValue(d, i) {
-							return yScale(getVisualValue(d, scope.viewparams.yAxis));
+							return yScale(getVisualValue(d, scope.viewparams.yAxis, "y"));
 						}
 						
 						function getR(d) {
-							return sizeScale(getVisualValue(d, scope.viewparams.size));
+							return sizeScale(getVisualValue(d, scope.viewparams.size, "size"));
 						}
 						
 						function getHsl(d) {
-							return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color)) + ", 80%, 50%)";
+							return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color, "color")) + ", 80%, 50%)";
 						}
 						
 						function getRgb(d) {
-							var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color)) + ","
+							var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color, "color")) + ","
 								+ (255-colorScale(getVisualValue(d, scope.viewparams.color))) + ","
 								+ colorScale(getVisualValue(d, scope.viewparams.color)) +")";
-							console.log(color);
 							return color;
 						}
 						
-						function getVisualValue(dmo, parameter) {
-							//console.log(parameter.name);
+						function getVisualValue(dmo, parameter, key) {
 							if (parameter.name == "random") {
-								return Math.random() * parameter.max;
+								if (!previousRandomValues[dmo.name]) {
+									previousRandomValues[dmo.name] = {};
+								}
+								if (!previousRandomValues[dmo.name][key]) {
+									previousRandomValues[dmo.name][key] = Math.random() * parameter.max;
+								}
+								return previousRandomValues[dmo.name][key];
 							} else {
+								if (previousRandomValues[dmo.name]) {
+									if (previousRandomValues[dmo.name][key]) {
+										delete previousRandomValues[dmo.name][key];
+									}
+								}
 								return dmo[parameter.name];
 							}
 						}
