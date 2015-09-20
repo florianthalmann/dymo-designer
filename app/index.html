@@ -29,13 +29,17 @@
 			</div>
 			<div>
 				<span>x-axis:</span>
-				<select ng-init="viewParams.xAxis = parameters[0]" ng-model="viewParams.xAxis" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.xAxis.param = parameters[0]" ng-model="viewParams.xAxis.param" ng-options="p.name for p in parameters"></select>
+				<input type="checkbox" ng-init="viewParams.xAxis.log = false" ng-model="viewParams.xAxis.log"></input>
 				<span> y-axis:</span>
-				<select ng-init="viewParams.yAxis = parameters[1]" ng-model="viewParams.yAxis" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.yAxis.param = parameters[1]" ng-model="viewParams.yAxis.param" ng-options="p.name for p in parameters"></select>
+				<input type="checkbox" ng-init="viewParams.yAxis.log = false" ng-model="viewParams.yAxis.log"></input>
 				<span> size:</span>
-				<select ng-init="viewParams.size = parameters[1]" ng-model="viewParams.size" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.size.param = parameters[1]" ng-model="viewParams.size.param" ng-options="p.name for p in parameters"></select>
+				<input type="checkbox" ng-init="viewParams.size.log = false" ng-model="viewParams.size.log"></input>
 				<span> color:</span>
-				<select ng-init="viewParams.color = parameters[2]" ng-model="viewParams.color" ng-options="p.name for p in parameters"></select>
+				<select ng-init="viewParams.color.param = parameters[2]" ng-model="viewParams.color.param" ng-options="p.name for p in parameters"></select>
+				<input type="checkbox" ng-init="viewParams.color.log = false" ng-model="viewParams.color.log"></input>
 			</div>
 			<div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
