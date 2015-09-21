@@ -74,8 +74,8 @@
 							return d3.scale.linear().domain([param.min, param.max]);
 						}
 						
-						xAxis.scale(xScale);
-						yAxis.scale(yScale);
+						xAxis.scale(xScale).tickFormat(d3.format(".g"));
+						yAxis.scale(yScale).tickFormat(d3.format(".g"));
 						
 						//update axes
 						svg.selectAll("g.xaxis")

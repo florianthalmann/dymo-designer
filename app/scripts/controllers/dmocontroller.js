@@ -11,7 +11,7 @@
 			$scope.dmo = null;
 			$scope.dmoGraph = {nodes:[], links:[]};
 			$scope.dmoList = [];
-			$scope.parameters = [{name:"time", min:1, max:1}, {name:"duration", min:1, max:1}, {name:"random", min:0, max:1}];
+			$scope.parameters = [createParameter("time"), createParameter("duration"), createParameter("random", 0, 1)];
 			$scope.views = [{name:"axes"}, {name:"graph"}];
 			
 			var maxDepth = 0;
@@ -74,20 +74,28 @@
 			function registerDmo(dmo) {
 				$scope.dmoList.push(dmo);
 				$scope.dmoGraph.nodes.push(dmo);
-				updateMinMax(dmo);
+				updateMinMaxes(dmo);
 			}
 			
-			function updateMinMax(dmo) {
+			function setDmoParameter(dmo, param, value) {
+				dmo[param.name] = value;
+				updateMinMax(dmo, param);
+			}
+			
+			function updateMinMaxes(dmo) {
 				for (var i = 0; i < $scope.parameters.length; i++) {
-					var p = $scope.parameters[i];
-					if (dmo[p.name]) {
-						if (p.max == undefined) {
-							p.min = dmo[p.name];
-							p.max = dmo[p.name];
-						} else {
-							p.min = Math.min(dmo[p.name], p.min);
-							p.max = Math.max(dmo[p.name], p.max);
-						}
+					updateMinMax(dmo, $scope.parameters[i]);
+				}
+			}
+			
+			function updateMinMax(dmo, param) {
+				if (dmo[param.name]) {
+					if (param.max == undefined) {
+						param.min = dmo[param.name];
+						param.max = dmo[param.name];
+					} else {
+						param.min = Math.min(dmo[param.name], param.min);
+						param.max = Math.max(dmo[param.name], param.max);
 					}
 				}
 			}
@@ -100,8 +108,7 @@
 						function(x){return x.time.value > $scope.dmoList[i].time}
 					);
 					var closestValue = laterValues[0].value[0];
-					$scope.dmoList[i][name] = closestValue;
-					parameter.max = Math.max(closestValue, parameter.max);
+					setDmoParameter($scope.dmoList[i], parameter, closestValue);
 				}
 			}
 			
@@ -113,9 +120,16 @@
 					}
 				}
 				//if doesn't exist make a new one
-				var newParameter = {name:name, max:0};
+				var newParameter = createParameter(name);
 				$scope.parameters.splice($scope.parameters.length-1, 0, newParameter);
 				return newParameter;
+			}
+			
+			function createParameter(name, min, max) {
+				if (min != undefined && max != undefined) {
+					return {name:name, min:min, max:max};
+				}
+				return {name:name, min:1, max:0};
 			}
 			
 			$scope.addSegmentation = function(segments) {
@@ -159,7 +173,7 @@
 				if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
 					parent.duration = (newDmo.time+newDmo.duration) - parent.time;
 				}
-				updateMinMax(parent);
+				updateMinMaxes(parent);
 			}
 			
 			function createNewDmo(time, duration) {
