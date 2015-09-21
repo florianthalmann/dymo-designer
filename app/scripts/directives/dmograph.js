@@ -35,6 +35,7 @@
 						links = force.links();
 					
 					var previousColors = null;
+					var prevRandomValues = {};
 					
 					// on window resize, re-render d3 canvas
 					window.onresize = function() {
@@ -62,6 +63,16 @@
 						var height = 500;
 						svg.attr('height', height);
 						
+						var sizeScale = createScale(scope.viewparams.size.log, scope.viewparams.size.param).range([10, 100]),
+						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([45, 360]);
+						
+						function createScale(log, param) {
+							if (log == true) {
+								return d3.scale.log().base(2).domain([param.min, param.max]);
+							}
+							return d3.scale.linear().domain([param.min, param.max]);
+						}
+						
 						force
 							.size([width, height])
 							.nodes(graph.nodes)
@@ -69,7 +80,7 @@
 						
 						link = link.data(force.links(), function(d) { return d.source.name + "-" + d.target.name; });
 						link.enter().insert("line", ".node")
-							.attr("stroke", getRgb)
+							.attr("stroke", getHsl)
 							.style("opacity", 0.1)
 							.style("stroke-width", 1);
 						link.exit().remove();
@@ -77,21 +88,21 @@
 						node = node.data(force.nodes(), function(d) { return d.name;});
 						node.enter().append("circle")
 							.attr("r", getR)
-							.style("fill", getRgb)
+							.style("fill", getHsl)
 							.style("opacity", 0.4)
 							.call(force.drag)
 							.on("click", function(d, i){return scope.onClick({item: d});});
 						node
 							.transition()
-							.duration(500)
-							.attr("r", getR);
+								.duration(500)
+								.attr("r", getR);
 						
 						//only change color if not random or newly random
 						if (scope.viewparams.color.name != "random" || previousColors != "random") {
 							node
 								.transition()
-									.duration(0) // time of duration
-									.style("fill", getRgb)
+									.duration(500) // time of duration
+									.style("fill", getHsl)
 									.style("opacity", 0.4)
 						}
 						
@@ -102,22 +113,37 @@
 						force.start();
 						
 						function getR(d) {
-							var value = getVisualValue(d, scope.viewparams.size);
-							return 1+Math.pow(value, 1/2)*50;
+							return sizeScale(getVisualValue(d, scope.viewparams.size.param, "size"));
+						}
+						
+						function getHsl(d) {
+							return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ", 80%, 50%)";
 						}
 						
 						function getRgb(d) {
-							return "rgb(" + Math.round((getVisualValue(d, scope.viewparams.color)) * 255) + ","
-								+ Math.round((1-getVisualValue(d, scope.viewparams.color)) * 255) + ","
-								+ Math.round(getVisualValue(d, scope.viewparams.color) * 255) +")";
+							var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ","
+								+ (255-colorScale(getVisualValue(d, scope.viewparams.color))) + ","
+								+ colorScale(getVisualValue(d, scope.viewparams.color)) +")";
+							return color;
 						}
 						
-						function getVisualValue(dmo, parameter) {
-							//console.log(parameter.name);
+						function getVisualValue(dmo, parameter, key) {
 							if (parameter.name == "random") {
-								return Math.random();
+								if (!prevRandomValues[dmo.name]) {
+									prevRandomValues[dmo.name] = {};
+								}
+								if (!prevRandomValues[dmo.name][key]) {
+									prevRandomValues[dmo.name][key] = Math.random() * parameter.max;
+								}
+								return prevRandomValues[dmo.name][key];
 							} else {
-								return dmo[parameter.name] / parameter.max;
+								if (prevRandomValues[dmo.name] && prevRandomValues[dmo.name][key]) {
+									delete prevRandomValues[dmo.name][key];
+								}
+								if (dmo[parameter.name]) {
+									return dmo[parameter.name];
+								}
+								return 0.00000001; //for log scale :(
 							}
 						}
 					};

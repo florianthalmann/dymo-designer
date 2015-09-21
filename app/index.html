@@ -28,7 +28,7 @@
 				<span>control:</span>
 				<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
 				<span>parameter:</span>
-				<select ng-init="selectedParameter = dmo.parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in dmo.parameters"></select>
+				<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
 				<button ng-click="addMapping()">Add Mapping</button>
 			</div>
 			<div>

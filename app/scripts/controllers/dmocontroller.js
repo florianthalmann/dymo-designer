@@ -9,8 +9,9 @@
 			$scope.featureLoadingThreads = 0;
 			
 			$scope.dmo = new Dmo();
-			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLongitude"}];
-			$scope.views = [{name:"axes"}, {name:"graph"}];
+			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
+			$scope.parameters = [{name:"Amplitude"}, {name:"Pan"}, {name:"Reverb"}, {name:"Segmentation"}];
+			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
 			$scope.mappings = [];
 			
 			var maxDepth = 0;
@@ -23,6 +24,11 @@
 			$scope.addChildrenFromFeatures = function() {
 				new FeatureLoader($scope, $http).loadFeature($scope.featureFile, $scope.labelCondition, $scope.dmo);
 			}
+			
+			$scope.addMapping = function() {
+				
+			}
+			
 		}]);
 
 }());
