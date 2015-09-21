@@ -65,7 +65,7 @@
 						var xScale = createScale(scope.viewparams.xAxis.log, scope.viewparams.xAxis.param).range([padding, width-padding]),
 						yScale = createScale(scope.viewparams.yAxis.log, scope.viewparams.yAxis.param).range([height-padding, padding]),
 						sizeScale = createScale(scope.viewparams.size.log, scope.viewparams.size.param).range([10, 40]),
-						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([0, 360]);
+						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
 							if (log == true) {
@@ -204,7 +204,10 @@
 								if (prevRandomValues[dmo.name] && prevRandomValues[dmo.name][key]) {
 									delete prevRandomValues[dmo.name][key];
 								}
-								return dmo[parameter.name];
+								if (dmo[parameter.name]) {
+									return dmo[parameter.name];
+								}
+								return 0.00000001; //for log scale :(
 							}
 						}
 					};
