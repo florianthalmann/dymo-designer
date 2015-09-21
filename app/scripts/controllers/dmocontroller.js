@@ -11,7 +11,7 @@
 			$scope.dmo = null;
 			$scope.dmoGraph = {nodes:[], links:[]};
 			$scope.dmoList = [];
-			$scope.parameters = [{name:"time", max:0}, {name:"duration", max:0}, {name:"random", max:1}];
+			$scope.parameters = [{name:"time", min:1, max:1}, {name:"duration", min:1, max:1}, {name:"random", min:0, max:1}];
 			$scope.views = [{name:"axes"}, {name:"graph"}];
 			
 			var maxDepth = 0;
@@ -74,14 +74,20 @@
 			function registerDmo(dmo) {
 				$scope.dmoList.push(dmo);
 				$scope.dmoGraph.nodes.push(dmo);
-				updateMaxes(dmo);
+				updateMinMax(dmo);
 			}
 			
-			function updateMaxes(dmo) {
+			function updateMinMax(dmo) {
 				for (var i = 0; i < $scope.parameters.length; i++) {
 					var p = $scope.parameters[i];
 					if (dmo[p.name]) {
-						p.max = Math.max(dmo[p.name], p.max);
+						if (p.max == undefined) {
+							p.min = dmo[p.name];
+							p.max = dmo[p.name];
+						} else {
+							p.min = Math.min(dmo[p.name], p.min);
+							p.max = Math.max(dmo[p.name], p.max);
+						}
 					}
 				}
 			}
@@ -153,7 +159,7 @@
 				if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
 					parent.duration = (newDmo.time+newDmo.duration) - parent.time;
 				}
-				updateMaxes(parent);
+				updateMinMax(parent);
 			}
 			
 			function createNewDmo(time, duration) {

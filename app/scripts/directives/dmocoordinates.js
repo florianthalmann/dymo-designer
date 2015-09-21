@@ -62,16 +62,16 @@
 						// set the height based on the calculations above
 						svg.attr('height', height);
 						
-						var xScale = createScale(scope.viewparams.xAxis.log).domain([0, scope.viewparams.xAxis.param.max]).range([padding, width-padding]),
-						yScale = createScale(scope.viewparams.yAxis.log).domain([0, scope.viewparams.yAxis.param.max]).range([height-padding, padding]),
-						sizeScale = createScale(scope.viewparams.size.log).domain([0, scope.viewparams.size.param.max]).range([10, 40]),
-						colorScale = createScale(scope.viewparams.color.log).domain([0, scope.viewparams.color.param.max]).rangeRound([0, 360]);
+						var xScale = createScale(scope.viewparams.xAxis.log, scope.viewparams.xAxis.param).range([padding, width-padding]),
+						yScale = createScale(scope.viewparams.yAxis.log, scope.viewparams.yAxis.param).range([height-padding, padding]),
+						sizeScale = createScale(scope.viewparams.size.log, scope.viewparams.size.param).range([10, 40]),
+						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([0, 360]);
 						
-						function createScale(log) {
+						function createScale(log, param) {
 							if (log == true) {
-								return d3.scale.sqrt();
+								return d3.scale.log().base(2).domain([param.min, param.max]);
 							}
-							return d3.scale.linear();
+							return d3.scale.linear().domain([param.min, param.max]);
 						}
 						
 						xAxis.scale(xScale);

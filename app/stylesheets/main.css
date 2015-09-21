@@ -80,8 +80,6 @@ button:hover {
 	transform: rotate(-45deg);
 }
 
-
-
 .xaxis path, .yaxis path,
 .xaxis line, .yaxis line {
 	fill: none;
