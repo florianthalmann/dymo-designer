@@ -16,7 +16,7 @@
 						.append("svg")
 						.attr("width", "100%");
 					
-					var height = 500;
+					var height = 600;
 					var padding = 50;
 					var previousColors = null;
 					var prevRandomValues = {};

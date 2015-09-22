@@ -7,7 +7,7 @@ html, body { height: 100%; }
 
 h1, body, button, input, select {
 	font-family: Avenir Next;
-	font-size: 18px;
+	font-size: 16px;
 	text-align: center;
 	font-weight: 300;
 	background-color: #fdfdfd;

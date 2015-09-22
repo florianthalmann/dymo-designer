@@ -4,29 +4,47 @@
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
 	<script src="scripts/app.js"></script>
+	<script src="scripts/dmomanager.js"></script>
 	<script src="scripts/dmo.js"></script>
+	<script src="scripts/rendering.js"></script>
+	<script src="scripts/parameter.js"></script>
 	<script src="scripts/featureloader.js"></script>
+	<script src="scripts/audio/scheduler.js"></script>
+	<script src="scripts/audio/source.js"></script>
+	<script src="scripts/audio/AudioSampleLoader.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/dmocontroller.js"></script>
+	<script src="scripts/controllers/renderingcontroller.js"></script>
 	<script src="scripts/directives/dmobubbles.js"></script>
 	<script src="scripts/directives/dmograph.js"></script>
 	<script src="scripts/directives/dmocoordinates.js"></script>
 </head>
 <body ng-app="dmoDesigner">
 	<div>
-		<h1>DMO Generator</h1>
+		<h1>DMO Designer</h1>
 		<div ng-controller="DmoController">
 			<div>
 				<button ng-click="dmo.addDmo()">Add DMO</button>
 				<span>feature file:</span>
 				<input type="text" ng-model="featureFile"></input-->
-				<span> condition:</span>
-				<input type="text" ng-model="labelCondition"></input-->
+				<span>condition:</span>
+				<input type="text" ng-model="labelCondition" size="2"></input-->
 				<button ng-click="addChildrenFromFeatures()">Add Features</button>
+				<button ng-click="play()">Play</button>
 			</div>
-			<div>
-				<span>control:</span>
-				<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
+			<div ng-controller="RenderingController">
+				<span>mapping type:</span>
+				<select ng-init="selectedMappingType = mappingTypes[0]" ng-model="selectedMappingType" ng-options="t.name for t in mappingTypes"></select>
+				<span ng-show="selectedMappingType == mappingTypes[0]">
+					feature:
+					<select ng-init="selectedFeature = dmo.parameters[0]" ng-model="selectedFeature" ng-options="p.name for p in dmo.parameters"></select>
+				</span>
+				<span ng-show="selectedMappingType == mappingTypes[1]">
+					control:
+					<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
+				</span>
+				<span>function: y = </span>
+				<input type="text" ng-model="mappingFunction" size="7"></input-->
 				<span>parameter:</span>
 				<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
 				<button ng-click="addMapping()">Add Mapping</button>
@@ -37,13 +55,13 @@
 				<span>x-axis:</span>
 				<select ng-init="viewParams.xAxis.param = dmo.parameters[0]" ng-model="viewParams.xAxis.param" ng-options="p.name for p in dmo.parameters"></select>
 				<input type="checkbox" ng-init="viewParams.xAxis.log = false" ng-model="viewParams.xAxis.log"></input>
-				<span> y-axis:</span>
+				<span>y-axis:</span>
 				<select ng-init="viewParams.yAxis.param = dmo.parameters[1]" ng-model="viewParams.yAxis.param" ng-options="p.name for p in dmo.parameters"></select>
 				<input type="checkbox" ng-init="viewParams.yAxis.log = false" ng-model="viewParams.yAxis.log"></input>
-				<span> size:</span>
+				<span>size:</span>
 				<select ng-init="viewParams.size.param = dmo.parameters[1]" ng-model="viewParams.size.param" ng-options="p.name for p in dmo.parameters"></select>
 				<input type="checkbox" ng-init="viewParams.size.log = false" ng-model="viewParams.size.log"></input>
-				<span> color:</span>
+				<span>color:</span>
 				<select ng-init="viewParams.color.param = dmo.parameters[2]" ng-model="viewParams.color.param" ng-options="p.name for p in dmo.parameters"></select>
 				<input type="checkbox" ng-init="viewParams.color.log = false" ng-model="viewParams.color.log"></input>
 			</div>

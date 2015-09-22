@@ -4,15 +4,19 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('DmoController', ['$scope', '$http', function($scope, $http){
 			
+			window.AudioContext = window.AudioContext || window.webkitAudioContext;
+			$scope.audioContext = new AudioContext();
+			
+			$scope.sourceFile = 'audio/low.mp3';
 			$scope.featureFile = 'features/low_barbeat.json';
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
-			$scope.dmo = new Dmo();
-			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
-			$scope.parameters = [{name:"Amplitude"}, {name:"Pan"}, {name:"Reverb"}, {name:"Segmentation"}];
 			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
-			$scope.mappings = [];
+			
+			$scope.scheduler = new Scheduler($scope);
+			$scope.scheduler.addSourceFile($scope.sourceFile);
+			$scope.dmo = new DmoManager($scope.scheduler);
 			
 			var maxDepth = 0;
 			
@@ -25,8 +29,12 @@
 				new FeatureLoader($scope, $http).loadFeature($scope.featureFile, $scope.labelCondition, $scope.dmo);
 			}
 			
-			$scope.addMapping = function() {
-				
+			$scope.play = function() {
+				var dmo = $scope.dmo.getRealTopDmo();
+				if (dmo) {
+					dmo.setSourcePath($scope.sourceFile);
+					$scope.scheduler.play(dmo);
+				}
 			}
 			
 		}]);

@@ -1,178 +1,182 @@
-function Dmo(dmoPath) {
+function DynamicMusicObject(uri, scheduler, type) {
 	
-	var self = this;
+	var parentDMO = null;
+	var children = [];
+	var sourcePath;
+	var graph = null;
+	var segmentsPlayed = 0;
+	var skipProportionAdjustment = false;
+	var previousIndex = null;
+	var segmentStart, segmentDuration;
 	
-	var topDmo = null;
-	this.graph = {nodes:[], links:[]};
-	this.list = [];
+	this.getUri = function() {
+		return uri;
+	}
 	
-	this.parameters = [createParameter("time"), createParameter("duration"), createParameter("random", 0, 1)];
+	this.setParent = function(dmo) {
+		parentDMO = dmo;
+	}
 	
-	var maxDepth = 0;
+	this.addChild = function(dmo) {
+		dmo.setParent(this);
+		children.push(dmo);
+	}
 	
-	this.addDmo = function() {
-		var newDmo = createNewDmo();
-		//set as top-level dmo if none exists
-		if (topDmo == null) {
-			setTopLevelDmo(newDmo);
-		//add as child if one exists
+	this.setSourcePath = function(path) {
+		sourcePath = path;
+	}
+	
+	this.setGraph = function(g) {
+		graph = g;
+	}
+	
+	this.getGraph = function() {
+		return graph;
+	}
+	
+	this.getSourcePath = function() {
+		if (parentDMO && !sourcePath) {
+			return parentDMO.getSourcePath();
+		}
+		return sourcePath;
+	}
+	
+	//positive change in play affects children
+	this.updatePlay = function(change) {
+		//ask their children to get appropriate segment
+		if (type == DmoTypes.SEQUENCE) {
+			
+		}
+		if (children.length > 0) {
+			for (var i = 0; i < children.length; i++) {
+				children[i].updatePlay(change);
+			}
 		} else {
-			addChildDmo(topDmo, newDmo);
-		}
-		//createPitchHelixDmo();
-	}
-	
-	function createPitchHelixDmo() {
-		getParameter("chroma");
-		getParameter("height");
-		var previousDmo = null;
-		for (var i = 0; i < 48; i++) {
-			var currentDmo = createNewDmo(1,1);
-			var cos = Math.cos((i % 12) / 6 * Math.PI);
-			var sin = Math.sin((i % 12) / 6 * Math.PI);
-			currentDmo.chroma = cos+1;
-			currentDmo.height = sin+1+(i/4.5);
-			if (previousDmo) {
-				addChildDmo(previousDmo, currentDmo);
+			if (change > 0) {
+				scheduler.play(this);
 			} else {
-				setTopLevelDmo(currentDmo);
-			}
-			previousDmo = currentDmo;
-		}
-	}
-	
-	function setTopLevelDmo(dmo) {
-		registerDmo(dmo);
-		topDmo = dmo;
-	}
-	
-	function addChildDmo(parent, child) {
-		registerDmo(child);
-		parent.children.push(child);
-		var parentIndex = self.list.indexOf(parent);
-		var childIndex = self.list.indexOf(child);
-		var link = {"source":parent, "target":child, "value":1};
-		self.graph.links.push(link);
-	}
-	
-	function registerDmo(dmo) {
-		self.list.push(dmo);
-		self.graph.nodes.push(dmo);
-		updateMinMaxes(dmo);
-	}
-	
-	function setDmoParameter(dmo, param, value) {
-		dmo[param.name] = value;
-		updateMinMax(dmo, param);
-	}
-	
-	function updateMinMaxes(dmo) {
-		for (var i = 0; i < self.parameters.length; i++) {
-			updateMinMax(dmo, self.parameters[i]);
-		}
-	}
-	
-	function updateMinMax(dmo, param) {
-		if (dmo[param.name]) {
-			if (param.max == undefined) {
-				param.min = dmo[param.name];
-				param.max = dmo[param.name];
-			} else {
-				param.min = Math.min(dmo[param.name], param.min);
-				param.max = Math.max(dmo[param.name], param.max);
+				scheduler.stop(this);
 			}
 		}
 	}
 	
-	this.addFeature = function(name, data) {
-		//iterate through all levels and add averages
-		var parameter = getParameter(name);
-		for (var i = 0; i < this.list.length; i++) {
-			var laterValues = data.filter(
-				function(x){return x.time.value > self.list[i].time}
-			);
-			var closestValue = laterValues[0].value[0];
-			setDmoParameter(this.list[i], parameter, closestValue);
-		}
-	}
-	
-	function getParameter(name) {
-		//if already exists return that
-		for (var i = 0; i < self.parameters.length; i++) {
-			if (self.parameters[i].name == name) {
-				return self.parameters[i];
+	//change in amplitude does not affect children
+	this.updateAmplitude = function(change) {
+		scheduler.updateAmplitude(this, change);
+		if (!sourcePath) {
+			for (var i = 0; i < children.length; i++) {
+				children[i].amplitude.relativeUpdate(change);
 			}
 		}
-		//if doesn't exist make a new one
-		var newParameter = createParameter(name);
-		self.parameters.splice(self.parameters.length-1, 0, newParameter);
-		return newParameter;
 	}
 	
-	function createParameter(name, min, max) {
-		if (min != undefined && max != undefined) {
-			return {name:name, min:min, max:max};
+	//change in amplitude does not affect children
+	this.updatePlaybackRate = function(change) {
+		scheduler.updatePlaybackRate(this, change);
+		if (!sourcePath) {
+			for (var i = 0; i < children.length; i++) {
+				children[i].playbackRate.relativeUpdate(change);
+			}
 		}
-		return {name:name, min:1, max:0};
 	}
 	
-	this.addSegmentation = function(segments) {
-		for (var i = 0; i < segments.length-1; i++) {
-			var newDmo = createNewDmo();
-			newDmo.time = segments[i].time.value;
-			newDmo.duration = segments[i+1].time.value - newDmo.time;
-			newDmo.segmentLabel = segments[i].label.value;
-			parent = getSuitableParent(newDmo);
-			updateParentDuration(parent, newDmo);
-			addChildDmo(parent, newDmo);
+	//change in pan affects pan of children
+	this.updatePan = function(change) {
+		scheduler.updatePan(this, change);
+		for (var i = 0; i < children.length; i++) {
+			children[i].pan.relativeUpdate(change);
 		}
-		maxDepth++;
 	}
 	
-	function getSuitableParent(dmo) {
-		var nextCandidate = topDmo;
-		var depth = 0;
-		while (depth < maxDepth) {
-			var children = nextCandidate.children;
-			if (children.length > 0) {
-				for (var i = 0; i < children.length; i++) {
-					if (children[i].time <= dmo.time) {
-						nextCandidate = children[i];
-						depth++;
-					} else {
-						break;
-					}
+	//change in distance affects distance of children
+	this.updateDistance = function(change) {
+		scheduler.updateDistance(this, change);
+		for (var i = 0; i < children.length; i++) {
+			children[i].distance.relativeUpdate(change);
+		}
+	}
+	
+	//change in reverb affects reverb of children
+	this.updateReverb = function(change) {
+		scheduler.updateReverb(this, change);
+		for (var i = 0; i < children.length; i++) {
+			children[i].reverb.relativeUpdate(change);
+		}
+	}
+	
+	//change in segment affects only segment of children if any
+	this.updateSegmentIndex = function(value) {
+		var start = segmentation[value];
+		var end = segmentation[value+1];
+		//scheduler.updateSegment(this, segmentStart, segmentEnd);
+		for (var i = 0; i < children.length; i++) {
+			children[i].jumpToSegment(start);
+		}
+	}
+	
+	this.jumpToSegment = function(time) {
+		if (segmentation.length == 0) {
+			return true;
+		} else {
+			var index = segmentation.indexOf(time);
+			if (index >= 0) {
+				this.segmentIndex.update(undefined, index);
+				//ADJUST CHILDREN!!!!!
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	this.getNextSegment = function() {
+		//TODO ADDED FOR NOW, IMPLEMENT SOON!!
+		return [0, undefined];
+		
+		var index = this.segmentIndex.value;
+		if (index == previousIndex || previousIndex == null) {
+			index = this.segmentIndex.requestValue();
+		}
+		previousIndex = index;
+		
+		var start = segmentation[index];
+		var duration = segmentation[index+1]-start;
+		
+		//try to adjust parent segmentation
+		if (parentDMO.jumpToSegment(start)) {
+			segmentsPlayed = 0;
+		}
+		//console.log(sourcePath, index, segmentation.length);
+		if (segmentsPlayed < this.segmentCount.value) {
+			duration *= this.segmentDurationRatio.value;
+			if (!skipProportionAdjustment) {
+				duration *= this.segmentProportion.value;
+			}
+			skipProportionAdjustment = !skipProportionAdjustment;
+			if (start >= 0) {
+				segmentsPlayed++;
+				if (duration > 0) {
+					//console.log(segmentsPlayed, this.segmentCount.value, [start, duration]);
+					return [start, duration];
+				} else {
+					return this.getNextSegment();
 				}
 			} else {
-				return nextCandidate;
+				return [0, undefined];
 			}
+		} else {
+			return this.getNextSegment();
 		}
-		return nextCandidate;
 	}
 	
-	function updateParentDuration(parent, newDmo) {
-		if (!parent.time || newDmo.time < parent.time) {
-			parent.time = newDmo.time;
-		}
-		if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
-			parent.duration = (newDmo.time+newDmo.duration) - parent.time;
-		}
-		updateMinMaxes(parent);
-	}
+	this.play = new Parameter(this, this.updatePlay, 0, true);
+	this.amplitude = new Parameter(this, this.updateAmplitude, 1);
+	this.playbackRate = new Parameter(this, this.updatePlaybackRate, 1);
+	this.pan = new Parameter(this, this.updatePan, 0);
+	this.distance = new Parameter(this, this.updateDistance, 0);
+	this.reverb = new Parameter(this, this.updateReverb, 0);
+	this.segmentIndex = new Parameter(this, this.updateSegmentIndex, 0, true, true);
+	this.segmentDurationRatio = new Parameter(this, undefined, 1, false, true);
+	this.segmentProportion = new Parameter(this, undefined, 1, false, true);
+	this.segmentCount = new Parameter(this, undefined, 4, true, true);
 	
-	var createNewDmo = function(time, duration) {
-		if (!time) {
-			time = Math.random();
-		}
-		if (!duration) {
-			duration = Math.random();
-		}
-		return {
-			name: "dmo" + (self.list.length+1),
-			time: time,
-			duration: duration,
-			children: []
-		}
-	}.bind(this);
-
 }
