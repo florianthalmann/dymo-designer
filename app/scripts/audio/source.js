@@ -18,7 +18,8 @@ function Source(audioContext, dmo, reverbSend) {
 	panner.connect(reverbGain);
 	var currentAmplitude = 1;
 	var currentPlaybackRate = 1;
-	var currentPannerPosition = [0,0,0];
+	var currentPannerPosition = [0,0,-0.01];
+	panner.setPosition(0,0,-0.01); //for chrome :(
 	var currentReverb = 0;
 	var currentAudioSubBuffer;
 	var currentSourceDuration;

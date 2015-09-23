@@ -7,7 +7,7 @@ function DmoManager(scheduler) {
 	this.list = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
-	this.parameters = [createParameter("time"), createParameter("duration"), createParameter("random", 0, 1)];
+	this.features = [createFeature("time"), createFeature("duration"), createFeature("random", 0, 1)];
 	
 	var maxDepth = 0;
 	
@@ -28,8 +28,8 @@ function DmoManager(scheduler) {
 	}
 	
 	function createPitchHelixDmo() {
-		getParameter("chroma");
-		getParameter("height");
+		getFeature("chroma");
+		getFeature("height");
 		var previousDmo = null;
 		for (var i = 0; i < 48; i++) {
 			var currentDmo = createNewDmo(1,1);
@@ -65,58 +65,59 @@ function DmoManager(scheduler) {
 		self.list.push(dmo);
 		self.graph.nodes.push(dmo);
 		toRealDmo[dmo] = new DynamicMusicObject(dmo.name, scheduler);
+		toRealDmo[dmo].setSegment(dmo.time, dmo.duration);
 		updateMinMaxes(dmo);
 	}
 	
-	function setDmoParameter(dmo, param, value) {
-		dmo[param.name] = value;
-		updateMinMax(dmo, param);
+	function setDmoFeature(dmo, feature, value) {
+		dmo[feature.name] = value;
+		updateMinMax(dmo, feature);
 	}
 	
 	function updateMinMaxes(dmo) {
-		for (var i = 0; i < self.parameters.length; i++) {
-			updateMinMax(dmo, self.parameters[i]);
+		for (var i = 0; i < self.features.length; i++) {
+			updateMinMax(dmo, self.features[i]);
 		}
 	}
 	
-	function updateMinMax(dmo, param) {
-		if (dmo[param.name]) {
-			if (param.max == undefined) {
-				param.min = dmo[param.name];
-				param.max = dmo[param.name];
+	function updateMinMax(dmo, feature) {
+		if (dmo[feature.name]) {
+			if (feature.max == undefined) {
+				feature.min = dmo[feature.name];
+				feature.max = dmo[feature.name];
 			} else {
-				param.min = Math.min(dmo[param.name], param.min);
-				param.max = Math.max(dmo[param.name], param.max);
+				feature.min = Math.min(dmo[feature.name], feature.min);
+				feature.max = Math.max(dmo[feature.name], feature.max);
 			}
 		}
 	}
 	
 	this.addFeature = function(name, data) {
 		//iterate through all levels and add averages
-		var parameter = getParameter(name);
+		var feature = getFeature(name);
 		for (var i = 0; i < this.list.length; i++) {
 			var laterValues = data.filter(
 				function(x){return x.time.value > self.list[i].time}
 			);
 			var closestValue = laterValues[0].value[0];
-			setDmoParameter(this.list[i], parameter, closestValue);
+			setDmoFeature(this.list[i], feature, closestValue);
 		}
 	}
 	
-	function getParameter(name) {
+	function getFeature(name) {
 		//if already exists return that
-		for (var i = 0; i < self.parameters.length; i++) {
-			if (self.parameters[i].name == name) {
-				return self.parameters[i];
+		for (var i = 0; i < self.features.length; i++) {
+			if (self.features[i].name == name) {
+				return self.features[i];
 			}
 		}
 		//if doesn't exist make a new one
-		var newParameter = createParameter(name);
-		self.parameters.splice(self.parameters.length-1, 0, newParameter);
-		return newParameter;
+		var newFeature = createFeature(name);
+		self.features.splice(self.features.length-1, 0, newFeature);
+		return newFeature;
 	}
 	
-	function createParameter(name, min, max) {
+	function createFeature(name, min, max) {
 		if (min != undefined && max != undefined) {
 			return {name:name, min:min, max:max};
 		}

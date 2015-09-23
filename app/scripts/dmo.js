@@ -26,6 +26,11 @@ function DynamicMusicObject(uri, scheduler, type) {
 		sourcePath = path;
 	}
 	
+	this.setSegment = function(start, duration) {
+		segmentStart = start;
+		segmentDuration = duration;
+	}
+	
 	this.setGraph = function(g) {
 		graph = g;
 	}
@@ -130,7 +135,12 @@ function DynamicMusicObject(uri, scheduler, type) {
 	
 	this.getNextSegment = function() {
 		//TODO ADDED FOR NOW, IMPLEMENT SOON!!
+		console.log("segment");
 		return [0, undefined];
+		
+		if (children.length > 0) {
+			
+		}
 		
 		var index = this.segmentIndex.value;
 		if (index == previousIndex || previousIndex == null) {
