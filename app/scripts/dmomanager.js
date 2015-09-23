@@ -1,10 +1,11 @@
-function DmoManager(scheduler) {
+function DmoManager(scheduler, $scope) {
 	
 	var self = this;
 	
 	var topDmo = null;
 	this.graph = {nodes:[], links:[]};
 	this.list = [];
+	this.playingDmos = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
 	this.features = [createFeature("time"), createFeature("duration"), createFeature("random", 0, 1)];
@@ -12,7 +13,7 @@ function DmoManager(scheduler) {
 	var maxDepth = 0;
 	
 	this.getRealTopDmo = function() {
-		return toRealDmo[topDmo];
+		return toRealDmo[topDmo.name];
 	}
 	
 	this.addDmo = function() {
@@ -58,14 +59,14 @@ function DmoManager(scheduler) {
 		var childIndex = self.list.indexOf(child);
 		var link = {"source":parent, "target":child, "value":1};
 		self.graph.links.push(link);
-		toRealDmo[parent].addChild(toRealDmo[child]);
+		toRealDmo[parent.name].addChild(toRealDmo[child.name]);
 	}
 	
 	function registerDmo(dmo) {
 		self.list.push(dmo);
 		self.graph.nodes.push(dmo);
-		toRealDmo[dmo] = new DynamicMusicObject(dmo.name, scheduler);
-		toRealDmo[dmo].setSegment(dmo.time, dmo.duration);
+		toRealDmo[dmo.name] = new DynamicMusicObject(dmo.name, scheduler, undefined, self);
+		toRealDmo[dmo.name].setSegment(dmo.time, dmo.duration);
 		updateMinMaxes(dmo);
 	}
 	
@@ -181,6 +182,20 @@ function DmoManager(scheduler) {
 			duration: duration,
 			children: []
 		}
+	}
+	
+	this.setPlaying = function(dmoUri, playing) {
+		if (playing) {
+			this.playingDmos.push(dmoUri);
+		} else {
+			var i = this.playingDmos.indexOf(dmoUri);
+			if (i >= 0) {
+				this.playingDmos.splice(i);
+			}
+		}
+		setTimeout(function() {
+			$scope.$apply();
+		}, 10);
 	}
 
 }

@@ -31,6 +31,7 @@
 				<input type="text" ng-model="labelCondition" size="2"></input-->
 				<button ng-click="addChildrenFromFeatures()">Add Features</button>
 				<button ng-click="play()">Play</button>
+				<button ng-click="stop()">Stop</button>
 			</div>
 			<div ng-controller="RenderingController">
 				<span>mapping type:</span>
@@ -70,7 +71,7 @@
 				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
 			</div>
 			<div ng-if="selectedView == views[0]">
-				<dmo-coordinates data="dmo.graph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+				<dmo-coordinates data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
 				<dmo-graph data="dmo.graph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-graph>

@@ -8,6 +8,7 @@
 				scope: {
 					data: "=",
 					viewparams: "=",
+					playing: "=",
 					label: "@",
 					onClick: "&"
 				},
@@ -55,8 +56,12 @@
 						return scope.render(scope.data);
 					}, true);
 					
+					scope.$watch('playing', function(newVals, oldVals) {
+						return scope.render(scope.data, true);
+					}, true);
+					
 					// define render function
-					scope.render = function(data){
+					scope.render = function(data, playing){
 						// setup variables
 						var width = d3.select(iElement[0])[0][0].offsetWidth - 20; // 20 is for paddings and can be changed
 						// set the height based on the calculations above
@@ -138,7 +143,7 @@
 						lines.exit().remove();
 						
 						//only change color if not random or newly random
-						if (scope.viewparams.color.param.name != "random" || previousColors != "random") {
+						if (scope.viewparams.color.param.name != "random" || previousColors != "random" || playing) {
 							circles
 								.transition()
 									.duration(500) // time of duration
@@ -181,6 +186,9 @@
 						}
 						
 						function getHsl(d) {
+							if (scope.playing.indexOf(d.name) >= 0) {
+								return "black";
+							}
 							return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ", 80%, 50%)";
 						}
 						

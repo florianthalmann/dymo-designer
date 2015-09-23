@@ -1,10 +1,11 @@
-function DynamicMusicObject(uri, scheduler, type) {
+function DynamicMusicObject(uri, scheduler, type, manager) {
 	
 	var parentDMO = null;
 	var children = [];
+	var childrenPlayed = 0;
+	var isPlaying = false;
 	var sourcePath;
 	var graph = null;
-	var segmentsPlayed = 0;
 	var skipProportionAdjustment = false;
 	var previousIndex = null;
 	var segmentStart, segmentDuration;
@@ -134,15 +135,36 @@ function DynamicMusicObject(uri, scheduler, type) {
 	}
 	
 	this.getNextSegment = function() {
-		//TODO ADDED FOR NOW, IMPLEMENT SOON!!
-		console.log("segment");
-		return [0, undefined];
-		
 		if (children.length > 0) {
-			
+			setPlaying(true);
+			while (childrenPlayed < children.length) {
+				var nextSegment = children[childrenPlayed].getNextSegment();
+				if (nextSegment) {
+					return nextSegment;
+				} else {
+					childrenPlayed++;
+				}
+			}
+			//done playing
+			childrenPlayed = 0;
+			setPlaying(false);
+			return null;
+		} else {
+			if (!isPlaying) {
+				setPlaying(true);
+				return [segmentStart, segmentDuration];
+			} else {
+				setPlaying(false);
+				return null;
+			}
 		}
 		
-		var index = this.segmentIndex.value;
+		function setPlaying(playing) {
+			isPlaying = playing;
+			manager.setPlaying(uri, isPlaying);
+		}
+		
+		/*var index = this.segmentIndex.value;
 		if (index == previousIndex || previousIndex == null) {
 			index = this.segmentIndex.requestValue();
 		}
@@ -175,7 +197,7 @@ function DynamicMusicObject(uri, scheduler, type) {
 			}
 		} else {
 			return this.getNextSegment();
-		}
+		}*/
 	}
 	
 	this.play = new Parameter(this, this.updatePlay, 0, true);

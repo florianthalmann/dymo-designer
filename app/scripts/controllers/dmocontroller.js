@@ -16,7 +16,7 @@
 			
 			$scope.scheduler = new Scheduler($scope);
 			$scope.scheduler.addSourceFile($scope.sourceFile);
-			$scope.dmo = new DmoManager($scope.scheduler);
+			$scope.dmo = new DmoManager($scope.scheduler, $scope);
 			
 			var maxDepth = 0;
 			
@@ -34,6 +34,13 @@
 				if (dmo) {
 					dmo.setSourcePath($scope.sourceFile);
 					$scope.scheduler.play(dmo);
+				}
+			}
+			
+			$scope.stop = function() {
+				var dmo = $scope.dmo.getRealTopDmo();
+				if (dmo) {
+					$scope.scheduler.stop(dmo);
 				}
 			}
 			
