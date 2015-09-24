@@ -64,18 +64,18 @@
 						
 						var lines = svg.selectAll(".edge");
 						lines.filter(function(d) { return toSelect.indexOf(d.target.name) >= 0 })
-							//.style("stroke", "black")
-							.style("opacity", 0.7);
+							.style("stroke", "black")
+							.style("opacity", 0.4);
 						lines.filter(function(d) { return toDeselect.indexOf(d.target.name) >= 0 })
-							//.style("stroke", function(d) { return getHsl(d.target); })
+							.style("stroke", function(d) { return getHsl(d.target); })
 							.style("opacity", 0.1);
 						
 						var circles = svg.selectAll("circle");
 						circles.filter(function(d) { return toSelect.indexOf(d.name) >= 0 })
-							//.style("fill", "black")
-							.style("opacity", 0.7);
+							.style("fill", "black")
+							.style("opacity", 0.6);
 						circles.filter(function(d) { return toDeselect.indexOf(d.name) >= 0 })
-							//.style("fill", getHsl)
+							.style("fill", getHsl)
 							.style("opacity", 0.3);
 					}, true);
 					
@@ -107,6 +107,29 @@
 						svg.selectAll("g.yaxis")
 							.call(yAxis);
 						
+						var circles = svg.selectAll("circle").data(data.nodes);
+						
+						circles.enter()
+							.append("circle")
+							.on("click", function(d, i){return scope.onClick({item: d});})
+							.style("fill", getHsl)
+							.style("opacity", 0.3)
+							.attr("r", 0)
+							.attr("cx", getXValue)
+							.attr("cy", getYValue)
+							.transition()
+								.duration(500) // time of duration
+								.attr("r", getR); // width based on scale
+							
+						circles
+							.transition()
+								.duration(500) // time of duration
+								.attr("r", getR) // width based on scale
+								.attr("cx", getXValue)
+								.attr("cy", getYValue);
+						
+						circles.exit().remove();
+						
 						
 						var lines = svg.selectAll(".edge").data(data.links);
 					
@@ -137,31 +160,6 @@
 								.attr("y2", function(d) { return getYValue(d.target); });
 						
 						lines.exit().remove();
-						
-						
-						var circles = svg.selectAll("circle").data(data.nodes);
-						
-						circles.enter()
-							.append("circle")
-							.on("click", function(d, i){return scope.onClick({item: d});})
-							.style("fill", getHsl)
-							.style("opacity", 0.3)
-							.attr("r", 0)
-							.attr("cx", getXValue)
-							.attr("cy", getYValue)
-							.transition()
-								.duration(500) // time of duration
-								.attr("r", getR); // width based on scale
-							
-						circles
-							.transition()
-								.duration(500) // time of duration
-								.attr("r", getR) // width based on scale
-								.attr("cx", getXValue)
-								.attr("cy", getYValue);
-						
-						circles.exit().remove();
-						
 						
 						//only change color if not random or newly random, or when playing ones change (OPTIMIZE!)
 						if (scope.viewparams.color.param.name != "random" || previousColors != "random") {

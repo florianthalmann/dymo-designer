@@ -18,6 +18,10 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		parentDMO = dmo;
 	}
 	
+	this.getParent = function() {
+		return parentDMO;
+	}
+	
 	this.addChild = function(dmo) {
 		dmo.setParent(this);
 		children.push(dmo);
@@ -134,9 +138,13 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		return false;
 	}
 	
+	this.updatePlayingDmos = function(dmo) {
+		manager.updatePlayingDmos(dmo);
+	}
+	
 	this.getNextSegment = function() {
 		if (children.length > 0) {
-			setPlaying(true);
+			isPlaying = true;
 			while (childrenPlayed < children.length) {
 				var nextSegment = children[childrenPlayed].getNextSegment();
 				if (nextSegment) {
@@ -147,21 +155,16 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 			}
 			//done playing
 			childrenPlayed = 0;
-			setPlaying(false);
+			isPlaying = false;
 			return null;
 		} else {
 			if (!isPlaying) {
-				setPlaying(true);
-				return [segmentStart, segmentDuration];
+				isPlaying = true;
+				return [segmentStart, segmentDuration, this];
 			} else {
-				setPlaying(false);
+				isPlaying = false;
 				return null;
 			}
-		}
-		
-		function setPlaying(playing) {
-			isPlaying = playing;
-			manager.setPlaying(uri, isPlaying);
 		}
 		
 		/*var index = this.segmentIndex.value;

@@ -184,7 +184,20 @@ function DmoManager(scheduler, $scope) {
 		}
 	}
 	
-	this.setPlaying = function(dmoUri, playing) {
+	this.updatePlayingDmos = function(dmo) {
+		var newDmos = [];
+		var currentDmo = dmo;
+		while (currentDmo != null) {
+			newDmos.push(currentDmo.getUri());
+			currentDmo = currentDmo.getParent();
+		}
+		this.playingDmos = newDmos;
+		setTimeout(function() {
+			$scope.$apply();
+		}, 10);
+	}
+	
+	/*this.setPlaying = function(dmoUri, playing) {
 		if (playing) {
 			this.playingDmos.push(dmoUri);
 		} else {
@@ -196,6 +209,6 @@ function DmoManager(scheduler, $scope) {
 		setTimeout(function() {
 			$scope.$apply();
 		}, 10);
-	}
+	}*/
 
 }

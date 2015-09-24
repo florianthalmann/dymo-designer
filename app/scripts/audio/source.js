@@ -26,6 +26,7 @@ function Source(audioContext, dmo, reverbSend) {
 	var currentAudioSubBuffer;
 	var currentSourceDuration;
 	var audioSource, nextAudioSource;
+	var currentSegmentInfo;
 	
 	var audioBuffer = null;
 	
@@ -57,8 +58,12 @@ function Source(audioContext, dmo, reverbSend) {
 		} else {
 			delay = endTime-audioContext.currentTime;
 		}
+		currentDmo = currentSegmentInfo[2];
 		startTime = audioContext.currentTime+delay;
 		audioSource.start(startTime, currentPausePosition); //% audioSource.loopEnd-audioSource.loopStart);
+		setTimeout(function() {
+			dmo.updatePlayingDmos(currentDmo);
+		}, delay);
 		endTime = startTime+currentSourceDuration;
 		//console.log(delay + " " + endTime + " " + currentSourceDuration + " " + ((endTime-audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000));
 		/*if (segmentations.length > 0) { //TODO FIND OTHER WAY TO MAKE PAUSE WORK WITH SEGMENTED TRACKS
@@ -142,17 +147,17 @@ function Source(audioContext, dmo, reverbSend) {
 	}
 	
 	function createNewAudioSource() {
-		var segment = dmo.getNextSegment();
-		if (segment) {
-			if (!segment[1]) {
-				segment[1] = audioBuffer.duration-segment[0];
+		currentSegmentInfo = dmo.getNextSegment();
+		if (currentSegmentInfo) {
+			if (!currentSegmentInfo[1]) {
+				currentSegmentInfo[1] = audioBuffer.duration-currentSegmentInfo[0];
 			}
-			currentSourceDuration = segment[1];
-			if (segment[0] == 0 && segment[1] == audioBuffer.duration) {
+			currentSourceDuration = currentSegmentInfo[1];
+			if (currentSegmentInfo[0] == 0 && currentSegmentInfo[1] == audioBuffer.duration) {
 				currentAudioSubBuffer = audioBuffer;
 			} else {
 				//add time for fade after source officially done
-				currentAudioSubBuffer = getAudioBufferCopy(toSamples(segment[0]), toSamples(currentSourceDuration+FADE_LENGTH));
+				currentAudioSubBuffer = getAudioBufferCopy(toSamples(currentSegmentInfo[0]), toSamples(currentSourceDuration+FADE_LENGTH));
 			}
 			var newSource = audioContext.createBufferSource();
 			newSource.connect(panner);
