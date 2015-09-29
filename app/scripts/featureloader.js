@@ -71,9 +71,9 @@ function FeatureLoader($scope, $http) {
 		$http.get(jsonUri).success(function(json) {
 			var results = json[Object.keys(json)[1]][0];
 			var outputId = results.annotation_metadata.annotator.output_id;
-			if (outputId == "beats") {
+			if (outputId == "beats" || outputId == "onsets") {
 				results = results.data;
-				if (labelCondition) {
+				if (labelCondition && results[0].label) {
 					results = results.filter(function(x) { return x.label.value == labelCondition; });
 				}
 				dmoController.addSegmentation(results);

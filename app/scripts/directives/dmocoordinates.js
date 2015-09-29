@@ -63,18 +63,18 @@
 						var toDeselect = oldVals.filter(function(i) {return newVals.indexOf(i) < 0;});
 						
 						var lines = svg.selectAll(".edge");
-						lines.filter(function(d) { return toSelect.indexOf(d.target.name) >= 0 })
+						lines.filter(function(d) { return toSelect.indexOf(d.target["@id"]) >= 0 })
 							.style("stroke", "black")
 							.style("opacity", 0.4);
-						lines.filter(function(d) { return toDeselect.indexOf(d.target.name) >= 0 })
+						lines.filter(function(d) { return toDeselect.indexOf(d.target["@id"]) >= 0 })
 							.style("stroke", function(d) { return getHsl(d.target); })
 							.style("opacity", 0.1);
 						
 						var circles = svg.selectAll("circle");
-						circles.filter(function(d) { return toSelect.indexOf(d.name) >= 0 })
+						circles.filter(function(d) { return toSelect.indexOf(d["@id"]) >= 0 })
 							.style("fill", "black")
 							.style("opacity", 0.6);
-						circles.filter(function(d) { return toDeselect.indexOf(d.name) >= 0 })
+						circles.filter(function(d) { return toDeselect.indexOf(d["@id"]) >= 0 })
 							.style("fill", getHsl)
 							.style("opacity", 0.3);
 					}, true);
@@ -206,7 +206,7 @@
 				}
 				
 				function getHsl(d) {
-					if (scope.playing.indexOf(d.name) >= 0) {
+					if (scope.playing.indexOf(d["@id"]) >= 0) {
 						return "black";
 					}
 					return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ", 80%, 50%)";
@@ -221,19 +221,19 @@
 				
 				function getVisualValue(dmo, parameter, key) {
 					if (parameter.name == "random") {
-						if (!prevRandomValues[dmo.name]) {
-							prevRandomValues[dmo.name] = {};
+						if (!prevRandomValues[dmo["@id"]]) {
+							prevRandomValues[dmo["@id"]] = {};
 						}
-						if (!prevRandomValues[dmo.name][key]) {
-							prevRandomValues[dmo.name][key] = Math.random() * parameter.max;
+						if (!prevRandomValues[dmo["@id"]][key]) {
+							prevRandomValues[dmo["@id"]][key] = Math.random() * parameter.max;
 						}
-						return prevRandomValues[dmo.name][key];
+						return prevRandomValues[dmo["@id"]][key];
 					} else {
-						if (prevRandomValues[dmo.name] && prevRandomValues[dmo.name][key]) {
-							delete prevRandomValues[dmo.name][key];
+						if (prevRandomValues[dmo["@id"]] && prevRandomValues[dmo["@id"]][key]) {
+							delete prevRandomValues[dmo["@id"]][key];
 						}
 						if (dmo[parameter.name]) {
-							return dmo[parameter.name];
+							return dmo[parameter.name].value;
 						}
 						return 0.00000001; //for log scale :(
 					}

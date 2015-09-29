@@ -1,0 +1,76 @@
+{
+"file_metadata": {
+  "filename": "ligeti.m4a"
+},
+"onset": [
+{ 
+  "annotation_metadata": {
+    "annotation_tools": "Sonic Annotator v1.2",
+    "data_source": "Automatic feature extraction",
+    "annotator": {
+      "plugin_id": "vamp:qm-vamp-plugins:qm-onsetdetector",
+      "output_id": "onsets",
+      "plugin_version": "3",
+      "step_size": 512,
+      "block_size": 1024,
+      "sample_rate": 44100,
+      "parameters": {
+        "dftype": 3,
+        "sensitivity": 50,
+        "whiten": 0
+      },
+      "transform_id": "vamp:qm-vamp-plugins:qm-onsetdetector:onsets"
+    }
+  },
+  "data": [
+    { "time": { "value": 39.4855 } },
+    { "time": { "value": 43.0614 } },
+    { "time": { "value": 43.3517 } },
+    { "time": { "value": 43.7116 } },
+    { "time": { "value": 44.0715 } },
+    { "time": { "value": 44.3849 } },
+    { "time": { "value": 44.8261 } },
+    { "time": { "value": 45.8826 } },
+    { "time": { "value": 46.1032 } },
+    { "time": { "value": 46.2774 } },
+    { "time": { "value": 46.498 } },
+    { "time": { "value": 47.1017 } },
+    { "time": { "value": 63.2163 } },
+    { "time": { "value": 63.5182 } },
+    { "time": { "value": 63.6227 } },
+    { "time": { "value": 63.8897 } },
+    { "time": { "value": 64.3657 } },
+    { "time": { "value": 64.6792 } },
+    { "time": { "value": 64.7953 } },
+    { "time": { "value": 64.981 } },
+    { "time": { "value": 65.0507 } },
+    { "time": { "value": 65.19 } },
+    { "time": { "value": 65.5732 } },
+    { "time": { "value": 70.101 } },
+    { "time": { "value": 70.3565 } },
+    { "time": { "value": 70.5771 } },
+    { "time": { "value": 70.7048 } },
+    { "time": { "value": 70.8325 } },
+    { "time": { "value": 70.937 } },
+    { "time": { "value": 71.0066 } },
+    { "time": { "value": 71.1808 } },
+    { "time": { "value": 71.262 } },
+    { "time": { "value": 71.622 } },
+    { "time": { "value": 90.999 } },
+    { "time": { "value": 93.7738 } },
+    { "time": { "value": 94.3195 } },
+    { "time": { "value": 94.6097 } },
+    { "time": { "value": 95.1786 } },
+    { "time": { "value": 95.5153 } },
+    { "time": { "value": 95.7591 } },
+    { "time": { "value": 95.8636 } },
+    { "time": { "value": 96.0842 } },
+    { "time": { "value": 96.2583 } },
+    { "time": { "value": 96.5137 } },
+    { "time": { "value": 96.595 } },
+    { "time": { "value": 96.6763 } },
+    { "time": { "value": 100.426 } }
+  ]
+}
+]
+}

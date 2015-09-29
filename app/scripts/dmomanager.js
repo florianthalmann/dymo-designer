@@ -13,7 +13,7 @@ function DmoManager(scheduler, $scope) {
 	var maxDepth = 0;
 	
 	this.getRealTopDmo = function() {
-		return toRealDmo[topDmo.name];
+		return toRealDmo[topDmo["@id"]];
 	}
 	
 	this.addDmo = function() {
@@ -54,24 +54,28 @@ function DmoManager(scheduler, $scope) {
 	
 	function addChildDmo(parent, child) {
 		registerDmo(child);
-		parent.children.push(child);
+		parent["hasPart"].push(child);
 		var parentIndex = self.list.indexOf(parent);
 		var childIndex = self.list.indexOf(child);
 		var link = {"source":parent, "target":child, "value":1};
 		self.graph.links.push(link);
-		toRealDmo[parent.name].addChild(toRealDmo[child.name]);
+		toRealDmo[parent["@id"]].addChild(toRealDmo[child["@id"]]);
 	}
 	
 	function registerDmo(dmo) {
 		self.list.push(dmo);
 		self.graph.nodes.push(dmo);
-		toRealDmo[dmo.name] = new DynamicMusicObject(dmo.name, scheduler, undefined, self);
-		toRealDmo[dmo.name].setSegment(dmo.time, dmo.duration);
+		toRealDmo[dmo["@id"]] = new DynamicMusicObject(dmo["@id"], scheduler, undefined, self);
+		toRealDmo[dmo["@id"]].setSegment(dmo["time"].value, dmo["duration"].value);
 		updateMinMaxes(dmo);
 	}
 	
 	function setDmoFeature(dmo, feature, value) {
-		dmo[feature.name] = value;
+		if (dmo[feature.name]) {
+			dmo[feature.name].value = value;
+		} else {
+			addFeatureToDmo(dmo, feature.name, value);
+		}
 		updateMinMax(dmo, feature);
 	}
 	
@@ -84,11 +88,11 @@ function DmoManager(scheduler, $scope) {
 	function updateMinMax(dmo, feature) {
 		if (dmo[feature.name]) {
 			if (feature.max == undefined) {
-				feature.min = dmo[feature.name];
-				feature.max = dmo[feature.name];
+				feature.min = dmo[feature.name].value;
+				feature.max = dmo[feature.name].value;
 			} else {
-				feature.min = Math.min(dmo[feature.name], feature.min);
-				feature.max = Math.max(dmo[feature.name], feature.max);
+				feature.min = Math.min(dmo[feature.name].value, feature.min);
+				feature.max = Math.max(dmo[feature.name].value, feature.max);
 			}
 		}
 	}
@@ -98,7 +102,7 @@ function DmoManager(scheduler, $scope) {
 		var feature = getFeature(name);
 		for (var i = 0; i < this.list.length; i++) {
 			var laterValues = data.filter(
-				function(x){return x.time.value > self.list[i].time}
+				function(x){return x.time.value > self.list[i]["time"].value}
 			);
 			var closestValue = laterValues[0].value[0];
 			setDmoFeature(this.list[i], feature, closestValue);
@@ -128,9 +132,11 @@ function DmoManager(scheduler, $scope) {
 	this.addSegmentation = function(segments) {
 		for (var i = 0; i < segments.length-1; i++) {
 			var newDmo = createNewDmo();
-			newDmo.time = segments[i].time.value;
-			newDmo.duration = segments[i+1].time.value - newDmo.time;
-			newDmo.segmentLabel = segments[i].label.value;
+			newDmo["time"].value = segments[i].time.value;
+			newDmo["duration"].value = segments[i+1].time.value - newDmo["time"].value;
+			if (segments[i].label) {
+				newDmo.segmentLabel = segments[i].label.value;
+			}
 			parent = getSuitableParent(newDmo);
 			updateParentDuration(parent, newDmo);
 			addChildDmo(parent, newDmo);
@@ -142,10 +148,10 @@ function DmoManager(scheduler, $scope) {
 		var nextCandidate = topDmo;
 		var depth = 0;
 		while (depth < maxDepth) {
-			var children = nextCandidate.children;
+			var children = nextCandidate.hasPart;
 			if (children.length > 0) {
 				for (var i = 0; i < children.length; i++) {
-					if (children[i].time <= dmo.time) {
+					if (children[i]["time"].value <= dmo["time"].value) {
 						nextCandidate = children[i];
 						depth++;
 					} else {
@@ -160,11 +166,11 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	function updateParentDuration(parent, newDmo) {
-		if (!parent.time || newDmo.time < parent.time) {
-			parent.time = newDmo.time;
+		if (!("time" in parent) || newDmo["time"].value < parent["time"].value) {
+			parent["time"].value = newDmo["time"].value;
 		}
-		if (!parent.duration || parent.time+parent.duration < newDmo.time+newDmo.duration) {
-			parent.duration = (newDmo.time+newDmo.duration) - parent.time;
+		if (!("duration" in parent) || parent["time"].value+parent["duration"].value < newDmo["time"].value+newDmo["duration"].value) {
+			parent["duration"].value = (newDmo["time"].value+newDmo["duration"].value) - parent["time"].value;
 		}
 		updateMinMaxes(parent);
 	}
@@ -176,12 +182,21 @@ function DmoManager(scheduler, $scope) {
 		if (!duration) {
 			duration = Math.random();
 		}
-		return {
-			name: "dmo" + (self.list.length+1),
-			time: time,
-			duration: duration,
-			children: []
+		var newDmo = {
+			"@id": "dmo" + (self.list.length+1),
+			"@type": "Constituent",
+			"hasPart": []
 		}
+		addFeatureToDmo(newDmo, "time", time);
+		addFeatureToDmo(newDmo, "duration", duration);
+		return newDmo;
+	}
+	
+	var addFeatureToDmo = function(dmo, name, value) {
+		dmo[name] = {
+			"value" : value,
+			"adt" : name.charAt(0).toUpperCase() + name.slice(1),
+		};
 	}
 	
 	this.updatePlayingDmos = function(dmo) {
