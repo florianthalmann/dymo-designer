@@ -78,14 +78,14 @@
 							.nodes(graph.nodes)
 							.links(graph.links);
 						
-						link = link.data(force.links(), function(d) { return d.source.name + "-" + d.target.name; });
+						link = link.data(force.links(), function(d) { return d.source["@id"] + "-" + d.target["@id"]; });
 						link.enter().insert("line", ".node")
 							.attr("stroke", getHsl)
 							.style("opacity", 0.1)
 							.style("stroke-width", 1);
 						link.exit().remove();
 						
-						node = node.data(force.nodes(), function(d) { return d.name;});
+						node = node.data(force.nodes(), function(d) { return d["@id"];});
 						node.enter().append("circle")
 							.attr("r", getR)
 							.style("fill", getHsl)
@@ -129,19 +129,19 @@
 						
 						function getVisualValue(dmo, parameter, key) {
 							if (parameter.name == "random") {
-								if (!prevRandomValues[dmo.name]) {
-									prevRandomValues[dmo.name] = {};
+								if (!prevRandomValues[dmo["@id"]]) {
+									prevRandomValues[dmo["@id"]] = {};
 								}
-								if (!prevRandomValues[dmo.name][key]) {
-									prevRandomValues[dmo.name][key] = Math.random() * parameter.max;
+								if (!prevRandomValues[dmo["@id"]][key]) {
+									prevRandomValues[dmo["@id"]][key] = Math.random() * parameter.max;
 								}
-								return prevRandomValues[dmo.name][key];
+								return prevRandomValues[dmo["@id"]][key];
 							} else {
-								if (prevRandomValues[dmo.name] && prevRandomValues[dmo.name][key]) {
-									delete prevRandomValues[dmo.name][key];
+								if (prevRandomValues[dmo["@id"]] && prevRandomValues[dmo["@id"]][key]) {
+									delete prevRandomValues[dmo["@id"]][key];
 								}
 								if (dmo[parameter.name]) {
-									return dmo[parameter.name];
+									return dmo[parameter.name].value;
 								}
 								return 0.00000001; //for log scale :(
 							}
