@@ -26,9 +26,11 @@
 			<div>
 				<button ng-click="dmo.addDmo()">Add DMO</button>
 				<span>feature file:</span>
-				<input type="text" ng-model="featureFile"></input-->
+				<input type="text" ng-model="featureFile"></input>
 				<span>condition:</span>
-				<input type="text" ng-model="labelCondition" size="2"></input-->
+				<input type="text" ng-model="labelCondition" size="2"></input>
+				<span>mode:</span>
+				<select ng-init="selectedFeatureMode = featureModes[0]" ng-model="selectedFeatureMode" ng-options="m.name for m in featureModes"></select>
 				<button ng-click="addPartsFromFeatures()">Add Features</button>
 				<button ng-click="play()">Play</button>
 				<button ng-click="stop()">Stop</button>

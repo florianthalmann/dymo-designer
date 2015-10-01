@@ -2,9 +2,7 @@ function DmoManager(scheduler, $scope) {
 	
 	var self = this;
 	
-	var topDmo = null;
 	this.graph = {nodes:[], links:[]};
-	this.list = [];
 	this.playingDmos = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
@@ -13,7 +11,7 @@ function DmoManager(scheduler, $scope) {
 	var maxDepth = 0;
 	
 	this.getRealTopDmo = function() {
-		return toRealDmo[topDmo["@id"]];
+		return toRealDmo[this.graph.nodes[0]["@id"]];
 	}
 	
 	this.getRealDmo = function(dmo) {
@@ -21,14 +19,12 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	this.addDmo = function() {
-		var newDmo = createNewDmo();
 		//set as top-level dmo if none exists
-		if (topDmo == null) {
-			setTopLevelDmo(newDmo);
-			this.getRealTopDmo().setSourcePath($scope.sourceFile);
+		if (this.graph.nodes.length <= 0) {
+			addTopDmo();
 		//add as part if one exists
 		} else {
-			addPartDmo(topDmo, newDmo);
+			addPartDmo(this.graph.nodes[0], createNewDmo());
 		}
 		//createPitchHelixDmo();
 	}
@@ -52,36 +48,24 @@ function DmoManager(scheduler, $scope) {
 		}
 	}
 	
-	function setTopLevelDmo(dmo) {
-		registerDmo(dmo);
-		topDmo = dmo;
+	function addTopDmo() {
+		registerDmo(createNewDmo());
+		self.getRealTopDmo().setSourcePath($scope.sourceFile);
 	}
 	
 	function addPartDmo(parent, part) {
 		registerDmo(part);
 		parent["hasPart"].push(part);
-		var parentIndex = self.list.indexOf(parent);
-		var partIndex = self.list.indexOf(part);
 		var link = {"source":parent, "target":part, "value":1};
 		self.graph.links.push(link);
 		toRealDmo[parent["@id"]].addPart(toRealDmo[part["@id"]]);
 	}
 	
 	function registerDmo(dmo) {
-		self.list.push(dmo);
 		self.graph.nodes.push(dmo);
 		toRealDmo[dmo["@id"]] = new DynamicMusicObject(dmo["@id"], scheduler, undefined, self);
 		toRealDmo[dmo["@id"]].setSegment(dmo["time"].value, dmo["duration"].value);
 		updateMinMaxes(dmo);
-	}
-	
-	function setDmoFeature(dmo, feature, value) {
-		if (dmo[feature.name]) {
-			dmo[feature.name].value = value;
-		} else {
-			addFeatureToDmo(dmo, feature.name, value);
-		}
-		updateMinMax(dmo, feature);
 	}
 	
 	function updateMinMaxes(dmo) {
@@ -105,12 +89,26 @@ function DmoManager(scheduler, $scope) {
 	this.addFeature = function(name, data) {
 		//iterate through all levels and add averages
 		var feature = getFeature(name);
-		for (var i = 0; i < this.list.length; i++) {
-			var laterValues = data.filter(
-				function(x){return x.time.value > self.list[i]["time"].value}
+		for (var i = 0; i < this.graph.nodes.length; i++) {
+			var currentTime = this.graph.nodes[i]["time"].value;
+			var currentDuration = this.graph.nodes[i]["duration"].value;
+			var currentValues = data.filter(
+				function(x){return currentTime <= x.time.value && x.time.value < currentTime+currentDuration}
 			);
-			var closestValue = laterValues[0].value[0];
-			setDmoFeature(this.list[i], feature, closestValue);
+			var value = 0;
+			if ($scope.selectedFeatureMode.name == "first") {
+				value = currentValues[0].value[0];
+			} else if ($scope.selectedFeatureMode.name == "average") {
+				value = currentValues.reduce(function(sum, i) { return sum + i.value[0]; }, 0) / currentValues.length;
+			} else if ($scope.selectedFeatureMode.name == "median") {
+				currentValues.sort(function(a, b) { return a.value[0] - b.value[0]; });
+				var middleIndex = Math.floor(currentValues.length/2);
+				value = currentValues[middleIndex].value[0];
+				if (currentValues.length % 2 == 0) {
+					value += currentValues[middleIndex-1].value[0];
+				}
+			}
+			setDmoFeature(this.graph.nodes[i], feature, value);
 		}
 	}
 	
@@ -134,7 +132,19 @@ function DmoManager(scheduler, $scope) {
 		return {name:name, min:1, max:0};
 	}
 	
+	function setDmoFeature(dmo, feature, value) {
+		if (dmo[feature.name]) {
+			dmo[feature.name].value = value;
+		} else {
+			addFeatureToDmo(dmo, feature.name, value);
+		}
+		updateMinMax(dmo, feature);
+	}
+	
 	this.addSegmentation = function(segments) {
+		if (self.graph.nodes.length <= 0) {
+			addTopDmo();
+		}
 		for (var i = 0; i < segments.length-1; i++) {
 			var newDmo = createNewDmo();
 			newDmo["time"].value = segments[i].time.value;
@@ -150,7 +160,7 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	function getSuitableParent(dmo) {
-		var nextCandidate = topDmo;
+		var nextCandidate = self.graph.nodes[0];
 		var depth = 0;
 		while (depth < maxDepth) {
 			var parts = nextCandidate.hasPart;
@@ -188,7 +198,7 @@ function DmoManager(scheduler, $scope) {
 			duration = Math.random();
 		}
 		var newDmo = {
-			"@id": "dmo" + (self.list.length+1),
+			"@id": "dmo" + (self.graph.nodes.length+1),
 			"@type": "DMO",
 			"hasPart": []
 		}
@@ -216,19 +226,5 @@ function DmoManager(scheduler, $scope) {
 			$scope.$apply();
 		}, 10);
 	}
-	
-	/*this.setPlaying = function(dmoUri, playing) {
-		if (playing) {
-			this.playingDmos.push(dmoUri);
-		} else {
-			var i = this.playingDmos.indexOf(dmoUri);
-			if (i >= 0) {
-				this.playingDmos.splice(i);
-			}
-		}
-		setTimeout(function() {
-			$scope.$apply();
-		}, 10);
-	}*/
 
 }

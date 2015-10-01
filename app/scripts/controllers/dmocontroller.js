@@ -12,6 +12,7 @@
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
+			$scope.featureModes = [{name:"first"}, {name:"average"}, {name:"median"}];
 			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
 			
 			$scope.scheduler = new Scheduler($scope);
