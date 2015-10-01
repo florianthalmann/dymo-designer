@@ -66,10 +66,10 @@
 				<select ng-init="viewParams.color.param = dmo.features[2]" ng-model="viewParams.color.param" ng-options="p.name for p in dmo.features"></select>
 				<input type="checkbox" ng-init="viewParams.color.log = false" ng-model="viewParams.color.log"></input>
 			</div>
-			<div ng-show="selectedDmo">
+			<!--div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
-				<!--input type="range" min="0" max="200" ng-model="selectedDmo.size"></input-->
-			</div>
+				<input type="range" min="0" max="200" ng-model="selectedDmo.size"></input>
+			</div-->
 			<div ng-if="selectedView == views[0]">
 				<dmo-coordinates data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>

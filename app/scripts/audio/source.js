@@ -71,7 +71,9 @@ function Source(audioContext, dmo, reverbSend) {
 		}*/
 		nextAudioSource = createNewAudioSource();
 		if (nextAudioSource && endTime) {
-			timeoutID = window.setTimeout(internalPlay, (endTime-audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000);
+			timeoutID = setTimeout(internalPlay, (endTime-audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000);
+		} else {
+			setTimeout(function() { dmo.updatePlayingDmos(null); }, (endTime-audioContext.currentTime)*1000);
 		}
 	}
 	
@@ -104,6 +106,8 @@ function Source(audioContext, dmo, reverbSend) {
 		audioSource = null;
 		nextAudioSource = null;
 		endTime = null;
+		currentSegmentInfo = null;
+		dmo.updatePlayingDmos(null);
 	}
 	
 	function setPosition(x, y, z) {

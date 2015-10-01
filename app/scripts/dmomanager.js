@@ -16,11 +16,16 @@ function DmoManager(scheduler, $scope) {
 		return toRealDmo[topDmo["@id"]];
 	}
 	
+	this.getRealDmo = function(dmo) {
+		return toRealDmo[dmo["@id"]];
+	}
+	
 	this.addDmo = function() {
 		var newDmo = createNewDmo();
 		//set as top-level dmo if none exists
 		if (topDmo == null) {
 			setTopLevelDmo(newDmo);
+			this.getRealTopDmo().setSourcePath($scope.sourceFile);
 		//add as part if one exists
 		} else {
 			addPartDmo(topDmo, newDmo);

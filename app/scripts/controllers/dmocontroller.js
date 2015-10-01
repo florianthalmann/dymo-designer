@@ -7,8 +7,8 @@
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
-			$scope.sourceFile = 'audio/sheago.mp3';
-			$scope.featureFile = 'features/sheago_barbeat.json';
+			$scope.sourceFile = 'audio/ligeti2.m4a';
+			$scope.featureFile = 'features/ligeti2_onset.json';
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
@@ -21,7 +21,13 @@
 			var maxDepth = 0;
 			
 			$scope.dmoOnClick = function(dmo){
-				$scope.selectedDmo = dmo;
+				if ($scope.selectedDmo != dmo) {
+					$scope.selectedDmo = dmo;
+					playDmo($scope.dmo.getRealDmo(dmo));
+				} else {
+					$scope.selectedDmo = null;
+					stopDmo($scope.dmo.getRealDmo(dmo));
+				}
 				$scope.$apply();
 			};
 			
@@ -30,15 +36,20 @@
 			}
 			
 			$scope.play = function() {
-				var dmo = $scope.dmo.getRealTopDmo();
+				playDmo($scope.dmo.getRealTopDmo());
+			}
+			
+			$scope.stop = function() {
+				stopDmo($scope.dmo.getRealTopDmo());
+			}
+			
+			function playDmo(dmo) {
 				if (dmo) {
-					dmo.setSourcePath($scope.sourceFile);
 					$scope.scheduler.play(dmo);
 				}
 			}
 			
-			$scope.stop = function() {
-				var dmo = $scope.dmo.getRealTopDmo();
+			function stopDmo(dmo) {
 				if (dmo) {
 					$scope.scheduler.stop(dmo);
 				}
