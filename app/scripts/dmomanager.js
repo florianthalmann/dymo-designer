@@ -184,7 +184,7 @@ function DmoManager(scheduler, $scope) {
 		}
 		var newDmo = {
 			"@id": "dmo" + (self.list.length+1),
-			"@type": "Constituent",
+			"@type": "DMO",
 			"hasPart": []
 		}
 		addFeatureToDmo(newDmo, "time", time);

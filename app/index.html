@@ -74,7 +74,7 @@
 				<dmo-coordinates data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dmo-graph data="dmo.graph" viewparams="viewParams" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+				<dmo-graph data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
