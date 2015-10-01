@@ -25,7 +25,7 @@
 				$scope.$apply();
 			};
 			
-			$scope.addChildrenFromFeatures = function() {
+			$scope.addPartsFromFeatures = function() {
 				new FeatureLoader($scope, $http).loadFeature($scope.featureFile, $scope.labelCondition, $scope.dmo);
 			}
 			

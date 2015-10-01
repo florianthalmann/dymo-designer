@@ -1,8 +1,8 @@
 function DynamicMusicObject(uri, scheduler, type, manager) {
 	
 	var parentDMO = null;
-	var children = [];
-	var childrenPlayed = 0;
+	var parts = [];
+	var partsPlayed = 0;
 	var isPlaying = false;
 	var sourcePath;
 	var graph = null;
@@ -22,9 +22,9 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		return parentDMO;
 	}
 	
-	this.addChild = function(dmo) {
+	this.addPart = function(dmo) {
 		dmo.setParent(this);
-		children.push(dmo);
+		parts.push(dmo);
 	}
 	
 	this.setSourcePath = function(path) {
@@ -51,15 +51,15 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		return sourcePath;
 	}
 	
-	//positive change in play affects children
+	//positive change in play affects parts
 	this.updatePlay = function(change) {
-		//ask their children to get appropriate segment
+		//ask their parts to get appropriate segment
 		if (type == DmoTypes.SEQUENCE) {
 			
 		}
-		if (children.length > 0) {
-			for (var i = 0; i < children.length; i++) {
-				children[i].updatePlay(change);
+		if (parts.length > 0) {
+			for (var i = 0; i < parts.length; i++) {
+				parts[i].updatePlay(change);
 			}
 		} else {
 			if (change > 0) {
@@ -70,57 +70,57 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		}
 	}
 	
-	//change in amplitude does not affect children
+	//change in amplitude does not affect parts
 	this.updateAmplitude = function(change) {
 		scheduler.updateAmplitude(this, change);
 		if (!sourcePath) {
-			for (var i = 0; i < children.length; i++) {
-				children[i].amplitude.relativeUpdate(change);
+			for (var i = 0; i < parts.length; i++) {
+				parts[i].amplitude.relativeUpdate(change);
 			}
 		}
 	}
 	
-	//change in amplitude does not affect children
+	//change in amplitude does not affect parts
 	this.updatePlaybackRate = function(change) {
 		scheduler.updatePlaybackRate(this, change);
 		if (!sourcePath) {
-			for (var i = 0; i < children.length; i++) {
-				children[i].playbackRate.relativeUpdate(change);
+			for (var i = 0; i < parts.length; i++) {
+				parts[i].playbackRate.relativeUpdate(change);
 			}
 		}
 	}
 	
-	//change in pan affects pan of children
+	//change in pan affects pan of parts
 	this.updatePan = function(change) {
 		scheduler.updatePan(this, change);
-		for (var i = 0; i < children.length; i++) {
-			children[i].pan.relativeUpdate(change);
+		for (var i = 0; i < parts.length; i++) {
+			parts[i].pan.relativeUpdate(change);
 		}
 	}
 	
-	//change in distance affects distance of children
+	//change in distance affects distance of parts
 	this.updateDistance = function(change) {
 		scheduler.updateDistance(this, change);
-		for (var i = 0; i < children.length; i++) {
-			children[i].distance.relativeUpdate(change);
+		for (var i = 0; i < parts.length; i++) {
+			parts[i].distance.relativeUpdate(change);
 		}
 	}
 	
-	//change in reverb affects reverb of children
+	//change in reverb affects reverb of parts
 	this.updateReverb = function(change) {
 		scheduler.updateReverb(this, change);
-		for (var i = 0; i < children.length; i++) {
-			children[i].reverb.relativeUpdate(change);
+		for (var i = 0; i < parts.length; i++) {
+			parts[i].reverb.relativeUpdate(change);
 		}
 	}
 	
-	//change in segment affects only segment of children if any
+	//change in segment affects only segment of parts if any
 	this.updateSegmentIndex = function(value) {
 		var start = segmentation[value];
 		var end = segmentation[value+1];
 		//scheduler.updateSegment(this, segmentStart, segmentEnd);
-		for (var i = 0; i < children.length; i++) {
-			children[i].jumpToSegment(start);
+		for (var i = 0; i < parts.length; i++) {
+			parts[i].jumpToSegment(start);
 		}
 	}
 	
@@ -131,7 +131,7 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 			var index = segmentation.indexOf(time);
 			if (index >= 0) {
 				this.segmentIndex.update(undefined, index);
-				//ADJUST CHILDREN!!!!!
+				//ADJUST PARTS!!!!!
 				return true;
 			}
 		}
@@ -143,18 +143,18 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 	}
 	
 	this.getNextSegment = function() {
-		if (children.length > 0) {
+		if (parts.length > 0) {
 			isPlaying = true;
-			while (childrenPlayed < children.length) {
-				var nextSegment = children[childrenPlayed].getNextSegment();
+			while (partsPlayed < parts.length) {
+				var nextSegment = parts[partsPlayed].getNextSegment();
 				if (nextSegment) {
 					return nextSegment;
 				} else {
-					childrenPlayed++;
+					partsPlayed++;
 				}
 			}
 			//done playing
-			childrenPlayed = 0;
+			partsPlayed = 0;
 			isPlaying = false;
 			return null;
 		} else {

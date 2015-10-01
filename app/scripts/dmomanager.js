@@ -21,9 +21,9 @@ function DmoManager(scheduler, $scope) {
 		//set as top-level dmo if none exists
 		if (topDmo == null) {
 			setTopLevelDmo(newDmo);
-		//add as child if one exists
+		//add as part if one exists
 		} else {
-			addChildDmo(topDmo, newDmo);
+			addPartDmo(topDmo, newDmo);
 		}
 		//createPitchHelixDmo();
 	}
@@ -39,7 +39,7 @@ function DmoManager(scheduler, $scope) {
 			currentDmo.chroma = cos+1;
 			currentDmo.height = sin+1+(i/4.5);
 			if (previousDmo) {
-				addChildDmo(previousDmo, currentDmo);
+				addPartDmo(previousDmo, currentDmo);
 			} else {
 				setTopLevelDmo(currentDmo);
 			}
@@ -52,14 +52,14 @@ function DmoManager(scheduler, $scope) {
 		topDmo = dmo;
 	}
 	
-	function addChildDmo(parent, child) {
-		registerDmo(child);
-		parent["hasPart"].push(child);
+	function addPartDmo(parent, part) {
+		registerDmo(part);
+		parent["hasPart"].push(part);
 		var parentIndex = self.list.indexOf(parent);
-		var childIndex = self.list.indexOf(child);
-		var link = {"source":parent, "target":child, "value":1};
+		var partIndex = self.list.indexOf(part);
+		var link = {"source":parent, "target":part, "value":1};
 		self.graph.links.push(link);
-		toRealDmo[parent["@id"]].addChild(toRealDmo[child["@id"]]);
+		toRealDmo[parent["@id"]].addPart(toRealDmo[part["@id"]]);
 	}
 	
 	function registerDmo(dmo) {
@@ -139,7 +139,7 @@ function DmoManager(scheduler, $scope) {
 			}
 			parent = getSuitableParent(newDmo);
 			updateParentDuration(parent, newDmo);
-			addChildDmo(parent, newDmo);
+			addPartDmo(parent, newDmo);
 		}
 		maxDepth++;
 	}
@@ -148,11 +148,11 @@ function DmoManager(scheduler, $scope) {
 		var nextCandidate = topDmo;
 		var depth = 0;
 		while (depth < maxDepth) {
-			var children = nextCandidate.hasPart;
-			if (children.length > 0) {
-				for (var i = 0; i < children.length; i++) {
-					if (children[i]["time"].value <= dmo["time"].value) {
-						nextCandidate = children[i];
+			var parts = nextCandidate.hasPart;
+			if (parts.length > 0) {
+				for (var i = 0; i < parts.length; i++) {
+					if (parts[i]["time"].value <= dmo["time"].value) {
+						nextCandidate = parts[i];
 						depth++;
 					} else {
 						break;
