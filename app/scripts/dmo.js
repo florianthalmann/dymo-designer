@@ -8,7 +8,7 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 	var graph = null;
 	var skipProportionAdjustment = false;
 	var previousIndex = null;
-	var segmentStart, segmentDuration;
+	var features = [];
 	
 	this.getUri = function() {
 		return uri;
@@ -31,9 +31,12 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		sourcePath = path;
 	}
 	
-	this.setSegment = function(start, duration) {
-		segmentStart = start;
-		segmentDuration = duration;
+	this.setFeature = function(name, value) {
+		features[name] = value;
+	}
+	
+	this.getFeature = function(name) {
+		return features[name];
 	}
 	
 	this.setGraph = function(g) {
@@ -160,7 +163,7 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		} else {
 			if (!isPlaying) {
 				isPlaying = true;
-				return [segmentStart, segmentDuration, this];
+				return [features["time"], features["duration"], this];
 			} else {
 				isPlaying = false;
 				return null;

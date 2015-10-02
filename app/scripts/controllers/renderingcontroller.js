@@ -4,15 +4,15 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('RenderingController', ['$scope', '$http', function($scope, $http){
 			
-			$scope.mappingTypes = [{name:"Analytical"}, {name:"Control"}];
+			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}];
 			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
 			$scope.parameters = [{name:"Amplitude"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"Segmentation"}];
-			$scope.mappingFunction = "2*x";
-			$scope.rendering = Rendering();
+			$scope.mappingFunction = "x/36";
+			$scope.rendering = new Rendering();
 			
 			$scope.addMapping = function() {
-				if ($scope.selectedMappingType == $scope.mappingTypes[0]) {
-					$scope.rendering.addFeatureMapping($scope.selectedFeature, getParsedFunction(), $scope.selectedParameter);
+				if ($scope.selectedMappingType.name == "Feature") {
+					$scope.rendering.addFeatureMapping($scope.dmo, $scope.selectedFeature, getParsedFunction(), $scope.selectedParameter);
 				} else {
 					$scope.rendering.addControlMapping($scope.selectedControl, getParsedFunction(), $scope.selectedParameter);
 				}

@@ -123,6 +123,7 @@ function Source(audioContext, dmo, reverbSend) {
 	}
 	
 	this.changeAmplitude = function(deltaAmplitude) {
+		console.log(deltaAmplitude);
 		currentAmplitude += deltaAmplitude;
 		if (currentAmplitude > 0) {
 			dryGain.gain.value += deltaAmplitude;

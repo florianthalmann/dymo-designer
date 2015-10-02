@@ -9,18 +9,18 @@ function FeatureLoader($scope, $http) {
 	
 	var features = {}
 	
-	this.loadFeature = function(uri, labelCondition, dmoController) {
+	this.loadFeature = function(uri, labelCondition, dmoManager) {
 		var fileExtension = uri.slice(uri.indexOf('.')+1);
 		if (fileExtension == 'n3') {
-			loadFeatureFromRdf(uri, labelCondition, dmoController);
+			loadFeatureFromRdf(uri, labelCondition, dmoManager);
 		} else if (fileExtension == 'json') {
-			loadFeatureFromJson(uri, labelCondition, dmoController);
+			loadFeatureFromJson(uri, labelCondition, dmoManager);
 		}
 	}
 		
-	function loadFeatureFromRdf(rdfUri, labelCondition, dmoController) {
+	function loadFeatureFromRdf(rdfUri, labelCondition, dmoManager) {
 		if (features[rdfUri]) {
-			setFeatureFromRdf(rdfUri, labelCondition, dmoController)
+			setFeatureFromRdf(rdfUri, labelCondition, dmoManager)
 		} else {
 			$scope.featureLoadingThreads++;
 			$http.get(rdfUri).success(function(data) {
@@ -47,7 +47,7 @@ function FeatureLoader($scope, $http) {
 							}
 							//save so that file does not have to be read twice
 							features[rdfUri] = times.sort(function(a,b){return a.time - b.time});
-							setFeatureFromRdf(rdfUri, labelCondition, dmoController);
+							setFeatureFromRdf(rdfUri, labelCondition, dmoManager);
 							$scope.featureLoadingThreads--;
 							$scope.$apply();
 						});
@@ -57,16 +57,16 @@ function FeatureLoader($scope, $http) {
 		}
 	}
 	
-	function setFeatureFromRdf(rdfUri, labelCondition, dmoController) {
+	function setFeatureFromRdf(rdfUri, labelCondition, dmoManager) {
 		subset = features[rdfUri];
 		if (labelCondition) {
 			subset = features[rdfUri].filter(function(x) { return x.label == labelCondition; });
 		}
 		subset = subset.map(function(x) { return x.time; });
-		dmoController.setSegmentation(subset);
+		dmoManager.setSegmentation(subset);
 	}
 	
-	function loadFeatureFromJson(jsonUri, labelCondition, dmoController) {
+	function loadFeatureFromJson(jsonUri, labelCondition, dmoManager) {
 		$scope.featureLoadingThreads++;
 		$http.get(jsonUri).success(function(json) {
 			var results = json[Object.keys(json)[1]][0];
@@ -76,9 +76,9 @@ function FeatureLoader($scope, $http) {
 				if (labelCondition && results[0].label) {
 					results = results.filter(function(x) { return x.label.value == labelCondition; });
 				}
-				dmoController.addSegmentation(results);
+				dmoManager.addSegmentation(results);
 			} else {
-				dmoController.addFeature(outputId, results.data)
+				dmoManager.addFeature(outputId, results.data)
 			}
 			$scope.featureLoadingThreads--;
 			//$scope.$apply();

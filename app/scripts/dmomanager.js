@@ -21,6 +21,7 @@ function DmoManager(scheduler, $scope) {
 	this.addDmo = function() {
 		//set as top-level dmo if none exists
 		if (this.graph.nodes.length <= 0) {
+			//createPitchHelixDmo();
 			addTopDmo();
 		//add as part if one exists
 		} else {
@@ -30,22 +31,23 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	function createPitchHelixDmo() {
-		getFeature("chroma");
-		getFeature("height");
+		chromaFeature = getFeature("chroma");
+		heightFeature = getFeature("height");
 		var previousDmo = null;
 		for (var i = 0; i < 48; i++) {
 			var currentDmo = createNewDmo(1,1);
-			var cos = Math.cos((i % 12) / 6 * Math.PI);
-			var sin = Math.sin((i % 12) / 6 * Math.PI);
-			currentDmo.chroma = cos+1;
-			currentDmo.height = sin+1+(i/4.5);
 			if (previousDmo) {
 				addPartDmo(previousDmo, currentDmo);
 			} else {
-				setTopLevelDmo(currentDmo);
+				addTopDmo(currentDmo);
 			}
+			var cos = Math.cos((i % 12) / 6 * Math.PI);
+			var sin = Math.sin((i % 12) / 6 * Math.PI);
+			setDmoFeature(currentDmo, chromaFeature, cos+1);
+			setDmoFeature(currentDmo, heightFeature, sin+1+(i/4.5));
 			previousDmo = currentDmo;
 		}
+		console.log(self.graph)
 	}
 	
 	function addTopDmo() {
@@ -64,7 +66,9 @@ function DmoManager(scheduler, $scope) {
 	function registerDmo(dmo) {
 		self.graph.nodes.push(dmo);
 		toRealDmo[dmo["@id"]] = new DynamicMusicObject(dmo["@id"], scheduler, undefined, self);
-		toRealDmo[dmo["@id"]].setSegment(dmo["time"].value, dmo["duration"].value);
+		//improve, dont do this here..
+		toRealDmo[dmo["@id"]].setFeature("time", dmo["time"].value);
+		toRealDmo[dmo["@id"]].setFeature("duration", dmo["duration"].value);
 		updateMinMaxes(dmo);
 	}
 	
@@ -98,7 +102,7 @@ function DmoManager(scheduler, $scope) {
 			var value = 0;
 			if ($scope.selectedFeatureMode.name == "first") {
 				value = currentValues[0].value[0];
-			} else if ($scope.selectedFeatureMode.name == "average") {
+			} else if ($scope.selectedFeatureMode.name == "mean") {
 				value = currentValues.reduce(function(sum, i) { return sum + i.value[0]; }, 0) / currentValues.length;
 			} else if ($scope.selectedFeatureMode.name == "median") {
 				currentValues.sort(function(a, b) { return a.value[0] - b.value[0]; });
@@ -138,6 +142,7 @@ function DmoManager(scheduler, $scope) {
 		} else {
 			addFeatureToDmo(dmo, feature.name, value);
 		}
+		toRealDmo[dmo["@id"]].setFeature(feature.name, value);
 		updateMinMax(dmo, feature);
 	}
 	
