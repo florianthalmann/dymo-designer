@@ -6,7 +6,6 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 	
 	var startTime, endTime, currentPausePosition = 0;
 	var isPlaying, isPaused;
-	var timeoutID;
 	
 	var dryGain = audioContext.createGain();
 	dryGain.connect(audioContext.destination);
@@ -71,16 +70,11 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 		}
 		//even in case it is paused
 		currentPausePosition = 0;
-		/*for (var i = 0; i < this.segmentationParams.length; i++) {
-			this.segmentationParams[i].reset();
-		}*/
 	}
 	
 	function stopAndRemoveAudioSources() {
-		window.clearTimeout(timeoutID);
 		isPlaying = false;
 		source.stop(0);
-		dmo.updatePlayingDmos(null);
 	}
 	
 	function updateAmplitude() {

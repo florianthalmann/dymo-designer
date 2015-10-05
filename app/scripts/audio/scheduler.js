@@ -11,6 +11,7 @@ function Scheduler($scope) {
 	convolverSend.connect($scope.audioContext.destination);
 	
 	var numCurrentlyLoading = 0;
+	var timeoutID;
 	
 	//load reverb impulse response
 	numCurrentlyLoading++;
@@ -66,7 +67,7 @@ function Scheduler($scope) {
 		if (nextSources[uri] && endTimes[uri]) {
 			timeoutID = setTimeout(function() { internalPlay(dmo); }, (endTimes[uri]-$scope.audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000);
 		} else {
-			setTimeout(function() { dmo.updatePlayingDmos(null); }, (endTimes[uri]-$scope.audioContext.currentTime)*1000);
+			setTimeout(function() { reset(dmo); }, (endTimes[uri]-$scope.audioContext.currentTime)*1000);
 		}
 	}
 	
@@ -82,6 +83,16 @@ function Scheduler($scope) {
 		if (source) {
 			source.stop();
 		}
+		reset(dmo);
+	}
+	
+	function reset(dmo) {
+		window.clearTimeout(timeoutID);
+		var uri = dmo.getUri();
+		sources[uri] = null;
+		nextSources[uri] = null;
+		dmo.resetPartsPlayed();
+		dmo.updatePlayingDmos(null);
 	}
 	
 	this.updateAmplitude = function(dmo, change) {

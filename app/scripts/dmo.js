@@ -169,6 +169,14 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 				return null;
 			}
 		}
+	}
+	
+	this.resetPartsPlayed = function() {
+		partsPlayed = 0;
+		for (var i = 0; i < parts.length; i++) {
+			parts[i].resetPartsPlayed();
+		}
+	}
 		
 		/*var index = this.segmentIndex.value;
 		if (index == previousIndex || previousIndex == null) {
@@ -204,7 +212,7 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		} else {
 			return this.getNextSegment();
 		}*/
-	}
+	
 	
 	this.play = new Parameter(this, this.updatePlay, 0, true);
 	this.amplitude = new Parameter(this, this.updateAmplitude, 1);
