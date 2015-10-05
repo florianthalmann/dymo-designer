@@ -7,7 +7,18 @@ function Rendering() {
 	this.addFeatureMapping = function(dmo, feature, mappingFunction, parameter) {
 		for (var i = 0; i < dmo.graph.nodes.length; i++) {
 			var currentDmo = dmo.getRealDmo(dmo.graph.nodes[i]);
-			currentDmo.amplitude.update(undefined, mappingFunction(currentDmo.getFeature(feature.name)));
+			var value = mappingFunction(currentDmo.getFeature(feature.name));
+			if (parameter.name == "Amplitude") {
+				currentDmo.amplitude.update(undefined, value);
+			} else if (parameter.name == "Pan") {
+				currentDmo.pan.update(undefined, value);
+			} else if (parameter.name == "Distance") {
+				currentDmo.distance.update(undefined, value);
+			} else if (parameter.name == "PlaybackRate") {
+				currentDmo.playbackRate.update(undefined, value);
+			} else if (parameter.name == "Reverb") {
+				currentDmo.reverb.update(undefined, value);
+			}
 		}
 	}
 	

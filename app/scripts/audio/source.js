@@ -16,16 +16,6 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 	var panner = audioContext.createPanner();
 	panner.connect(dryGain);
 	panner.connect(reverbGain);
-	var currentAmplitude = 1;
-	var currentPlaybackRate = 1;
-	var currentPannerPosition = [0,0,-0.01];
-	panner.setPosition(0,0,-0.01); //for chrome :(
-	
-	var currentReverb = 0;
-	var currentAudioSubBuffer;
-	var currentSourceDuration;
-	var audioSource, nextAudioSource;
-	var currentSegmentInfo;
 	
 	var time = dmo.getFeature("time");
 	var duration = dmo.getFeature("duration");
@@ -40,17 +30,16 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 	var source = audioContext.createBufferSource();
 	source.connect(panner);
 	source.buffer = buffer;
-	source.playbackRate.value = currentPlaybackRate;
 	
-	var audioBuffer = null;
+	var currentAmplitude = dmo.amplitude.value;
+	updateAmplitude();
+	var currentPlaybackRate = dmo.playbackRate.value;
+	updatePlaybackRate();
+	var currentPannerPosition = [dmo.pan.value, 0, dmo.distance.value];
+	updatePosition();
+	var currentReverb = dmo.reverb.value;
+	updateReverb();
 	
-	this.hasAudioBuffer = function() {
-		return audioBuffer;
-	};
-	
-	this.setAudioBuffer = function(buffer) {
-		audioBuffer = buffer;
-	};
 	
 	this.getDmo = function() {
 		return dmo;
@@ -90,52 +79,59 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 	function stopAndRemoveAudioSources() {
 		window.clearTimeout(timeoutID);
 		isPlaying = false;
-		audioSource.stop(0);
-		audioSource = null;
-		nextAudioSource = null;
-		endTime = null;
-		currentSegmentInfo = null;
+		source.stop(0);
 		dmo.updatePlayingDmos(null);
 	}
 	
-	function setPosition(x, y, z) {
-		currentPannerPosition = [x, y, z];
-		panner.setPosition(x, y, z);
+	function updateAmplitude() {
+		if (currentAmplitude > 0) {
+			dryGain.gain.value = currentAmplitude;
+		} else {
+			dryGain.gain.value = 0;
+		}
+	}
+	
+	function updatePosition() {
+		if (currentPannerPosition[2] == 0) {
+			z = -0.01; //for chrome :( source not audible at z = 0
+		} else {
+			z = currentPannerPosition[2];
+		}
+		panner.setPosition(currentPannerPosition[0], currentPannerPosition[1], z);
+	}
+	
+	function updatePlaybackRate() {
+		source.playbackRate.value = currentPlaybackRate;
+	}
+	
+	function updateReverb() {
+		if (currentReverb > 0) {
+			reverbGain.gain.value = currentReverb;
+		} else {
+			reverbGain.gain.value = 0;
+		}
+	}
+	
+	this.changeAmplitude = function(deltaAmplitude) {
+		currentAmplitude += deltaAmplitude;
+		updateAmplitude();
 	}
 	
 	this.changePosition = function(deltaX, deltaY, deltaZ) {
 		currentPannerPosition[0] += deltaX;
 		currentPannerPosition[1] += deltaY;
 		currentPannerPosition[2] += deltaZ;
-		panner.setPosition(currentPannerPosition[0], currentPannerPosition[1], currentPannerPosition[2]);
-	}
-	
-	this.changeAmplitude = function(deltaAmplitude) {
-		currentAmplitude += deltaAmplitude;
-		if (currentAmplitude > 0) {
-			dryGain.gain.value += deltaAmplitude;
-		} else {
-			dryGain.gain.value = 0;
-		}
+		updatePosition();
 	}
 	
 	this.changePlaybackRate = function(deltaRate) {
 		currentPlaybackRate += deltaRate;
-		if (audioSource) {
-			audioSource.playbackRate.value = currentPlaybackRate;
-		}
-		if (nextAudioSource) {
-			nextAudioSource.playbackRate.value = currentPlaybackRate;
-		}
+		updatePlaybackRate();
 	}
 	
 	this.changeReverb = function(deltaReverb) {
 		currentReverb += deltaReverb;
-		if (currentReverb > 0) {
-			reverbGain.gain.value += deltaReverb;
-		} else {
-			reverbGain.gain.value = 0;
-		}
+		updateReverb();
 	}
 	
 	function toSamples(seconds, buffer) {

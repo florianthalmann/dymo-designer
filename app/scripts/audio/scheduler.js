@@ -85,35 +85,35 @@ function Scheduler($scope) {
 	}
 	
 	this.updateAmplitude = function(dmo, change) {
-		source = getSource(dmo);
+		var source = sources[dmo.getUri()];
 		if (source) {
 			source.changeAmplitude(change);
 		}
 	}
 	
 	this.updatePlaybackRate = function(dmo, change) {
-		source = getSource(dmo);
+		var source = sources[dmo.getUri()];
 		if (source) {
 			source.changePlaybackRate(change);
 		}
 	}
 	
 	this.updatePan = function(dmo, change) {
-		source = getSource(dmo);
+		var source = sources[dmo.getUri()];
 		if (source) {
 			source.changePosition(change, 0, 0);
 		}
 	}
 	
 	this.updateDistance = function(dmo, change) {
-		source = getSource(dmo);
+		var source = sources[dmo.getUri()];
 		if (source) {
 			source.changePosition(0, 0, change);
 		}
 	}
 	
 	this.updateReverb = function(dmo, change) {
-		source = getSource(dmo);
+		var source = sources[dmo.getUri()];
 		if (source) {
 			source.changeReverb(change);
 		}
