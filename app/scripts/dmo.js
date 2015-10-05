@@ -145,13 +145,13 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		manager.updatePlayingDmos(dmo);
 	}
 	
-	this.getNextSegment = function() {
+	this.getNextPart = function() {
 		if (parts.length > 0) {
 			isPlaying = true;
 			while (partsPlayed < parts.length) {
-				var nextSegment = parts[partsPlayed].getNextSegment();
-				if (nextSegment) {
-					return nextSegment;
+				var nextPart = parts[partsPlayed].getNextPart();
+				if (nextPart) {
+					return nextPart;
 				} else {
 					partsPlayed++;
 				}
@@ -163,7 +163,7 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		} else {
 			if (!isPlaying) {
 				isPlaying = true;
-				return [features["time"], features["duration"], this];
+				return this;
 			} else {
 				isPlaying = false;
 				return null;

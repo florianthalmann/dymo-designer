@@ -1,9 +1,7 @@
-function Source(audioContext, dmo, reverbSend) {
+function Source(dmo, audioContext, buffer, reverbSend) {
 	
 	var self = this;
 	
-	var SCHEDULE_AHEAD_TIME = 0.1; //seconds
-	var SWITCH_BUFFER_IMMEDIATELY = false;
 	var FADE_LENGTH = 0.05; //seconds
 	
 	var startTime, endTime, currentPausePosition = 0;
@@ -22,11 +20,27 @@ function Source(audioContext, dmo, reverbSend) {
 	var currentPlaybackRate = 1;
 	var currentPannerPosition = [0,0,-0.01];
 	panner.setPosition(0,0,-0.01); //for chrome :(
+	
 	var currentReverb = 0;
 	var currentAudioSubBuffer;
 	var currentSourceDuration;
 	var audioSource, nextAudioSource;
 	var currentSegmentInfo;
+	
+	var time = dmo.getFeature("time");
+	var duration = dmo.getFeature("duration");
+	if (!duration) {
+		duration = buffer.duration-time;
+	}
+	if (time != 0 || duration != buffer.duration) {
+		//add time for fade after source officially done
+		buffer = getSubBuffer(buffer, toSamples(time, buffer), toSamples(duration+FADE_LENGTH, buffer));
+	}
+	
+	var source = audioContext.createBufferSource();
+	source.connect(panner);
+	source.buffer = buffer;
+	source.playbackRate.value = currentPlaybackRate;
 	
 	var audioBuffer = null;
 	
@@ -38,43 +52,17 @@ function Source(audioContext, dmo, reverbSend) {
 		audioBuffer = buffer;
 	};
 	
-	this.play = function() {
-		if (!isPlaying) {
-			internalPlay();
-		}
-		isPlaying = true;
+	this.getDmo = function() {
+		return dmo;
 	}
 	
-	function internalPlay() {
-		if (!audioSource) {
-			//initially create sources
-			audioSource = createNewAudioSource();
-		} else {
-			//switch source
-			audioSource = nextAudioSource;
-		}
-		if (!endTime) {
-			delay = SCHEDULE_AHEAD_TIME;
-		} else {
-			delay = endTime-audioContext.currentTime;
-		}
-		currentDmo = currentSegmentInfo[2];
-		startTime = audioContext.currentTime+delay;
-		audioSource.start(startTime, currentPausePosition); //% audioSource.loopEnd-audioSource.loopStart);
-		setTimeout(function() {
-			dmo.updatePlayingDmos(currentDmo);
-		}, delay);
-		endTime = startTime+currentSourceDuration;
-		//console.log(delay + " " + endTime + " " + currentSourceDuration + " " + ((endTime-audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000));
-		/*if (segmentations.length > 0) { //TODO FIND OTHER WAY TO MAKE PAUSE WORK WITH SEGMENTED TRACKS
-			currentPausePosition = 0;
-		}*/
-		nextAudioSource = createNewAudioSource();
-		if (nextAudioSource && endTime) {
-			timeoutID = setTimeout(internalPlay, (endTime-audioContext.currentTime-SCHEDULE_AHEAD_TIME)*1000);
-		} else {
-			setTimeout(function() { dmo.updatePlayingDmos(null); }, (endTime-audioContext.currentTime)*1000);
-		}
+	this.getDuration = function() {
+		return duration;
+	}
+	
+	this.play = function(startTime) {
+		source.start(startTime, currentPausePosition);
+		isPlaying = true;
 	}
 	
 	this.pause = function() {
@@ -123,7 +111,6 @@ function Source(audioContext, dmo, reverbSend) {
 	}
 	
 	this.changeAmplitude = function(deltaAmplitude) {
-		console.log(deltaAmplitude);
 		currentAmplitude += deltaAmplitude;
 		if (currentAmplitude > 0) {
 			dryGain.gain.value += deltaAmplitude;
@@ -151,59 +138,21 @@ function Source(audioContext, dmo, reverbSend) {
 		}
 	}
 	
-	function createNewAudioSource() {
-		currentSegmentInfo = dmo.getNextSegment();
-		if (currentSegmentInfo) {
-			if (!currentSegmentInfo[1]) {
-				currentSegmentInfo[1] = audioBuffer.duration-currentSegmentInfo[0];
-			}
-			currentSourceDuration = currentSegmentInfo[1];
-			if (currentSegmentInfo[0] == 0 && currentSegmentInfo[1] == audioBuffer.duration) {
-				currentAudioSubBuffer = audioBuffer;
-			} else {
-				//add time for fade after source officially done
-				currentAudioSubBuffer = getAudioBufferCopy(toSamples(currentSegmentInfo[0]), toSamples(currentSourceDuration+FADE_LENGTH));
-			}
-			var newSource = audioContext.createBufferSource();
-			newSource.connect(panner);
-			newSource.buffer = currentAudioSubBuffer;
-			newSource.playbackRate.value = currentPlaybackRate;
-			return newSource;
-		} else {
-			self.stop();
-		}
-	}
-	
-	function toSamples(seconds) {
+	function toSamples(seconds, buffer) {
 		if (seconds || seconds == 0) {
-			return Math.round(seconds*audioBuffer.sampleRate);
+			return Math.round(seconds*buffer.sampleRate);
 		}
 	}
 	
-	/*function getAudioBufferCopy(fromSample, durationInSamples) {
-		var subBuffer = audioContext.createBuffer(audioBuffer.numberOfChannels, durationInSamples, audioBuffer.sampleRate);
-		for (var i = 0; i < audioBuffer.numberOfChannels; i++) {
-			//audioBuffer.copyFromChannel(subBuffer.getChannelData(i), i);
-			var currentChannelCopy = subBuffer.getChannelData(i);
-			var currentChannelOriginal = audioBuffer.getChannelData(i);
-			console.log(i, audioBuffer, currentChannelOriginal, fromSample, durationInSamples);
-			for (var j = 0; j < durationInSamples; j++) {
-				currentChannelCopy[j] = currentChannelOriginal[j];
-			}
-			//currentCopyChannel = currentOriginalChannel.slice(fromSample, fromSample+durationInSamples);
-		}
-		return subBuffer;
-	}*/
-	
-	function getAudioBufferCopy(fromSample, durationInSamples) {
-		var subBuffer = audioContext.createBuffer(audioBuffer.numberOfChannels, durationInSamples, audioBuffer.sampleRate);
-		for (var i = 0; i < audioBuffer.numberOfChannels; i++) {
+	function getSubBuffer(buffer, fromSample, durationInSamples) {
+		var subBuffer = audioContext.createBuffer(buffer.numberOfChannels, durationInSamples, buffer.sampleRate);
+		for (var i = 0; i < buffer.numberOfChannels; i++) {
 			var currentCopyChannel = subBuffer.getChannelData(i);
-			var currentOriginalChannel = audioBuffer.getChannelData(i);
+			var currentOriginalChannel = buffer.getChannelData(i);
 			for (var j = 0; j < durationInSamples; j++) {
 				currentCopyChannel[j] = currentOriginalChannel[fromSample+j];
 			}
-			var fadeSamples = audioBuffer.sampleRate*FADE_LENGTH;
+			var fadeSamples = buffer.sampleRate*FADE_LENGTH;
 			for (var j = 0.0; j < fadeSamples; j++) {
 				currentCopyChannel[j] *= j/fadeSamples;
 				currentCopyChannel[durationInSamples-j-1] *= j/fadeSamples;
