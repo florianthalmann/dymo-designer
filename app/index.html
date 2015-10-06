@@ -47,9 +47,11 @@
 					<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
 				</span>
 				<span>function: y = </span>
-				<input type="text" ng-model="mappingFunction" size="7"></input-->
+				<input type="text" ng-model="mappingFunction" size="7"></input>
 				<span>parameter:</span>
 				<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
+				<span>level:</span>
+				<input type="text" ng-model="mappingLevel" size="2"></input>
 				<button ng-click="addMapping()">Add Mapping</button>
 			</div>
 			<div>

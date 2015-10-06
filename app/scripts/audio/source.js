@@ -16,8 +16,9 @@ function Source(dmo, audioContext, buffer, reverbSend) {
 	panner.connect(dryGain);
 	panner.connect(reverbGain);
 	
-	var time = dmo.getFeature("time");
-	var duration = dmo.getFeature("duration");
+	var segment = dmo.getSegment();
+	var time = segment[0];
+	var duration = segment[1];
 	if (!duration) {
 		duration = buffer.duration-time;
 	}
