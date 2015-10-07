@@ -152,6 +152,12 @@ function DynamicMusicObject(uri, scheduler, type, manager) {
 		manager.updatePlayingDmos(dmo);
 	}
 	
+	this.updatePartOrder = function(featureName) {
+		parts.sort(function(a,b) {
+			return a.getFeature(featureName) - b.getFeature(featureName);
+		})
+	}
+	
 	this.getNextPart = function() {
 		if (parts.length > 0) {
 			isPlaying = true;

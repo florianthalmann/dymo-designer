@@ -7,8 +7,8 @@
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
-			$scope.sourceFile = 'audio/sheago.mp3';
-			$scope.featureFile = 'features/sheago_barbeat.json';
+			$scope.sourceFile = 'audio/ligeti2.m4a';
+			$scope.featureFile = 'features/ligeti2_onset.json';
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			

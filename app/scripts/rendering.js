@@ -19,11 +19,15 @@ function Rendering() {
 					currentDmo.playbackRate.update(undefined, value);
 				} else if (parameter.name == "Reverb") {
 					currentDmo.reverb.update(undefined, value);
-				} else if (parameter.name == "PartCount") {
-					currentDmo.partCount.update(undefined, value);
 				} else if (parameter.name == "DurationRatio") {
 					currentDmo.durationRatio.update(undefined, value);
-				}
+				} else if (parameter.name == "PartCount") {
+					currentDmo.partCount.update(undefined, value);
+				} else if (parameter.name == "PartOrder") {
+					currentDmo.updatePartOrder(feature.name);
+				}/* else if (parameter.name == "PartIndex") {
+					currentDmo.partIndex.update(undefined, feature.name);
+				}*/
 			}
 		}
 	}
