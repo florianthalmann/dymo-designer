@@ -37,7 +37,6 @@
 					var nodes = force.nodes(),
 						links = force.links();
 					
-					var previousColors = null;
 					var prevRandomValues = {};
 					
 					// on window resize, re-render d3 canvas
@@ -105,6 +104,11 @@
 							.attr("stroke", getHsl)
 							.style("opacity", 0.1)
 							.style("stroke-width", 1);
+						link
+							.transition()
+								.duration(500)
+								.attr("stroke", getHsl)
+								.style("opacity", 0.1)
 						link.exit().remove();
 						
 						node = node.data(force.nodes(), function(d) { return d["@id"];});
@@ -117,24 +121,16 @@
 						node
 							.transition()
 								.duration(500)
+								.style("fill", getHsl)
+								.style("opacity", 0.4)
 								.attr("r", getR);
-						
-						//only change color if not random or newly random
-						if (scope.viewconfig.color.name != "random" || previousColors != "random") {
-							node
-								.transition()
-									.duration(500) // time of duration
-									.style("fill", getHsl)
-									.style("opacity", 0.4)
-						}
-						
-						previousColors = scope.viewconfig.color.name;
-						
 						node.exit().remove();
 						
 						force.start();
 						
 					};
+					
+					
 					function getR(d) {
 						return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
 					}

@@ -19,6 +19,7 @@
 					
 					var height = 600;
 					var padding = 50;
+					var previousColors = null;
 					var prevRandomValues = {};
 					
 					var xScale, yScale, sizeScale, colorScale;
@@ -123,7 +124,7 @@
 							.transition()
 								.duration(500) // time of duration
 								.attr("r", getR); // width based on scale
-							
+						
 						circles
 							.transition()
 								.duration(500) // time of duration
@@ -137,7 +138,7 @@
 						
 						
 						var lines = svg.selectAll(".edge").data(data.links);
-					
+						
 						lines.enter()
 							.append("line")
 							.attr("class", "edge")
@@ -167,33 +168,36 @@
 								.attr("y2", function(d) { return getYValue(d.target); });
 						
 						lines.exit().remove();
-				
+						
+					};
+					
+					
 					function getXValue(d, i) {
 						return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
 					}
-				
+					
 					function getYValue(d, i) {
 						return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
 					}
-				
+					
 					function getR(d) {
 						return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
 					}
-				
+					
 					function getHsl(d) {
 						if (scope.playing.indexOf(d["@id"]) >= 0) {
 							return "black";
 						}
 						return "hsl(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ", 80%, 50%)";
 					}
-				
+					
 					function getRgb(d) {
 						var color = "rgb(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ","
 							+ (255-colorScale(getVisualValue(d, scope.viewconfig.color))) + ","
 							+ colorScale(getVisualValue(d, scope.viewconfig.color)) +")";
 						return color;
 					}
-				
+					
 					function getVisualValue(dmo, parameter, key) {
 						if (parameter.name == "random") {
 							if (!prevRandomValues[dmo["@id"]]) {
@@ -213,7 +217,7 @@
 							return 0;//0.00000001; //for log scale :(
 						}
 					}
-				
+					
 				}
 			};
 		}]);
