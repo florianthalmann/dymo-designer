@@ -6,7 +6,7 @@ function DmoManager(scheduler, $scope) {
 	this.playingDmos = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
-	this.features = [createFeature("time"), createFeature("duration"), createFeature("random", 0, 1)];
+	this.features = [createFeature("random", 0, 1)];
 	
 	var maxDepth = 0;
 	
@@ -35,7 +35,7 @@ function DmoManager(scheduler, $scope) {
 		heightFeature = getFeature("height");
 		var previousDmo = null;
 		for (var i = 0; i < 48; i++) {
-			var currentDmo = createNewDmo(1,1);
+			var currentDmo = createNewDmo();
 			if (previousDmo) {
 				addPartDmo(previousDmo, currentDmo);
 			} else {
@@ -65,9 +65,6 @@ function DmoManager(scheduler, $scope) {
 	function registerDmo(dmo) {
 		self.graph.nodes.push(dmo);
 		toRealDmo[dmo["@id"]] = new DynamicMusicObject(dmo["@id"], scheduler, undefined, self);
-		//improve, dont do this here..
-		toRealDmo[dmo["@id"]].setFeature("time", dmo["time"].value);
-		toRealDmo[dmo["@id"]].setFeature("duration", dmo["duration"].value);
 		updateMinMaxes(dmo);
 	}
 	
@@ -115,6 +112,80 @@ function DmoManager(scheduler, $scope) {
 		}
 	}
 	
+	this.addSegmentation = function(segments) {
+		if (self.graph.nodes.length <= 0) {
+			addTopDmo();
+		}
+		for (var i = 0; i < segments.length-1; i++) {
+			var newDmo = createNewDmo();
+			parent = getSuitableParent(segments[i].time.value);
+			addPartDmo(parent, newDmo);
+			setDmoFeature(newDmo, "time", segments[i].time.value);
+			setDmoFeature(newDmo, "duration", segments[i+1].time.value - newDmo["time"].value);
+			if (segments[i].label) {
+				setDmoFeature(newDmo, "segmentLabel", segments[i].label.value);
+			}
+			updateParentDuration(parent, newDmo);
+		}
+		maxDepth++;
+	}
+	
+	function getSuitableParent(time) {
+		var nextCandidate = self.graph.nodes[0];
+		var depth = 0;
+		while (depth < maxDepth) {
+			var parts = nextCandidate.hasPart;
+			if (parts.length > 0) {
+				for (var i = 0; i < parts.length; i++) {
+					if (parts[i]["time"].value <= time) {
+						nextCandidate = parts[i];
+						depth++;
+					} else {
+						break;
+					}
+				}
+			} else {
+				return nextCandidate;
+			}
+		}
+		return nextCandidate;
+	}
+	
+	function updateParentDuration(parent, newDmo) {
+		if (!("time" in parent) || newDmo["time"].value < parent["time"].value) {
+			setDmoFeature(parent, "time", newDmo["time"].value);
+		}
+		if (!("duration" in parent) || parent["time"].value+parent["duration"].value < newDmo["time"].value+newDmo["duration"].value) {
+			setDmoFeature(parent, "duration", newDmo["time"].value+newDmo["duration"].value - parent["time"].value);
+		}
+		updateMinMaxes(parent);
+	}
+	
+	function createNewDmo() {
+		var newDmo = {
+			"@id": "dmo" + (self.graph.nodes.length+1),
+			"@type": "DMO",
+			"hasPart": []
+		}
+		return newDmo;
+	}
+	
+	function setDmoFeature(dmo, feature, value) {
+		if (typeof feature === 'string' || feature instanceof String) {
+			feature = getFeature(feature);
+		}
+		if (dmo[feature.name]) {
+			dmo[feature.name].value = value;
+		} else {
+			dmo[feature.name] = {
+				"value" : value,
+				"adt" : name.charAt(0).toUpperCase() + name.slice(1),
+			};
+		}
+		toRealDmo[dmo["@id"]].setFeature(feature.name, value);
+		updateMinMax(dmo, feature);
+	}
+	
 	function getFeature(name) {
 		//if already exists return that
 		for (var i = 0; i < self.features.length; i++) {
@@ -133,89 +204,6 @@ function DmoManager(scheduler, $scope) {
 			return {name:name, min:min, max:max};
 		}
 		return {name:name, min:1, max:0};
-	}
-	
-	function setDmoFeature(dmo, feature, value) {
-		if (dmo[feature.name]) {
-			dmo[feature.name].value = value;
-		} else {
-			addFeatureToDmo(dmo, feature.name, value);
-		}
-		toRealDmo[dmo["@id"]].setFeature(feature.name, value);
-		updateMinMax(dmo, feature);
-	}
-	
-	this.addSegmentation = function(segments) {
-		if (self.graph.nodes.length <= 0) {
-			addTopDmo();
-		}
-		for (var i = 0; i < segments.length-1; i++) {
-			var newDmo = createNewDmo();
-			newDmo["time"].value = segments[i].time.value;
-			newDmo["duration"].value = segments[i+1].time.value - newDmo["time"].value;
-			if (segments[i].label) {
-				newDmo.segmentLabel = segments[i].label.value;
-			}
-			parent = getSuitableParent(newDmo);
-			updateParentDuration(parent, newDmo);
-			addPartDmo(parent, newDmo);
-		}
-		maxDepth++;
-	}
-	
-	function getSuitableParent(dmo) {
-		var nextCandidate = self.graph.nodes[0];
-		var depth = 0;
-		while (depth < maxDepth) {
-			var parts = nextCandidate.hasPart;
-			if (parts.length > 0) {
-				for (var i = 0; i < parts.length; i++) {
-					if (parts[i]["time"].value <= dmo["time"].value) {
-						nextCandidate = parts[i];
-						depth++;
-					} else {
-						break;
-					}
-				}
-			} else {
-				return nextCandidate;
-			}
-		}
-		return nextCandidate;
-	}
-	
-	function updateParentDuration(parent, newDmo) {
-		if (!("time" in parent) || newDmo["time"].value < parent["time"].value) {
-			parent["time"].value = newDmo["time"].value;
-		}
-		if (!("duration" in parent) || parent["time"].value+parent["duration"].value < newDmo["time"].value+newDmo["duration"].value) {
-			parent["duration"].value = (newDmo["time"].value+newDmo["duration"].value) - parent["time"].value;
-		}
-		updateMinMaxes(parent);
-	}
-	
-	var createNewDmo = function(time, duration) {
-		if (!time) {
-			time = Math.random();
-		}
-		if (!duration) {
-			duration = Math.random();
-		}
-		var newDmo = {
-			"@id": "dmo" + (self.graph.nodes.length+1),
-			"@type": "DMO",
-			"hasPart": []
-		}
-		addFeatureToDmo(newDmo, "time", time);
-		addFeatureToDmo(newDmo, "duration", duration);
-		return newDmo;
-	}
-	
-	var addFeatureToDmo = function(dmo, name, value) {
-		dmo[name] = {
-			"value" : value,
-			"adt" : name.charAt(0).toUpperCase() + name.slice(1),
-		};
 	}
 	
 	this.updatePlayingDmos = function(dmo) {
