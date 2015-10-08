@@ -47,12 +47,11 @@ function DmoManager(scheduler, $scope) {
 			setDmoFeature(currentDmo, heightFeature, sin+1+(i/4.5));
 			previousDmo = currentDmo;
 		}
-		console.log(self.graph)
 	}
 	
 	function addTopDmo() {
 		registerDmo(createNewDmo());
-		self.getRealTopDmo().setSourcePath($scope.sourceFile);
+		self.getRealTopDmo().setSourcePath($scope.getFullSourcePath());
 	}
 	
 	function addPartDmo(parent, part) {

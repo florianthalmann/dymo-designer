@@ -7,8 +7,6 @@
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
-			$scope.sourceFile = 'audio/ligeti2.m4a';
-			$scope.featureFile = 'features/ligeti2_onset.json';
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
@@ -16,10 +14,24 @@
 			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
 			
 			$scope.scheduler = new Scheduler($scope);
-			$scope.scheduler.addSourceFile($scope.sourceFile);
 			$scope.dmo = new DmoManager($scope.scheduler, $scope);
 			
 			var maxDepth = 0;
+			
+			$http.get('getsourcefiles/').success(function(data) {
+				$scope.sourceFiles = data;
+			});
+			
+			$scope.sourceSelected = function() {
+				$scope.scheduler.addSourceFile($scope.getFullSourcePath());
+				$http.get('getfeaturefiles/', {params:{source:$scope.selectedSource}}).success(function(data) {
+					$scope.featureFiles = data;
+				});
+			}
+			
+			$scope.getFullSourcePath = function() {
+				return 'audio/' + $scope.selectedSource;
+			}
 			
 			$scope.dmoOnClick = function(dmo){
 				if ($scope.selectedDmo != dmo) {
@@ -32,8 +44,8 @@
 				$scope.$apply();
 			};
 			
-			$scope.addPartsFromFeatures = function() {
-				new FeatureLoader($scope, $http).loadFeature($scope.featureFile, $scope.labelCondition, $scope.dmo);
+			$scope.loadFeature = function() {
+				new FeatureLoader($scope, $http).loadFeature('features/' + $scope.selectedFeature, $scope.labelCondition, $scope.dmo);
 			}
 			
 			$scope.play = function() {
