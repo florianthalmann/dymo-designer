@@ -7,7 +7,7 @@
 				restrict: 'EA',
 				scope: {
 					data: "=",
-					viewparams: "=",
+					viewconfig: "=",
 					playing: "=",
 					label: "@",
 					onClick: "&"
@@ -54,7 +54,7 @@
 						return scope.render(newVals);
 					}, true);
 					
-					scope.$watch('viewparams', function(newVals, oldVals) {
+					scope.$watch('viewconfig', function(newVals, oldVals) {
 						return scope.render(scope.data);
 					}, true);
 					
@@ -86,10 +86,10 @@
 						// set the height based on the calculations above
 						svg.attr('height', height);
 						
-						xScale = createScale(scope.viewparams.xAxis.log, scope.viewparams.xAxis.param).range([padding, width-padding]),
-						yScale = createScale(scope.viewparams.yAxis.log, scope.viewparams.yAxis.param).range([height-padding, padding]),
-						sizeScale = createScale(scope.viewparams.size.log, scope.viewparams.size.param).range([10, 40]),
-						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([45, 360]);
+						xScale = createScale(scope.viewconfig.xAxis.log, scope.viewconfig.xAxis.param).range([padding, width-padding]),
+						yScale = createScale(scope.viewconfig.yAxis.log, scope.viewconfig.yAxis.param).range([height-padding, padding]),
+						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 40]),
+						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
 							if (log == true) {
@@ -162,7 +162,7 @@
 						lines.exit().remove();
 						
 						//only change color if not random or newly random, or when playing ones change (OPTIMIZE!)
-						if (scope.viewparams.color.param.name != "random" || previousColors != "random") {
+						if (scope.viewconfig.color.param.name != "random" || previousColors != "random") {
 							lines
 								.transition()
 									.duration(500) // time of duration
@@ -176,7 +176,7 @@
 									.style("opacity", 0.3)
 						}
 						
-						previousColors = scope.viewparams.color.param.name;
+						previousColors = scope.viewconfig.color.param.name;
 						
 						/*var text = svg.selectAll("text").data(data);
 				
@@ -194,28 +194,28 @@
 					};
 				
 				function getXValue(d, i) {
-					return xScale(getVisualValue(d, scope.viewparams.xAxis.param, "x"));
+					return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
 				}
 				
 				function getYValue(d, i) {
-					return yScale(getVisualValue(d, scope.viewparams.yAxis.param, "y"));
+					return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
 				}
 				
 				function getR(d) {
-					return sizeScale(getVisualValue(d, scope.viewparams.size.param, "size"));
+					return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
 				}
 				
 				function getHsl(d) {
 					if (scope.playing.indexOf(d["@id"]) >= 0) {
 						return "black";
 					}
-					return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ", 80%, 50%)";
+					return "hsl(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ", 80%, 50%)";
 				}
 				
 				function getRgb(d) {
-					var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ","
-						+ (255-colorScale(getVisualValue(d, scope.viewparams.color))) + ","
-						+ colorScale(getVisualValue(d, scope.viewparams.color)) +")";
+					var color = "rgb(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ","
+						+ (255-colorScale(getVisualValue(d, scope.viewconfig.color))) + ","
+						+ colorScale(getVisualValue(d, scope.viewconfig.color)) +")";
 					return color;
 				}
 				

@@ -20,12 +20,15 @@
 			
 			$http.get('getsourcefiles/').success(function(data) {
 				$scope.sourceFiles = data;
+				$scope.selectedSource = data[0];
+				$scope.sourceSelected();
 			});
 			
 			$scope.sourceSelected = function() {
 				$scope.scheduler.addSourceFile($scope.getFullSourcePath());
 				$http.get('getfeaturefiles/', {params:{source:$scope.selectedSource}}).success(function(data) {
 					$scope.featureFiles = data;
+					$scope.selectedFeature = data[0];
 				});
 			}
 			

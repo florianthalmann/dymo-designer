@@ -196,7 +196,18 @@ function DmoManager(scheduler, $scope) {
 		//if doesn't exist make a new one
 		var newFeature = createFeature(name);
 		self.features.splice(self.features.length-1, 0, newFeature);
+		adjustViewConfig(newFeature);
 		return newFeature;
+	}
+	
+	function adjustViewConfig(newFeature) {
+		if (self.features.length-1 == 1) {
+			$scope.viewConfig.xAxis.param = newFeature;
+		} else if (self.features.length-1 == 2) {
+			$scope.viewConfig.yAxis.param = newFeature;
+		} else if (self.features.length-1 == 3) {
+			$scope.viewConfig.size.param = newFeature;
+		}
 	}
 	
 	function createFeature(name, min, max) {

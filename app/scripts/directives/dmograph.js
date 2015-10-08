@@ -7,7 +7,7 @@
 				restrict: 'EA',
 				scope: {
 					data: "=",
-					viewparams: "=",
+					viewconfig: "=",
 					playing: "=",
 					label: "@",
 					onClick: "&"
@@ -56,7 +56,7 @@
 						return scope.render(newVals);
 					}, true);
 					
-					scope.$watch('viewparams', function(newVals, oldVals) {
+					scope.$watch('viewconfig', function(newVals, oldVals) {
 						return scope.render(scope.data);
 					}, true);
 					
@@ -85,8 +85,8 @@
 						var height = 500;
 						svg.attr('height', height);
 						
-						sizeScale = createScale(scope.viewparams.size.log, scope.viewparams.size.param).range([10, 100]),
-						colorScale = createScale(scope.viewparams.color.log, scope.viewparams.color.param).rangeRound([45, 360]);
+						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 100]),
+						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
 							if (log == true) {
@@ -120,7 +120,7 @@
 								.attr("r", getR);
 						
 						//only change color if not random or newly random
-						if (scope.viewparams.color.name != "random" || previousColors != "random") {
+						if (scope.viewconfig.color.name != "random" || previousColors != "random") {
 							node
 								.transition()
 									.duration(500) // time of duration
@@ -128,7 +128,7 @@
 									.style("opacity", 0.4)
 						}
 						
-						previousColors = scope.viewparams.color.name;
+						previousColors = scope.viewconfig.color.name;
 						
 						node.exit().remove();
 						
@@ -136,20 +136,20 @@
 						
 					};
 					function getR(d) {
-						return sizeScale(getVisualValue(d, scope.viewparams.size.param, "size"));
+						return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
 					}
 					
 					function getHsl(d) {
 						if (scope.playing.indexOf(d["@id"]) >= 0) {
 							return "black";
 						}
-						return "hsl(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ", 80%, 50%)";
+						return "hsl(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ", 80%, 50%)";
 					}
 					
 					function getRgb(d) {
-						var color = "rgb(" + colorScale(getVisualValue(d, scope.viewparams.color.param, "color")) + ","
-							+ (255-colorScale(getVisualValue(d, scope.viewparams.color))) + ","
-							+ colorScale(getVisualValue(d, scope.viewparams.color)) +")";
+						var color = "rgb(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ","
+							+ (255-colorScale(getVisualValue(d, scope.viewconfig.color))) + ","
+							+ colorScale(getVisualValue(d, scope.viewconfig.color)) +")";
 						return color;
 					}
 					

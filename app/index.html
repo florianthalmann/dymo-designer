@@ -60,27 +60,27 @@
 				<span>view:</span>
 				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span>x-axis:</span>
-				<select ng-init="viewParams.xAxis.param = dmo.features[0]" ng-model="viewParams.xAxis.param" ng-options="p.name for p in dmo.features"></select>
-				<input type="checkbox" ng-init="viewParams.xAxis.log = false" ng-model="viewParams.xAxis.log"></input>
+				<select ng-init="viewConfig.xAxis.param = dmo.features[0]" ng-model="viewConfig.xAxis.param" ng-options="p.name for p in dmo.features"></select>
+				<input type="checkbox" ng-init="viewConfig.xAxis.log = false" ng-model="viewConfig.xAxis.log"></input>
 				<span>y-axis:</span>
-				<select ng-init="viewParams.yAxis.param = dmo.features[0]" ng-model="viewParams.yAxis.param" ng-options="p.name for p in dmo.features"></select>
-				<input type="checkbox" ng-init="viewParams.yAxis.log = false" ng-model="viewParams.yAxis.log"></input>
+				<select ng-init="viewConfig.yAxis.param = dmo.features[0]" ng-model="viewConfig.yAxis.param" ng-options="p.name for p in dmo.features"></select>
+				<input type="checkbox" ng-init="viewConfig.yAxis.log = false" ng-model="viewConfig.yAxis.log"></input>
 				<span>size:</span>
-				<select ng-init="viewParams.size.param = dmo.features[0]" ng-model="viewParams.size.param" ng-options="p.name for p in dmo.features"></select>
-				<input type="checkbox" ng-init="viewParams.size.log = false" ng-model="viewParams.size.log"></input>
+				<select ng-init="viewConfig.size.param = dmo.features[0]" ng-model="viewConfig.size.param" ng-options="p.name for p in dmo.features"></select>
+				<input type="checkbox" ng-init="viewConfig.size.log = false" ng-model="viewConfig.size.log"></input>
 				<span>color:</span>
-				<select ng-init="viewParams.color.param = dmo.features[0]" ng-model="viewParams.color.param" ng-options="p.name for p in dmo.features"></select>
-				<input type="checkbox" ng-init="viewParams.color.log = false" ng-model="viewParams.color.log"></input>
+				<select ng-init="viewConfig.color.param = dmo.features[0]" ng-model="viewConfig.color.param" ng-options="p.name for p in dmo.features"></select>
+				<input type="checkbox" ng-init="viewConfig.color.log = false" ng-model="viewConfig.color.log"></input>
 			</div>
 			<!--div ng-show="selectedDmo">
 				<span>selected: {{selectedDmo.name}}</span>
 				<input type="range" min="0" max="200" ng-model="selectedDmo.size"></input>
 			</div-->
 			<div ng-if="selectedView == views[0]">
-				<dmo-coordinates data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+				<dmo-coordinates data="dmo.graph" viewconfig="viewConfig" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dmo-graph data="dmo.graph" viewparams="viewParams" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+				<dmo-graph data="dmo.graph" viewconfig="viewConfig" playing="dmo.playingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
