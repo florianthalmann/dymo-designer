@@ -6,7 +6,7 @@ function DmoManager(scheduler, $scope) {
 	this.playingDmos = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
-	this.features = [createFeature("random", 0, 1)];
+	this.features = [createFeature("level"), createFeature("random", 0, 1)];
 	
 	var maxDepth = 0;
 	
@@ -50,12 +50,15 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	function addTopDmo() {
-		registerDmo(createNewDmo());
+		var newDmo = createNewDmo();
+		registerDmo(newDmo);
+		setDmoFeature(newDmo, "level", 0);
 		self.getRealTopDmo().setSourcePath($scope.getFullSourcePath());
 	}
 	
 	function addPartDmo(parent, part) {
 		registerDmo(part);
+		setDmoFeature(part, "level", parent["level"].value+1);
 		parent["hasPart"].push(part);
 		var link = {"source":parent, "target":part, "value":1};
 		self.graph.links.push(link);
@@ -195,17 +198,17 @@ function DmoManager(scheduler, $scope) {
 		}
 		//if doesn't exist make a new one
 		var newFeature = createFeature(name);
-		self.features.splice(self.features.length-1, 0, newFeature);
+		self.features.splice(self.features.length-2, 0, newFeature);
 		adjustViewConfig(newFeature);
 		return newFeature;
 	}
 	
 	function adjustViewConfig(newFeature) {
-		if (self.features.length-1 == 1) {
+		if (self.features.length-2 == 1) {
 			$scope.viewConfig.xAxis.param = newFeature;
-		} else if (self.features.length-1 == 2) {
+		} else if (self.features.length-2 == 2) {
 			$scope.viewConfig.yAxis.param = newFeature;
-		} else if (self.features.length-1 == 3) {
+		} else if (self.features.length-2 == 3) {
 			$scope.viewConfig.size.param = newFeature;
 		}
 	}
@@ -214,7 +217,7 @@ function DmoManager(scheduler, $scope) {
 		if (min != undefined && max != undefined) {
 			return {name:name, min:min, max:max};
 		}
-		return {name:name, min:1, max:0};
+		return {name:name, min:1000, max:0};
 	}
 	
 	this.updatePlayingDmos = function(dmo) {

@@ -10,11 +10,15 @@
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
-			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
-			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
-			
 			$scope.scheduler = new Scheduler($scope);
 			$scope.dmo = new DmoManager($scope.scheduler, $scope);
+			
+			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
+			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
+			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
+			function createConfig(name) {
+				return {name:name, param:$scope.dmo.features[1], log:false};
+			}
 			
 			var maxDepth = 0;
 			
