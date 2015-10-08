@@ -91,6 +91,7 @@ function Scheduler($scope) {
 		var uri = dmo.getUri();
 		sources[uri] = null;
 		nextSources[uri] = null;
+		endTimes[uri] = null;
 		dmo.resetPartsPlayed();
 		dmo.updatePlayingDmos(null);
 	}
