@@ -19,7 +19,6 @@
 					
 					var height = 600;
 					var padding = 50;
-					var previousColors = null;
 					var prevRandomValues = {};
 					
 					var xScale, yScale, sizeScale, colorScale;
@@ -92,8 +91,12 @@
 						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
-							if (log == true) {
-								return d3.scale.log().base(2).domain([param.min, param.max]);
+							if (log) {
+								var min = param.min;
+								if (min <= 0) {
+									min = 0.0000001;
+								}
+								return d3.scale.log().base(2).domain([min, param.max]);
 							}
 							return d3.scale.linear().domain([param.min, param.max]);
 						}
@@ -124,6 +127,8 @@
 						circles
 							.transition()
 								.duration(500) // time of duration
+								.style("fill", getHsl)
+								.style("opacity", 0.3)
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
@@ -154,90 +159,60 @@
 						lines
 							.transition()
 								.duration(500) // time of duration
+								.style("stroke", function(d) { return getHsl(d.target); })
+								.style("opacity", 0.1)
 								.attr("x1", function(d) { return getXValue(d.source); })
 								.attr("y1", function(d) { return getYValue(d.source); })
 								.attr("x2", function(d) { return getXValue(d.target); })
 								.attr("y2", function(d) { return getYValue(d.target); });
 						
 						lines.exit().remove();
-						
-						//only change color if not random or newly random, or when playing ones change (OPTIMIZE!)
-						if (scope.viewconfig.color.param.name != "random" || previousColors != "random") {
-							lines
-								.transition()
-									.duration(500) // time of duration
-									.style("stroke", function(d) { return getHsl(d.target); })
-									.style("opacity", 0.1)
-							
-							circles
-								.transition()
-									.duration(500) // time of duration
-									.style("fill", getHsl)
-									.style("opacity", 0.3)
-						}
-						
-						previousColors = scope.viewconfig.color.param.name;
-						
-						/*var text = svg.selectAll("text").data(data);
 				
-						text.enter()
-								.append("text")
-								.attr("fill", "#fff")
-								.attr("y", 255)
-								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})
-								.text(function(d){return d[scope.label];});
-				
-						text
-							.transition()
-								.duration(0) // time of duration
-								.attr("x", function(d, i){return (i+1) * width/(data.length+1) - 30;})*/
-					};
-				
-				function getXValue(d, i) {
-					return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
-				}
-				
-				function getYValue(d, i) {
-					return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
-				}
-				
-				function getR(d) {
-					return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
-				}
-				
-				function getHsl(d) {
-					if (scope.playing.indexOf(d["@id"]) >= 0) {
-						return "black";
+					function getXValue(d, i) {
+						return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
 					}
-					return "hsl(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ", 80%, 50%)";
-				}
 				
-				function getRgb(d) {
-					var color = "rgb(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ","
-						+ (255-colorScale(getVisualValue(d, scope.viewconfig.color))) + ","
-						+ colorScale(getVisualValue(d, scope.viewconfig.color)) +")";
-					return color;
-				}
-				
-				function getVisualValue(dmo, parameter, key) {
-					if (parameter.name == "random") {
-						if (!prevRandomValues[dmo["@id"]]) {
-							prevRandomValues[dmo["@id"]] = {};
-						}
-						if (!prevRandomValues[dmo["@id"]][key]) {
-							prevRandomValues[dmo["@id"]][key] = Math.random() * parameter.max;
-						}
-						return prevRandomValues[dmo["@id"]][key];
-					} else {
-						if (prevRandomValues[dmo["@id"]] && prevRandomValues[dmo["@id"]][key]) {
-							delete prevRandomValues[dmo["@id"]][key];
-						}
-						if (dmo[parameter.name]) {
-							return dmo[parameter.name].value;
-						}
-						return 0.00000001; //for log scale :(
+					function getYValue(d, i) {
+						return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
 					}
-				}
+				
+					function getR(d) {
+						return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
+					}
+				
+					function getHsl(d) {
+						if (scope.playing.indexOf(d["@id"]) >= 0) {
+							return "black";
+						}
+						return "hsl(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ", 80%, 50%)";
+					}
+				
+					function getRgb(d) {
+						var color = "rgb(" + colorScale(getVisualValue(d, scope.viewconfig.color.param, "color")) + ","
+							+ (255-colorScale(getVisualValue(d, scope.viewconfig.color))) + ","
+							+ colorScale(getVisualValue(d, scope.viewconfig.color)) +")";
+						return color;
+					}
+				
+					function getVisualValue(dmo, parameter, key) {
+						if (parameter.name == "random") {
+							if (!prevRandomValues[dmo["@id"]]) {
+								prevRandomValues[dmo["@id"]] = {};
+							}
+							if (!prevRandomValues[dmo["@id"]][key]) {
+								prevRandomValues[dmo["@id"]][key] = Math.random() * parameter.max;
+							}
+							return prevRandomValues[dmo["@id"]][key];
+						} else {
+							if (prevRandomValues[dmo["@id"]] && prevRandomValues[dmo["@id"]][key]) {
+								delete prevRandomValues[dmo["@id"]][key];
+							}
+							if (dmo[parameter.name]) {
+								return dmo[parameter.name].value;
+							}
+							return 0;//0.00000001; //for log scale :(
+						}
+					}
 				
 				}
 			};
