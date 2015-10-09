@@ -2,16 +2,16 @@
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/dymo-core/logic/dymo.js"></script>
+	<script src="bower_components/dymo-core/logic/rendering.js"></script>
+	<script src="bower_components/dymo-core/logic/parameter.js"></script>
+	<script src="bower_components/dymo-core/io/featureloader.js"></script>
+	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
+	<script src="bower_components/dymo-core/audio/source.js"></script>
+	<script src="bower_components/dymo-core/lib/AudioSampleLoader.js"></script>
 	<script src="scripts/app.js"></script>
 	<script src="scripts/dmomanager.js"></script>
-	<script src="scripts/dmo.js"></script>
-	<script src="scripts/rendering.js"></script>
-	<script src="scripts/parameter.js"></script>
-	<script src="scripts/featureloader.js"></script>
-	<script src="scripts/audio/scheduler.js"></script>
-	<script src="scripts/audio/source.js"></script>
-	<script src="scripts/audio/AudioSampleLoader.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/dmocontroller.js"></script>
 	<script src="scripts/controllers/renderingcontroller.js"></script>
@@ -21,7 +21,7 @@
 </head>
 <body ng-app="dmoDesigner">
 	<div>
-		<h1>DYMO Designer</h1>
+		<h1>Dymo Designer</h1>
 		<div ng-controller="DmoController">
 			<div>
 				<!--button ng-click="dmo.addDmo()">Add DMO</button-->

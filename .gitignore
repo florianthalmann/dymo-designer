@@ -18,3 +18,4 @@ out
 node_modules
 
 app/audio
+app/bower_components
