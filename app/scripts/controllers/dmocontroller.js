@@ -10,7 +10,7 @@
 			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
-			$scope.scheduler = new Scheduler($scope);
+			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
 			$scope.dmo = new DmoManager($scope.scheduler, $scope);
 			
 			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
@@ -34,6 +34,18 @@
 					$scope.featureFiles = data;
 					$scope.selectedFeature = data[0];
 				});
+			}
+			
+			function sourcesReadyCallback() {
+				$scope.sourcesReady = true;
+				$scope.$apply();
+			}
+			
+			function onPlaybackChange() {
+				console.log("YE");
+				setTimeout(function() {
+					$scope.$apply();
+				}, 10);
 			}
 			
 			$scope.getFullSourcePath = function() {

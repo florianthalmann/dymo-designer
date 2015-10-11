@@ -3,7 +3,6 @@ function DmoManager(scheduler, $scope) {
 	var self = this;
 	
 	this.graph = {nodes:[], links:[]};
-	this.playingDmos = [];
 	toRealDmo = {}; //saves all real dmos for now
 	
 	this.features = [createFeature("level"), createFeature("random", 0, 1)];
@@ -218,19 +217,6 @@ function DmoManager(scheduler, $scope) {
 			return {name:name, min:min, max:max};
 		}
 		return {name:name, min:1000, max:0};
-	}
-	
-	this.updatePlayingDmos = function(dmo) {
-		var newDmos = [];
-		var currentDmo = dmo;
-		while (currentDmo != null) {
-			newDmos.push(currentDmo.getUri());
-			currentDmo = currentDmo.getParent();
-		}
-		this.playingDmos = newDmos;
-		setTimeout(function() {
-			$scope.$apply();
-		}, 10);
 	}
 
 }
