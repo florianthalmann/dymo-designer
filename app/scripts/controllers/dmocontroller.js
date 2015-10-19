@@ -42,7 +42,6 @@
 			}
 			
 			function onPlaybackChange() {
-				console.log("YE");
 				setTimeout(function() {
 					$scope.$apply();
 				}, 10);
@@ -65,6 +64,10 @@
 			
 			$scope.loadFeature = function() {
 				new FeatureLoader($scope, $http).loadFeature('features/' + $scope.selectedFeature, $scope.labelCondition, $scope.dmo);
+			}
+			
+			$scope.save = function() {
+				new DymoWriter($http).writeDymoToJson($scope.dmo.getTopDmo(), '/');
 			}
 			
 			$scope.play = function() {

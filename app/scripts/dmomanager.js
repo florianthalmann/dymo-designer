@@ -9,8 +9,12 @@ function DmoManager(scheduler, $scope) {
 	
 	var maxDepth = 0;
 	
+	this.getTopDmo = function() {
+		return this.graph.nodes[0];
+	}
+	
 	this.getRealTopDmo = function() {
-		return toRealDmo[this.graph.nodes[0]["@id"]];
+		return toRealDmo[this.getTopDmo()["@id"]];
 	}
 	
 	this.getRealDmo = function(dmo) {

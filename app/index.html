@@ -7,6 +7,7 @@
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
 	<script src="bower_components/dymo-core/logic/parameter.js"></script>
 	<script src="bower_components/dymo-core/io/featureloader.js"></script>
+	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
 	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
 	<script src="bower_components/dymo-core/audio/source.js"></script>
 	<script src="bower_components/dymo-core/lib/AudioSampleLoader.js"></script>
@@ -36,6 +37,7 @@
 				<button ng-click="loadFeature()">Add Features</button>
 				<button ng-click="play()">Play</button>
 				<button ng-click="stop()">Stop</button>
+				<button ng-click="save()">Save</button>
 			</div>
 			<div ng-controller="RenderingController">
 				<span>mapping type:</span>

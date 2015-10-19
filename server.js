@@ -1,13 +1,13 @@
 (function() {
-	var app, express, fs;
 	
-	fs = require("fs");
+	var fs = require("fs");
+	var express = require('express');
+	var bodyParser = require('body-parser');
 	
-	express = require('express');
-	
-	app = express();
+	var app = express();
 	
 	app.use(express["static"](__dirname + '/app'));
+	app.use(bodyParser.json());
 	
 	app.get('/getsourcefiles', function(req, res) {
 		fs.readdir(__dirname + '/app/audio/', function(err, files) {
@@ -25,6 +25,13 @@
 			}
 			files = files.filter(function(f) { return f.indexOf(sourceName) >= 0; });
 			res.send(files);
+		});
+	});
+	
+	app.post('*', function(req, res) {
+		fs.writeFile('app/' + req.path, JSON.stringify(req.body), function (err) {
+			if (err) return res.send(err);
+			res.send('file saved at ' + req.path);
 		});
 	});
 	
