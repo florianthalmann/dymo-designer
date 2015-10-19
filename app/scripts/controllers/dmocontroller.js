@@ -69,7 +69,7 @@
 			}
 			
 			$scope.save = function() {
-				new DymoWriter($http).writeDymoToJson($scope.dmo.getTopDmo(), '/');
+				new DymoWriter($http).writeDymoToJson($scope.dmo.getTopDmo(), $scope.dymoPath);
 			}
 			
 			$scope.play = function() {

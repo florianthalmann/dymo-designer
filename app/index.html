@@ -22,7 +22,7 @@
 	<script src="scripts/directives/dmocoordinates.js"></script>
 </head>
 <body ng-app="dmoDesigner">
-	<div>
+	<div  ng-controller="MainController">
 		<h1>Dymo Designer</h1>
 		<div ng-controller="DmoController">
 			<div>
@@ -66,6 +66,7 @@
 					<span>level:</span>
 					<input type="text" ng-model="mappingLevel" size="2"></input>
 					<button ng-click="addMapping()">Add Mapping</button>
+					<button ng-click="save()">Save</button>
 				</div>
 				<div>
 					<span>Current Dimensions: </span>
@@ -75,8 +76,8 @@
 				</div>
 				<div>
 					<div>Mappings:</div>
-					<span ng-repeat="m in mappings">
-						({{getFunctionReturnString(m.function)}}) :
+					<span ng-repeat="m in rendering.mappings">
+						{{getFunctionReturnString(m.function)}} :
 						<span ng-repeat="d in m.domainDims">
 							{{d.value.name}}{{$last ? '' : String.fromCharCode(158)}}
 						</span>

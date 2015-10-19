@@ -7,13 +7,17 @@
 			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}];
 			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
 			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
-			$scope.mappingFunction = "a/36";
-			$scope.rendering = new Rendering();
-			$scope.mappings = [];
+			$scope.realRendering = new Rendering();
+			$scope.rendering = {mappings:[]};
+			var currentVariable;
 			
-			$scope.currentMapping = createMapping();
+			reset();
 			
-			var currentVariable = 'a';
+			function reset() {
+				$scope.currentMapping = createMapping();
+				$scope.mappingFunction = "a/36";
+				currentVariable = 'a';
+			}
 			
 			$scope.addDomainDim = function() {
 				var dimension;
@@ -29,17 +33,20 @@
 				$scope.currentMapping.parameter = $scope.selectedParameter;
 				$scope.currentMapping.function = getParsedFunction();
 				$scope.currentMapping.level = Number.parseInt($scope.mappingLevel);
-				console.log($scope.currentMapping.function);
 				
 				//TODO REDESIGN!!
 				if ($scope.selectedMappingType.name == "Feature") {
-					$scope.rendering.addFeatureMapping($scope.dmo, $scope.selectedFeature, $scope.currentMapping.function, $scope.selectedParameter, $scope.currentMapping.level);
+					$scope.realRendering.addFeatureMapping($scope.dmo, $scope.selectedFeature, $scope.currentMapping.function, $scope.selectedParameter, $scope.currentMapping.level);
 				} else {
-					$scope.rendering.addControlMapping($scope.selectedControl, getParsedFunction(), $scope.selectedParameter, level);
+					$scope.realRendering.addControlMapping($scope.selectedControl, getParsedFunction(), $scope.selectedParameter, level);
 				}
 				
-				$scope.mappings.push($scope.currentMapping);
-				$scope.currentMapping = createMapping();
+				$scope.rendering.mappings.push($scope.currentMapping);
+				reset();
+			}
+			
+			$scope.save = function() {
+				new DymoWriter($http).writeRenderingToJson($scope.rendering, $scope.dymoPath);
 			}
 			
 			$scope.getFunctionReturnString = function(f) {
