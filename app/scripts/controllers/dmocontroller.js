@@ -13,8 +13,10 @@
 			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
 			$scope.dmo = new DmoManager($scope.scheduler, $scope);
 			
+			$scope.activities = [{name:"Features"}, {name:"Mappings"}, {name:"View"}];
 			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
 			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
+			$scope.selectedView = $scope.views[0];
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
 				return {name:name, param:$scope.dmo.features[1], log:false};

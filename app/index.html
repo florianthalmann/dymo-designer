@@ -14,6 +14,7 @@
 	<script src="scripts/app.js"></script>
 	<script src="scripts/dmomanager.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
+	<script src="scripts/controllers/maincontroller.js"></script>
 	<script src="scripts/controllers/dmocontroller.js"></script>
 	<script src="scripts/controllers/renderingcontroller.js"></script>
 	<script src="scripts/directives/dmobubbles.js"></script>
@@ -25,6 +26,10 @@
 		<h1>Dymo Designer</h1>
 		<div ng-controller="DmoController">
 			<div>
+				<span>activity:</span>
+				<select ng-init="selectedActivity = activities[0]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
+			</div>
+			<div ng-show="selectedActivity == activities[0]">
 				<!--button ng-click="dmo.addDmo()">Add DMO</button-->
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
@@ -39,26 +44,47 @@
 				<button ng-click="stop()">Stop</button>
 				<button ng-click="save()">Save</button>
 			</div>
-			<div ng-controller="RenderingController">
-				<span>mapping type:</span>
-				<select ng-init="selectedMappingType = mappingTypes[0]" ng-model="selectedMappingType" ng-options="t.name for t in mappingTypes"></select>
-				<span ng-show="selectedMappingType == mappingTypes[0]">
-					feature:
-					<select ng-init="selectedFeature = dmo.features[0]" ng-model="selectedFeature" ng-options="p.name for p in dmo.features"></select>
-				</span>
-				<span ng-show="selectedMappingType == mappingTypes[1]">
-					control:
-					<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
-				</span>
-				<span>function: y = </span>
-				<input type="text" ng-model="mappingFunction" size="7"></input>
-				<span>parameter:</span>
-				<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
-				<span>level:</span>
-				<input type="text" ng-model="mappingLevel" size="2"></input>
-				<button ng-click="addMapping()">Add Mapping</button>
+			<div ng-controller="RenderingController" ng-show="selectedActivity == activities[1]">
+				<div>
+					<span>type:</span>
+					<select ng-init="selectedMappingType = mappingTypes[0]" ng-model="selectedMappingType" ng-options="t.name for t in mappingTypes"></select>
+					<span ng-show="selectedMappingType == mappingTypes[0]">
+						feature:
+						<select ng-init="selectedFeature = dmo.features[0]" ng-model="selectedFeature" ng-options="p.name for p in dmo.features"></select>
+					</span>
+					<span ng-show="selectedMappingType == mappingTypes[1]">
+						control:
+						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
+					</span>
+					<button ng-click="addDomainDim()">Add Domain Dimension</button>
+				</div>
+				<div>
+					<span>function: y = </span>
+					<input type="text" ng-model="mappingFunction" size="7"></input>
+					<span>parameter:</span>
+					<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
+					<span>level:</span>
+					<input type="text" ng-model="mappingLevel" size="2"></input>
+					<button ng-click="addMapping()">Add Mapping</button>
+				</div>
+				<div>
+					<span>Current Dimensions: </span>
+					<span ng-repeat="d in currentMapping.domainDims">
+						<span>{{d.variable}} = {{d.value.name}}{{$last ? '' : ', '}}</span>
+					</span>
+				</div>
+				<div>
+					<div>Mappings:</div>
+					<span ng-repeat="m in mappings">
+						({{getFunctionReturnString(m.function)}}) :
+						<span ng-repeat="d in m.domainDims">
+							{{d.value.name}}{{$last ? '' : String.fromCharCode(158)}}
+						</span>
+						-> {{m.parameter.name}}{{$last ? '' : ', '}}
+					</span>
+				</div>
 			</div>
-			<div>
+			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
 				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
