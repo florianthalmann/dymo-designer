@@ -9,14 +9,15 @@
 			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
 			$scope.realRendering = new Rendering();
 			$scope.rendering = {mappings:[]};
-			var currentVariable;
-			
+			var currentVariables;
+			var currentVariableCode;
 			reset();
 			
 			function reset() {
 				$scope.currentMapping = createMapping();
 				$scope.mappingFunction = "a/36";
-				currentVariable = 'a';
+				currentVariables = [];
+				currentVariableCode = 97; // 'a'
 			}
 			
 			$scope.addDomainDim = function() {
@@ -33,16 +34,32 @@
 				$scope.currentMapping.parameter = $scope.selectedParameter;
 				$scope.currentMapping.function = getParsedFunction();
 				$scope.currentMapping.level = Number.parseInt($scope.mappingLevel);
+				$scope.rendering.mappings.push($scope.currentMapping);
 				
-				//TODO REDESIGN!!
-				if ($scope.selectedMappingType.name == "Feature") {
+				//for now just features
+				var domainDims = $scope.currentMapping.domainDims.map(function (d) { return d.value.name });
+				var dmos = getDmos($scope.currentMapping.level);
+				
+				$scope.realRendering.addMapping(new Mapping(domainDims, undefined, $scope.currentMapping.function, dmos, $scope.selectedParameter.name));
+				
+				/*if ($scope.selectedMappingType.name == "Feature") {
 					$scope.realRendering.addFeatureMapping($scope.dmo, $scope.selectedFeature, $scope.currentMapping.function, $scope.selectedParameter, $scope.currentMapping.level);
 				} else {
 					$scope.realRendering.addControlMapping($scope.selectedControl, getParsedFunction(), $scope.selectedParameter, level);
-				}
+				}*/
 				
-				$scope.rendering.mappings.push($scope.currentMapping);
 				reset();
+			}
+			
+			function getDmos(level) {
+				var dmos = [];
+				for (var i = 0; i < $scope.dmo.graph.nodes.length; i++) {
+					var currentDmo = $scope.dmo.getRealDmo($scope.dmo.graph.nodes[i]);
+					if (isNaN(level) || currentDmo.getLevel() == level) {
+						dmos.push(currentDmo);
+					}
+				}
+				return dmos;
 			}
 			
 			$scope.save = function() {
@@ -59,17 +76,17 @@
 			}
 			
 			function createDomainDim(type, value) {
-				var dim = {type:type, value:value, variable:currentVariable};
-				incrementCurrentVariable();
-				return dim;
+				var currentVariable = String.fromCharCode(currentVariableCode);
+				currentVariables.push(currentVariable);
+				currentVariableCode++;
+				return {type:type, value:value, variable:currentVariable};
 			}
 			
 			function getParsedFunction() {
-				return new Function("x", "return " + $scope.mappingFunction + ";");
-			}
-			
-			function incrementCurrentVariable() {
-				currentVariable = String.fromCharCode(currentVariable.charCodeAt(0) + 1);
+				var variablesString = JSON.stringify(currentVariables);
+				variablesString = variablesString.substring(1, variablesString.length-1);
+				var functionString = 'new Function(' + variablesString + ', "return ' + $scope.mappingFunction + ';");';
+				return eval(functionString);
 			}
 			
 		}]);

@@ -56,7 +56,6 @@ function DmoManager(scheduler, $scope) {
 		var newDmo = createNewDmo();
 		registerDmo(newDmo);
 		setDmoFeature(newDmo, "level", 0);
-		console.log($scope);
 		self.getRealTopDmo().setSourcePath($scope.getFullSourcePath());
 	}
 	

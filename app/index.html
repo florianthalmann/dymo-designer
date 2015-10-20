@@ -5,6 +5,7 @@
 	<script src="bower_components/angular/angular.min.js"></script>
 	<script src="bower_components/dymo-core/logic/dymo.js"></script>
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
+	<script src="bower_components/dymo-core/logic/mapping.js"></script>
 	<script src="bower_components/dymo-core/logic/parameter.js"></script>
 	<script src="bower_components/dymo-core/io/featureloader.js"></script>
 	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
@@ -59,6 +60,12 @@
 					<button ng-click="addDomainDim()">Add Domain Dimension</button>
 				</div>
 				<div>
+					<span>available domain dimensions: </span>
+					<span ng-repeat="d in currentMapping.domainDims">
+						<span>{{d.variable}} = {{d.value.name}}{{$last ? '' : ', '}}</span>
+					</span>
+				</div>
+				<div>
 					<span>function: y = </span>
 					<input type="text" ng-model="mappingFunction" size="7"></input>
 					<span>parameter:</span>
@@ -67,12 +74,6 @@
 					<input type="text" ng-model="mappingLevel" size="2"></input>
 					<button ng-click="addMapping()">Add Mapping</button>
 					<button ng-click="save()">Save</button>
-				</div>
-				<div>
-					<span>Current Dimensions: </span>
-					<span ng-repeat="d in currentMapping.domainDims">
-						<span>{{d.variable}} = {{d.value.name}}{{$last ? '' : ', '}}</span>
-					</span>
 				</div>
 				<div>
 					<div>Mappings:</div>
