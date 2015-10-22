@@ -9,9 +9,14 @@
 	app.use(express["static"](__dirname + '/app'));
 	app.use(bodyParser.json());
 	
-	app.get('/getsourcefiles', function(req, res) {
-		fs.readdir(__dirname + '/app/audio/', function(err, files) {
-			var files = files.filter(function(f) { return f.indexOf('.') != 0; });
+	app.get('/getsourcefilesindir', function(req, res) {
+		var fileTypes = ["m4a", "mp3", "wav"];
+		var directory = req.query.directory;
+		fs.readdir(__dirname + '/app/' + directory, function(err, files) {
+			var files = files.filter(function(f) {
+				//check if right extension
+				return fileTypes.indexOf(f.split('.').slice(-1)[0]) >= 0;
+			});
 			res.send(files);
 		});
 	});

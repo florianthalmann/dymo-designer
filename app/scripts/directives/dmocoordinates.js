@@ -111,7 +111,7 @@
 						svg.selectAll("g.yaxis")
 							.call(yAxis);
 						
-						var circles = svg.selectAll("circle").data(data.nodes);
+						var circles = svg.selectAll("circle").data(data["nodes"]);
 						
 						circles.enter()
 							.append("circle")
@@ -136,8 +136,7 @@
 						
 						circles.exit().remove();
 						
-						
-						var lines = svg.selectAll(".edge").data(data.links);
+						var lines = svg.selectAll(".edge").data(data["links"]);
 						
 						lines.enter()
 							.append("line")

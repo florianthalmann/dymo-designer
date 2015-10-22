@@ -5,17 +5,18 @@
 		.controller('RenderingController', ['$scope', '$http', function($scope, $http){
 			
 			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}];
+			//TODO GET THESE FROM CENTRALIZED PLACE IN DYMO-CORE!!
 			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
-			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
-			$scope.realRendering = new Rendering();
-			$scope.rendering = {mappings:[]};
+			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"Onset"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
+			$scope.rendering = new Rendering();
+			$scope.currentMappings = [];
 			var currentVariables;
 			var currentVariableCode;
 			reset();
 			
 			function reset() {
-				$scope.currentMapping = createMapping();
 				$scope.mappingFunction = "a/36";
+				$scope.currentDomainDims = [];
 				currentVariables = [];
 				currentVariableCode = 97; // 'a'
 			}
@@ -27,34 +28,22 @@
 				} else {
 					dimension = $scope.selectedControl;
 				}
-				$scope.currentMapping.domainDims.push(createDomainDim($scope.selectedMappingType, dimension));
+				$scope.currentDomainDims.push(createDomainDim($scope.selectedMappingType, dimension));
 			}
 			
 			$scope.addMapping = function() {
-				$scope.currentMapping.parameter = $scope.selectedParameter;
-				$scope.currentMapping.function = getParsedFunction();
-				$scope.currentMapping.level = Number.parseInt($scope.mappingLevel);
-				$scope.rendering.mappings.push($scope.currentMapping);
-				
-				//for now just features
-				var domainDims = $scope.currentMapping.domainDims.map(function (d) { return d.value.name });
-				var dmos = getDmos($scope.currentMapping.level);
-				
-				$scope.realRendering.addMapping(new Mapping(domainDims, undefined, $scope.currentMapping.function, dmos, $scope.selectedParameter.name));
-				
-				/*if ($scope.selectedMappingType.name == "Feature") {
-					$scope.realRendering.addFeatureMapping($scope.dmo, $scope.selectedFeature, $scope.currentMapping.function, $scope.selectedParameter, $scope.currentMapping.level);
-				} else {
-					$scope.realRendering.addControlMapping($scope.selectedControl, getParsedFunction(), $scope.selectedParameter, level);
-				}*/
-				
+				var dmos = getDmos(Number.parseInt($scope.mappingLevel));
+				var domainDims = $scope.currentDomainDims.map(function (d) { return d.value.name });
+				var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dmos, $scope.selectedParameter.name);
+				$scope.rendering.addMapping(newMapping);
+				$scope.currentMappings.push(newMapping.toJson());
 				reset();
 			}
 			
 			function getDmos(level) {
 				var dmos = [];
-				for (var i = 0; i < $scope.dmo.graph.nodes.length; i++) {
-					var currentDmo = $scope.dmo.getRealDmo($scope.dmo.graph.nodes[i]);
+				for (var i = 0; i < $scope.dmo.dymoGraph.nodes.length; i++) {
+					var currentDmo = $scope.dmo.getRealDmo($scope.dmo.dymoGraph.nodes[i]);
 					if (isNaN(level) || currentDmo.getLevel() == level) {
 						dmos.push(currentDmo);
 					}
@@ -63,16 +52,12 @@
 			}
 			
 			$scope.save = function() {
-				new DymoWriter($http).writeRenderingToJson($scope.rendering, $scope.dymoPath);
+				new DymoWriter($http).writeRenderingToJson($scope.rendering.toJson(), $scope.dymoPath);
 			}
 			
 			$scope.getFunctionReturnString = function(f) {
 				var fString = f.toString();
 				return fString.substring(fString.indexOf('return')+7, fString.indexOf(';'));
-			}
-			
-			function createMapping() {
-				return {domainDims:[]};
 			}
 			
 			function createDomainDim(type, value) {
@@ -82,11 +67,10 @@
 				return {type:type, value:value, variable:currentVariable};
 			}
 			
-			function getParsedFunction() {
+			function getFunctionString() {
 				var variablesString = JSON.stringify(currentVariables);
 				variablesString = variablesString.substring(1, variablesString.length-1);
-				var functionString = 'new Function(' + variablesString + ', "return ' + $scope.mappingFunction + ';");';
-				return eval(functionString);
+				return 'new Function(' + variablesString + ', "return ' + $scope.mappingFunction + ';");';
 			}
 			
 		}]);

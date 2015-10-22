@@ -4,6 +4,9 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('DmoController', ['$scope', '$http', function($scope, $http){
 			
+			var audioFilesDir = 'audio/';
+			var featureFilesDir = 'features/';
+			
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
@@ -11,11 +14,11 @@
 			$scope.featureLoadingThreads = 0;
 			
 			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
-			$scope.dmo = new DmoManager($scope.scheduler, $scope);
+			$scope.dmo = new DmoManager($scope.scheduler, $scope, $http);
 			
 			$scope.activities = [{name:"Features"}, {name:"Mappings"}, {name:"View"}];
 			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
-			$scope.views = [{name:"DMO Axes"}, {name:"DMO Graph"}];
+			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Graph"}];
 			$scope.selectedView = $scope.views[0];
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
@@ -24,7 +27,7 @@
 			
 			var maxDepth = 0;
 			
-			$http.get('getsourcefiles/').success(function(data) {
+			$http.get('getsourcefilesindir/', {params:{directory:audioFilesDir}}).success(function(data) {
 				$scope.sourceFiles = data;
 				$scope.selectedSource = data[0];
 				$scope.sourceSelected();
@@ -50,7 +53,7 @@
 			}
 			
 			$scope.getFullSourcePath = function() {
-				return 'audio/' + $scope.selectedSource;
+				return audioFilesDir + $scope.selectedSource;
 			}
 			
 			$scope.dmoOnClick = function(dmo){
@@ -65,19 +68,19 @@
 			};
 			
 			$scope.loadFeature = function() {
-				new FeatureLoader($scope, $http).loadFeature('features/' + $scope.selectedFeature, $scope.labelCondition, $scope.dmo);
+				new FeatureLoader($scope, $http).loadFeature(featureFilesDir + $scope.selectedFeature, $scope.labelCondition, $scope.dmo);
 			}
 			
 			$scope.save = function() {
-				new DymoWriter($http).writeDymoToJson($scope.dmo.getTopDmo(), $scope.dymoPath);
+				new DymoWriter($http).writeDymoToJson($scope.dmo.dymo.toJsonHierarchy(), $scope.dymoPath);
 			}
 			
 			$scope.play = function() {
-				playDmo($scope.dmo.getRealTopDmo());
+				playDmo($scope.dmo.dymo);
 			}
 			
 			$scope.stop = function() {
-				stopDmo($scope.dmo.getRealTopDmo());
+				stopDmo($scope.dmo.dymo);
 			}
 			
 			function playDmo(dmo) {

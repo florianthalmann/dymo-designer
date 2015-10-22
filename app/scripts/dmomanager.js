@@ -1,39 +1,33 @@
-function DmoManager(scheduler, $scope) {
+function DmoManager(scheduler, $scope, $http) {
 	
 	var self = this;
 	
-	this.graph = {nodes:[], links:[]};
-	toRealDmo = {}; //saves all real dmos for now
+	this.dymo;
+	this.dymoGraph = {"nodes":[], "links":[]};
+	idToDymo = {};
+	idToJson = {};
 	
 	this.features = [createFeature("level"), createFeature("random", 0, 1)];
 	
 	var maxDepth = 0;
 	
-	this.getTopDmo = function() {
-		return this.graph.nodes[0];
-	}
-	
-	this.getRealTopDmo = function() {
-		return toRealDmo[this.getTopDmo()["@id"]];
-	}
-	
 	this.getRealDmo = function(dmo) {
-		return toRealDmo[dmo["@id"]];
+		return idToDymo[dmo["@id"]];
 	}
 	
 	this.addDmo = function() {
 		//set as top-level dmo if none exists
-		if (this.graph.nodes.length <= 0) {
+		/*if (this.graph.nodes.length <= 0) {
 			//createPitchHelixDmo();
 			addTopDmo();
 		//add as part if one exists
 		} else {
 			addPartDmo(this.graph.nodes[0], createNewDmo());
-		}
-		//createPitchHelixDmo();
+		}*/
+		createSebastianDymo();
 	}
 	
-	function createPitchHelixDmo() {
+	/*function createPitchHelixDmo() {
 		chromaFeature = getFeature("chroma");
 		heightFeature = getFeature("height");
 		var previousDmo = null;
@@ -46,50 +40,81 @@ function DmoManager(scheduler, $scope) {
 			}
 			var cos = Math.cos((i % 12) / 6 * Math.PI);
 			var sin = Math.sin((i % 12) / 6 * Math.PI);
-			setDmoFeature(currentDmo, chromaFeature, cos+1);
-			setDmoFeature(currentDmo, heightFeature, sin+1+(i/4.5));
+			setDymoFeature(currentDmo, chromaFeature, cos+1);
+			setDymoFeature(currentDmo, heightFeature, sin+1+(i/4.5));
 			previousDmo = currentDmo;
 		}
+	}*/
+	
+	function createSebastianDymo() {
+		var dirPath = 'audio/Chopin_Op028-01_003_20100611-SMD/';
+		var onsetFeature = getFeature("onset");
+		var pitchFeature = getFeature("pitch");
+		var topDymo = addDymo();
+		setDymoFeature(topDymo, onsetFeature, 0);
+		setDymoFeature(topDymo, pitchFeature, 0);
+		$http.get('getsourcefilesindir/', {params:{directory:dirPath}}).success(function(data) {
+			var allFilenames = data;
+			allFilenames = allFilenames.filter(function(f) { return f.split("_").length - 1 > 4; });
+			for (var i = 0; i < allFilenames.length; i++) {
+				$scope.scheduler.addSourceFile(dirPath+allFilenames[i]);
+				var nameSegments = allFilenames[i].split("_");
+				var onsetSegment = nameSegments[nameSegments.length-1];
+				var currentOnset = Number.parseInt(onsetSegment.substring(1, onsetSegment.indexOf('.')))/1000;
+				var currentPitch = Number.parseInt(nameSegments[nameSegments.length-3].substring(1));
+				var currentDymo = addDymo(topDymo, dirPath+allFilenames[i]);
+				setDymoFeature(currentDymo, onsetFeature, currentOnset);
+				setDymoFeature(currentDymo, pitchFeature, currentPitch);
+			}
+			topDymo.updatePartOrder(onsetFeature.name);
+		});
 	}
 	
-	function addTopDmo() {
-		var newDmo = createNewDmo();
-		registerDmo(newDmo);
-		setDmoFeature(newDmo, "level", 0);
-		self.getRealTopDmo().setSourcePath($scope.getFullSourcePath());
+	function addDymo(parent, sourcePath) {
+		var newDymo = new DynamicMusicObject("dymo" + getDymoCount(), scheduler);
+		if (!self.dymo) {
+			self.dymo = newDymo;
+		}
+		if (parent) {
+			parent.addPart(newDymo);
+		}
+		if (sourcePath) {
+			newDymo.setSourcePath(sourcePath);
+		}
+		updateGraphAndMap(newDymo, parent);
+		return newDymo;
 	}
 	
-	function addPartDmo(parent, part) {
-		registerDmo(part);
-		setDmoFeature(part, "level", parent["level"].value+1);
-		parent["hasPart"].push(part);
-		var link = {"source":parent, "target":part, "value":1};
-		self.graph.links.push(link);
-		toRealDmo[parent["@id"]].addPart(toRealDmo[part["@id"]]);
-	}
-	
-	function registerDmo(dmo) {
-		self.graph.nodes.push(dmo);
-		toRealDmo[dmo["@id"]] = new DynamicMusicObject(dmo["@id"], scheduler, undefined, self);
-		updateMinMaxes(dmo);
-	}
-	
-	function updateMinMaxes(dmo) {
+	function updateGraphAndMap(dymo, parent) {
+		var json = dymo.toFlatJson();
+		self.dymoGraph["nodes"].push(json);
+		if (parent) {
+			var parentJson = idToJson[parent.getUri()];
+			var link = {"source":parentJson, "target":json, "value":1};
+			self.dymoGraph["links"].push(link);
+		}
+		idToDymo[dymo.getUri()] = dymo;
+		idToJson[dymo.getUri()] = json;
 		for (var i = 0; i < self.features.length; i++) {
-			updateMinMax(dmo, self.features[i]);
+			updateMinMax(dymo, self.features[i]);
 		}
 	}
 	
-	function updateMinMax(dmo, feature) {
-		if (dmo[feature.name]) {
+	function updateMinMax(dymo, feature) {
+		var value = dymo.getFeature(feature.name);
+		if (!isNaN(value)) {
 			if (feature.max == undefined) {
-				feature.min = dmo[feature.name].value;
-				feature.max = dmo[feature.name].value;
+				feature.min = value;
+				feature.max = value;
 			} else {
-				feature.min = Math.min(dmo[feature.name].value, feature.min);
-				feature.max = Math.max(dmo[feature.name].value, feature.max);
+				feature.min = Math.min(value, feature.min);
+				feature.max = Math.max(value, feature.max);
 			}
 		}
+	}
+	
+	function getDymoCount() {
+		return Object.keys(idToDymo).length;
 	}
 	
 	this.addFeature = function(name, data) {
@@ -114,22 +139,22 @@ function DmoManager(scheduler, $scope) {
 					value += currentValues[middleIndex-1].value[0];
 				}
 			}
-			setDmoFeature(this.graph.nodes[i], feature, value);
+			setDymoFeature(this.graph.nodes[i], feature, value);
 		}
 	}
 	
 	this.addSegmentation = function(segments) {
-		if (self.graph.nodes.length <= 0) {
-			addTopDmo();
+		if (getDymoCount() <= 0) {
+			addDymo(undefined, $scope.getFullSourcePath());
 		}
 		for (var i = 0; i < segments.length-1; i++) {
-			var newDmo = createNewDmo();
 			parent = getSuitableParent(segments[i].time.value);
-			addPartDmo(parent, newDmo);
-			setDmoFeature(newDmo, "time", segments[i].time.value);
-			setDmoFeature(newDmo, "duration", segments[i+1].time.value - newDmo["time"].value);
+			var newDmo = addDymo(parent);
+			var startTime = segments[i].time.value;
+			setDymoFeature(newDmo, "time", startTime);
+			setDymoFeature(newDmo, "duration", segments[i+1].time.value - startTime);
 			if (segments[i].label) {
-				setDmoFeature(newDmo, "segmentLabel", segments[i].label.value);
+				setDymoFeature(newDmo, "segmentLabel", segments[i].label.value);
 			}
 			updateParentDuration(parent, newDmo);
 		}
@@ -137,13 +162,13 @@ function DmoManager(scheduler, $scope) {
 	}
 	
 	function getSuitableParent(time) {
-		var nextCandidate = self.graph.nodes[0];
+		var nextCandidate = self.dymo;
 		var depth = 0;
 		while (depth < maxDepth) {
-			var parts = nextCandidate.hasPart;
+			var parts = nextCandidate.getParts();
 			if (parts.length > 0) {
 				for (var i = 0; i < parts.length; i++) {
-					if (parts[i]["time"].value <= time) {
+					if (parts[i].getFeature("time") <= time) {
 						nextCandidate = parts[i];
 						depth++;
 					} else {
@@ -157,39 +182,26 @@ function DmoManager(scheduler, $scope) {
 		return nextCandidate;
 	}
 	
-	function updateParentDuration(parent, newDmo) {
-		if (!("time" in parent) || newDmo["time"].value < parent["time"].value) {
-			setDmoFeature(parent, "time", newDmo["time"].value);
+	function updateParentDuration(parent, newDymo) {
+		var parentTime = parent.getFeature("time");
+		var newDymoTime = newDymo.getFeature("time");
+		if (!parentTime || newDymoTime < parentTime) {
+			setDymoFeature(parent, "time", newDymoTime);
 		}
-		if (!("duration" in parent) || parent["time"].value+parent["duration"].value < newDmo["time"].value+newDmo["duration"].value) {
-			setDmoFeature(parent, "duration", newDmo["time"].value+newDmo["duration"].value - parent["time"].value);
+		var parentDuration = parent.getFeature("duration");
+		var newDymoDuration = newDymo.getFeature("duration");
+		if (!parentDuration || parentTime+parentDuration < newDymoTime+newDymoDuration) {
+			setDymoFeature(parent, "duration", newDymoTime+newDymoDuration - parentTime);
 		}
-		updateMinMaxes(parent);
 	}
 	
-	function createNewDmo() {
-		var newDmo = {
-			"@id": "dmo" + (self.graph.nodes.length+1),
-			"@type": "DMO",
-			"hasPart": []
-		}
-		return newDmo;
-	}
-	
-	function setDmoFeature(dmo, feature, value) {
+	function setDymoFeature(dymo, feature, value) {
 		if (typeof feature === 'string' || feature instanceof String) {
 			feature = getFeature(feature);
 		}
-		if (dmo[feature.name]) {
-			dmo[feature.name].value = value;
-		} else {
-			dmo[feature.name] = {
-				"value" : value,
-				"adt" : name.charAt(0).toUpperCase() + name.slice(1),
-			};
-		}
-		toRealDmo[dmo["@id"]].setFeature(feature.name, value);
-		updateMinMax(dmo, feature);
+		dymo.setFeature(feature.name, value);
+		idToJson[dymo.getUri()][feature.name] = dymo.getFeatureJson(feature.name);
+		updateMinMax(dymo, feature);
 	}
 	
 	function getFeature(name) {

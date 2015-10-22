@@ -29,9 +29,11 @@
 			<div>
 				<span>activity:</span>
 				<select ng-init="selectedActivity = activities[0]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
+				<button ng-click="play()">Play</button>
+				<button ng-click="stop()">Stop</button>
 			</div>
 			<div ng-show="selectedActivity == activities[0]">
-				<!--button ng-click="dmo.addDmo()">Add DMO</button-->
+				<button ng-click="dmo.addDmo()">Add DMO</button>
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
 				<span>feature:</span>
@@ -41,8 +43,6 @@
 				<span>mode:</span>
 				<select ng-init="selectedFeatureMode = featureModes[0]" ng-model="selectedFeatureMode" ng-options="m.name for m in featureModes"></select>
 				<button ng-click="loadFeature()">Add Features</button>
-				<button ng-click="play()">Play</button>
-				<button ng-click="stop()">Stop</button>
 				<button ng-click="save()">Save</button>
 			</div>
 			<div ng-controller="RenderingController" ng-show="selectedActivity == activities[1]">
@@ -58,16 +58,14 @@
 						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
 					</span>
 					<button ng-click="addDomainDim()">Add Domain Dimension</button>
-				</div>
-				<div>
-					<span>available domain dimensions: </span>
-					<span ng-repeat="d in currentMapping.domainDims">
+					<span>available: </span>
+					<span ng-repeat="d in currentDomainDims">
 						<span>{{d.variable}} = {{d.value.name}}{{$last ? '' : ', '}}</span>
 					</span>
 				</div>
 				<div>
 					<span>function: y = </span>
-					<input type="text" ng-model="mappingFunction" size="7"></input>
+					<input type="text" ng-model="mappingFunction" size="20"></input>
 					<span>parameter:</span>
 					<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
 					<span>level:</span>
@@ -77,12 +75,12 @@
 				</div>
 				<div>
 					<div>Mappings:</div>
-					<span ng-repeat="m in rendering.mappings">
+					<span ng-repeat="m in currentMappings">
 						{{getFunctionReturnString(m.function)}} :
 						<span ng-repeat="d in m.domainDims">
-							{{d.value.name}}{{$last ? '' : String.fromCharCode(158)}}
+							{{d}}{{$last ? '' : String.fromCharCode(158)}}
 						</span>
-						-> {{m.parameter.name}}{{$last ? '' : ', '}}
+						-> {{m.parameter}}{{$last ? '' : ', '}}
 					</span>
 				</div>
 			</div>
@@ -96,10 +94,10 @@
 				</span>
 			</div>
 			<div ng-if="selectedView == views[0]">
-				<dmo-coordinates data="dmo.graph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+				<dmo-coordinates data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dmo-graph data="dmo.graph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+				<dmo-graph data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
