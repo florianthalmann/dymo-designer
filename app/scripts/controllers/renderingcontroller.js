@@ -11,12 +11,12 @@
 			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"Onset"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
 			$scope.rendering = new Rendering();
 			$scope.currentMappings = [];
+			$scope.mappingFunction = "Math.cos(a%12/12*2*Math.PI)";
 			var currentVariables;
 			var currentVariableCode;
 			reset();
 			
 			function reset() {
-				$scope.mappingFunction = "a/36";
 				$scope.currentDomainDims = [];
 				currentVariables = [];
 				currentVariableCode = 97; // 'a'
@@ -28,14 +28,16 @@
 					name = $scope.selectedFeature.name;
 					dimension = $scope.selectedFeature;
 				} else if ($scope.selectedMappingType == $scope.mappingTypes[1]){
-					name = $scope.selectedControl.name;
-					dimension = $scope.selectedControl;
+					name = $scope.selectedControlType.name;
+					dimension = $scope.selectedControlType;
 				} else {
 					name = $scope.controlName;
 					//always make sliders for now...
 					dimension = new Control(0, name, "Slider");
 					$scope.uiControls[name] = dimension;
-					$scope.controls.splice(0, 0, dimension);
+					if (!$scope.selectedControl) {
+						$scope.selectedControl = dimension;
+					}
 				}
 				$scope.currentDomainDims.push(createDomainDim($scope.selectedMappingType, name, dimension));
 			}
@@ -48,10 +50,17 @@
 					}
 					return d.value.name;
 				});
-				var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dmos, $scope.selectedParameter.name);
-				$scope.rendering.addMapping(newMapping);
-				$scope.currentMappings.push(newMapping.toJson());
-				reset();
+				if ($scope.selectedParameter.name == "PartOrder") {
+					//TODO FIND BETTER PLACE AND WAY TO DO THIS!!! (WITH MAPPINGS)
+					for (var i = 0; i < dmos.length; i++) {
+						dmos[i].updatePartOrder(domainDims[0]);
+					}
+				} else {
+					var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dmos, $scope.selectedParameter.name);
+					$scope.rendering.addMapping(newMapping);
+					$scope.currentMappings.push(newMapping.toJson());
+					reset();	
+				}
 			}
 			
 			function getDmos(level) {

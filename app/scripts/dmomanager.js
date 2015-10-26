@@ -47,7 +47,7 @@ function DmoManager(scheduler, $scope, $http) {
 	}*/
 	
 	function createSebastianDymo() {
-		var dirPath = 'audio/Chopin_Op028-01_003_20100611-SMD/';
+		var dirPath = 'audio/Chopin_Op028-04_003_20100611-SMD/';
 		var onsetFeature = getFeature("onset");
 		var pitchFeature = getFeature("pitch");
 		var topDymo = addDymo();
@@ -120,9 +120,9 @@ function DmoManager(scheduler, $scope, $http) {
 	this.addFeature = function(name, data) {
 		//iterate through all levels and add averages
 		var feature = getFeature(name);
-		for (var i = 0; i < this.graph.nodes.length; i++) {
-			var currentTime = this.graph.nodes[i]["time"].value;
-			var currentDuration = this.graph.nodes[i]["duration"].value;
+		for (var i = 0; i < this.dymoGraph.nodes.length; i++) {
+			var currentTime = this.dymoGraph.nodes[i]["time"].value;
+			var currentDuration = this.dymoGraph.nodes[i]["duration"].value;
 			var currentValues = data.filter(
 				function(x){return currentTime <= x.time.value && x.time.value < currentTime+currentDuration}
 			);
@@ -139,7 +139,7 @@ function DmoManager(scheduler, $scope, $http) {
 					value += currentValues[middleIndex-1].value[0];
 				}
 			}
-			setDymoFeature(this.graph.nodes[i], feature, value);
+			setDymoFeature(this.getRealDmo(this.dymoGraph.nodes[i]), feature, value);
 		}
 	}
 	

@@ -56,11 +56,11 @@
 					</span>
 					<span ng-show="selectedMappingType == mappingTypes[1]">
 						control:
-						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in uiControls"></select>
+						<select ng-model="selectedControl" ng-options="c.name for c in uiControls"></select>
 					</span>
 					<span ng-show="selectedMappingType == mappingTypes[2]">
 						control:
-						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
+						<select ng-init="selectedControlType = controls[0]" ng-model="selectedControlType" ng-options="c.name for c in controls"></select>
 						name:
 						<input type="text" ng-model="controlName" size="10"></input>
 					</span>
@@ -85,7 +85,7 @@
 					<span ng-repeat="m in currentMappings">
 						{{getFunctionReturnString(m.function)}} :
 						<span ng-repeat="d in m.domainDims">
-							{{d.name}}{{$last ? '' : String.fromCharCode(158)}}
+							{{d.name}}{{$last ? '' : ', '}}
 						</span>
 						-> {{m.parameter}}{{$last ? '' : ', '}}
 					</span>
@@ -95,7 +95,7 @@
 					<input type="range" name="slider" min="0" max="1" step=".001" ng-model="u.value" ng-change="u.updateMappings()">
 				</div>
 			</div>
-			<div ng-show="selectedActivity == activities[3]">
+			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
 				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
