@@ -16,7 +16,6 @@
 			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
 			$scope.dmo = new DmoManager($scope.scheduler, $scope, $http);
 			
-			$scope.activities = [{name:"Features"}, {name:"Mappings"}, {name:"View"}];
 			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
 			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Graph"}];
 			$scope.selectedView = $scope.views[0];

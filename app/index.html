@@ -6,6 +6,7 @@
 	<script src="bower_components/dymo-core/logic/dymo.js"></script>
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
 	<script src="bower_components/dymo-core/logic/mapping.js"></script>
+	<script src="bower_components/dymo-core/logic/control.js"></script>
 	<script src="bower_components/dymo-core/logic/parameter.js"></script>
 	<script src="bower_components/dymo-core/io/featureloader.js"></script>
 	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
@@ -33,7 +34,7 @@
 				<button ng-click="stop()">Stop</button>
 			</div>
 			<div ng-show="selectedActivity == activities[0]">
-				<button ng-click="dmo.addDmo()">Add DMO</button>
+				<button ng-click="dmo.addDmo()">Add Dymo</button>
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
 				<span>feature:</span>
@@ -55,12 +56,18 @@
 					</span>
 					<span ng-show="selectedMappingType == mappingTypes[1]">
 						control:
+						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in uiControls"></select>
+					</span>
+					<span ng-show="selectedMappingType == mappingTypes[2]">
+						control:
 						<select ng-init="selectedControl = controls[0]" ng-model="selectedControl" ng-options="c.name for c in controls"></select>
+						name:
+						<input type="text" ng-model="controlName" size="10"></input>
 					</span>
 					<button ng-click="addDomainDim()">Add Domain Dimension</button>
 					<span>available: </span>
 					<span ng-repeat="d in currentDomainDims">
-						<span>{{d.variable}} = {{d.value.name}}{{$last ? '' : ', '}}</span>
+						<span>{{d.variable}} = {{d.name}}{{$last ? '' : ', '}}</span>
 					</span>
 				</div>
 				<div>
@@ -69,22 +76,26 @@
 					<span>parameter:</span>
 					<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
 					<span>level:</span>
-					<input type="text" ng-model="mappingLevel" size="2"></input>
+					<input type="text" ng-init="mappingLevel = 1" ng-model="mappingLevel" size="2"></input>
 					<button ng-click="addMapping()">Add Mapping</button>
 					<button ng-click="save()">Save</button>
 				</div>
 				<div>
-					<div>Mappings:</div>
+					Mappings: 
 					<span ng-repeat="m in currentMappings">
 						{{getFunctionReturnString(m.function)}} :
 						<span ng-repeat="d in m.domainDims">
-							{{d}}{{$last ? '' : String.fromCharCode(158)}}
+							{{d.name}}{{$last ? '' : String.fromCharCode(158)}}
 						</span>
 						-> {{m.parameter}}{{$last ? '' : ', '}}
 					</span>
 				</div>
+				<div ng-repeat="u in uiControls">
+					{{u.name}}
+					<input type="range" name="slider" min="0" max="1" step=".001" ng-model="u.value" ng-change="u.updateMappings()">
+				</div>
 			</div>
-			<div ng-show="selectedActivity == activities[2]">
+			<div ng-show="selectedActivity == activities[3]">
 				<span>view:</span>
 				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">

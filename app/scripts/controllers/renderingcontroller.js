@@ -4,9 +4,10 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('RenderingController', ['$scope', '$http', function($scope, $http){
 			
-			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}];
+			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}, {name:"New Control"}];
 			//TODO GET THESE FROM CENTRALIZED PLACE IN DYMO-CORE!!
-			$scope.controls = [{name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
+			$scope.controls = [{name:"Slider"}, {name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
+			$scope.uiControls = {};
 			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"Onset"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
 			$scope.rendering = new Rendering();
 			$scope.currentMappings = [];
@@ -22,18 +23,31 @@
 			}
 			
 			$scope.addDomainDim = function() {
-				var dimension;
+				var name, dimension;
 				if ($scope.selectedMappingType == $scope.mappingTypes[0]) {
+					name = $scope.selectedFeature.name;
 					dimension = $scope.selectedFeature;
-				} else {
+				} else if ($scope.selectedMappingType == $scope.mappingTypes[1]){
+					name = $scope.selectedControl.name;
 					dimension = $scope.selectedControl;
+				} else {
+					name = $scope.controlName;
+					//always make sliders for now...
+					dimension = new Control(0, name, "Slider");
+					$scope.uiControls[name] = dimension;
+					$scope.controls.splice(0, 0, dimension);
 				}
-				$scope.currentDomainDims.push(createDomainDim($scope.selectedMappingType, dimension));
+				$scope.currentDomainDims.push(createDomainDim($scope.selectedMappingType, name, dimension));
 			}
 			
 			$scope.addMapping = function() {
 				var dmos = getDmos(Number.parseInt($scope.mappingLevel));
-				var domainDims = $scope.currentDomainDims.map(function (d) { return d.value.name });
+				var domainDims = $scope.currentDomainDims.map(function (d) {
+					if (d.type.name == "Control" || d.type.name == "New Control") {
+						return d.value;
+					}
+					return d.value.name;
+				});
 				var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dmos, $scope.selectedParameter.name);
 				$scope.rendering.addMapping(newMapping);
 				$scope.currentMappings.push(newMapping.toJson());
@@ -60,11 +74,11 @@
 				return fString.substring(fString.indexOf('return')+7, fString.indexOf(';'));
 			}
 			
-			function createDomainDim(type, value) {
+			function createDomainDim(type, name, value) {
 				var currentVariable = String.fromCharCode(currentVariableCode);
 				currentVariables.push(currentVariable);
 				currentVariableCode++;
-				return {type:type, value:value, variable:currentVariable};
+				return {type:type, name:name, value:value, variable:currentVariable};
 			}
 			
 			function getFunctionString() {
