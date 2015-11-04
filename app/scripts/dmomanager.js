@@ -70,6 +70,30 @@ function DmoManager(scheduler, $scope, $http) {
 		});
 	}
 	
+	function createSebastianDymo2() {
+		var dirPath = 'audio/scale_out/scale_single/';
+		var onsetFeature = getFeature("onset");
+		var pitchFeature = getFeature("pitch");
+		var topDymo = addDymo();
+		setDymoFeature(topDymo, onsetFeature, 0);
+		setDymoFeature(topDymo, pitchFeature, 0);
+		$http.get('getsourcefilesindir/', {params:{directory:dirPath}}).success(function(data) {
+			var allFilenames = data;
+			allFilenames = allFilenames.filter(function(f) { return f.split("_").length - 1 > 4; });
+			for (var i = 0; i < allFilenames.length; i++) {
+				$scope.scheduler.addSourceFile(dirPath+allFilenames[i]);
+				var nameSegments = allFilenames[i].split("_");
+				var currentOnset = Number.parseInt(nameSegments[4].substring(1))/1000;
+				var currentPitch = Number.parseInt(nameSegments[2].substring(1));
+				var currentDymo = addDymo(topDymo, dirPath+allFilenames[i]);
+				setDymoFeature(currentDymo, onsetFeature, currentOnset);
+				setDymoFeature(currentDymo, pitchFeature, currentPitch);
+				console.log(currentOnset, currentPitch);
+			}
+			topDymo.updatePartOrder(onsetFeature.name);
+		});
+	}
+	
 	function addDymo(parent, sourcePath) {
 		var newDymo = new DynamicMusicObject("dymo" + getDymoCount(), scheduler);
 		if (!self.dymo) {
