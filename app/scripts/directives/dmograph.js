@@ -14,8 +14,8 @@
 				},
 				link: function(scope, iElement, iAttrs) {
 					var force = d3.layout.force()
-						.charge(-50)
-						.linkDistance(70)
+						.charge(-60)
+						.linkDistance(100)
 						.on("tick", function() {
 								node.attr("cx", function(d) { return d.x; })
 									.attr("cy", function(d) { return d.y; })
@@ -84,7 +84,7 @@
 						var height = 500;
 						svg.attr('height', height);
 						
-						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 100]),
+						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([5, 30]),
 						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {

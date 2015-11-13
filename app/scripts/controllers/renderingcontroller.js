@@ -4,11 +4,8 @@
 	angular.module('dmoDesigner.controllers')
 		.controller('RenderingController', ['$scope', '$http', function($scope, $http){
 			
+			initControlsAndParameters();
 			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}, {name:"New Control"}];
-			//TODO GET THESE FROM CENTRALIZED PLACE IN DYMO-CORE!!
-			$scope.controls = [{name:"Slider"}, {name:"GraphControl"}, {name:"AccelerometerX"}, {name:"AccelerometerY"}, {name:"AccelerometerZ"}, {name:"GeolocationLatitude"}, {name:"GeolocationLongitude"}];
-			$scope.uiControls = {};
-			$scope.parameters = [{name:"Amplitude"}, {name:"PlaybackRate"}, {name:"Pan"}, {name:"Distance"}, {name:"Height"}, {name:"Reverb"}, {name:"Onset"}, {name:"DurationRatio"}, {name:"PartIndex"}, {name:"PartOrder"}, {name:"PartCount"}];
 			$scope.rendering = new Rendering();
 			$scope.currentMappings = [];
 			$scope.mappingFunction = "Math.cos(a%12/12*2*Math.PI)";
@@ -22,6 +19,18 @@
 				currentVariableCode = 97; // 'a'
 			}
 			
+			function initControlsAndParameters() {
+				$scope.controls = [];
+				for (var i = 0; i < CONTROLS.length; i++) {
+					$scope.controls.push({name:CONTROLS[i]});
+				}
+				$scope.uiControls = {};
+				$scope.parameters = [];
+				for (var i = 0; i < PARAMETERS.length; i++) {
+					$scope.parameters.push({name:PARAMETERS[i]});
+				}
+			}
+			
 			$scope.addDomainDim = function() {
 				var name, dimension;
 				if ($scope.selectedMappingType == $scope.mappingTypes[0]) {
@@ -33,7 +42,7 @@
 				} else {
 					name = $scope.controlName;
 					//always make sliders for now...
-					dimension = new Control(0, name, "Slider");
+					dimension = new Control(0, name, SLIDER);
 					$scope.uiControls[name] = dimension;
 					if (!$scope.selectedControl) {
 						$scope.selectedControl = dimension;
@@ -50,7 +59,7 @@
 					}
 					return d.value.name;
 				});
-				if ($scope.selectedParameter.name == "PartOrder") {
+				if ($scope.selectedParameter.name == PART_ORDER) {
 					//TODO FIND BETTER PLACE AND WAY TO DO THIS!!! (WITH MAPPINGS)
 					for (var i = 0; i < dmos.length; i++) {
 						dmos[i].updatePartOrder(domainDims[0]);

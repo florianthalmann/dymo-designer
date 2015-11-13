@@ -3,11 +3,13 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/dymo-core/io/globals.js"></script>
 	<script src="bower_components/dymo-core/logic/dymo.js"></script>
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
 	<script src="bower_components/dymo-core/logic/mapping.js"></script>
 	<script src="bower_components/dymo-core/logic/control.js"></script>
 	<script src="bower_components/dymo-core/logic/parameter.js"></script>
+	<script src="bower_components/dymo-core/io/dymoloader.js"></script>
 	<script src="bower_components/dymo-core/io/featureloader.js"></script>
 	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
 	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
@@ -109,6 +111,9 @@
 			</div>
 			<div ng-if="selectedView == views[1]">
 				<dmo-graph data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+			</div>
+			<div ng-if="selectedView == views[2]">
+				<dmo-graph data="dmo.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>

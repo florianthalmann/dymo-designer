@@ -4,6 +4,7 @@ function DmoManager(scheduler, $scope, $http) {
 	
 	this.dymo;
 	this.dymoGraph = {"nodes":[], "links":[]};
+	this.similarityGraph = {"nodes":[], "links":[]};
 	idToDymo = {};
 	idToJson = {};
 	
@@ -67,6 +68,10 @@ function DmoManager(scheduler, $scope, $http) {
 				setDymoFeature(currentDymo, pitchFeature, currentPitch);
 			}
 			topDymo.updatePartOrder(onsetFeature.name);
+			//just to test similarity graph representation
+			new DymoLoader(scheduler).loadGraphFromJson('bower_components/dymo-core/example/similarity.json', idToDymo, function() {
+				updateGraphAndMap();
+			}, $http);
 		});
 	}
 	
@@ -88,7 +93,6 @@ function DmoManager(scheduler, $scope, $http) {
 				var currentDymo = addDymo(topDymo, dirPath+allFilenames[i]);
 				setDymoFeature(currentDymo, onsetFeature, currentOnset);
 				setDymoFeature(currentDymo, pitchFeature, currentPitch);
-				console.log(currentOnset, currentPitch);
 			}
 			topDymo.updatePartOrder(onsetFeature.name);
 		});
@@ -105,22 +109,20 @@ function DmoManager(scheduler, $scope, $http) {
 		if (sourcePath) {
 			newDymo.setSourcePath(sourcePath);
 		}
-		updateGraphAndMap(newDymo, parent);
+		updateGraphAndMap(newDymo);
 		return newDymo;
 	}
 	
-	function updateGraphAndMap(dymo, parent) {
-		var json = dymo.toFlatJson();
-		self.dymoGraph["nodes"].push(json);
-		if (parent) {
-			var parentJson = idToJson[parent.getUri()];
-			var link = {"source":parentJson, "target":json, "value":1};
-			self.dymoGraph["links"].push(link);
-		}
-		idToDymo[dymo.getUri()] = dymo;
-		idToJson[dymo.getUri()] = json;
-		for (var i = 0; i < self.features.length; i++) {
-			updateMinMax(dymo, self.features[i]);
+	function updateGraphAndMap(dymo) {
+		self.dymoGraph = self.dymo.toJsonHierarchyGraph();
+		self.similarityGraph = self.dymo.toJsonSimilarityGraph();
+		if (dymo) {
+			var flatJson = dymo.toFlatJson();
+			idToDymo[dymo.getUri()] = dymo;
+			idToJson[dymo.getUri()] = flatJson;
+			for (var i = 0; i < self.features.length; i++) {
+				updateMinMax(dymo, self.features[i]);
+			}
 		}
 	}
 	

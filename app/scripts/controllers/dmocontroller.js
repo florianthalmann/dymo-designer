@@ -17,7 +17,7 @@
 			$scope.dmo = new DmoManager($scope.scheduler, $scope, $http);
 			
 			$scope.featureModes = [{name:"mean"}, {name:"median"}, {name:"first"}];
-			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Graph"}];
+			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Graph"}, {name:"Similarity Graph"}];
 			$scope.selectedView = $scope.views[0];
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
