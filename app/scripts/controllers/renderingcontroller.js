@@ -6,7 +6,7 @@
 			
 			initControlsAndParameters();
 			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}, {name:"New Control"}];
-			$scope.rendering = new Rendering();
+			$scope.rendering = new Rendering($scope.dmo.dymo);
 			$scope.currentMappings = [];
 			$scope.mappingFunction = "Math.cos(a%12/12*2*Math.PI)";
 			var currentVariables;

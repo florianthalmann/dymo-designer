@@ -3,6 +3,8 @@ function DmoManager(scheduler, $scope, $http) {
 	var self = this;
 	
 	this.dymo;
+	var currentTopDymo; //the top dymo for the current audio file
+	var audioFileChanged = false;
 	this.dymoGraph = {"nodes":[], "links":[]};
 	this.similarityGraph = {"nodes":[], "links":[]};
 	idToDymo = {};
@@ -14,6 +16,11 @@ function DmoManager(scheduler, $scope, $http) {
 	
 	this.getRealDmo = function(dmo) {
 		return idToDymo[dmo["@id"]];
+	}
+	
+	this.setAudioFileChanged = function() {
+		audioFileChanged = true;
+		insertTopDymo();
 	}
 	
 	this.addDmo = function() {
@@ -98,7 +105,20 @@ function DmoManager(scheduler, $scope, $http) {
 		});
 	}
 	
+	function insertTopDymo() {
+		if (self.dymo) {
+			var newDymo = new DynamicMusicObject("dymo" + getDymoCount(), scheduler, PARALLEL);
+			newDymo.addPart(self.dymo);
+			self.dymo = newDymo;
+			updateGraphAndMap(self.dymo);
+		}
+	}
+	
 	function addDymo(parent, sourcePath) {
+		var uri;
+		if (parent) {
+			uri = parent.getUri();
+		}
 		var newDymo = new DynamicMusicObject("dymo" + getDymoCount(), scheduler);
 		if (!self.dymo) {
 			self.dymo = newDymo;
@@ -167,11 +187,16 @@ function DmoManager(scheduler, $scope, $http) {
 			}
 			setDymoFeature(this.getRealDmo(this.dymoGraph.nodes[i]), feature, value);
 		}
+		updateGraphAndMap();
 	}
 	
-	this.addSegmentation = function(segments) {
-		if (getDymoCount() <= 0) {
-			addDymo(undefined, $scope.getFullSourcePath());
+	this.addSegmentation = function(segments, fileName) {
+		if (getDymoCount() == 0) {
+			currentTopDymo = addDymo(undefined, $scope.getFullSourcePath());
+		} else if (audioFileChanged) {
+			currentTopDymo = addDymo(self.dymo, $scope.getFullSourcePath());
+			maxDepth = currentTopDymo.getLevel();
+			audioFileChanged = false;
 		}
 		for (var i = 0; i < segments.length-1; i++) {
 			parent = getSuitableParent(segments[i].time.value);
@@ -184,12 +209,13 @@ function DmoManager(scheduler, $scope, $http) {
 			}
 			updateParentDuration(parent, newDmo);
 		}
+		updateGraphAndMap();
 		maxDepth++;
 	}
 	
 	function getSuitableParent(time) {
-		var nextCandidate = self.dymo;
-		var depth = 0;
+		var nextCandidate = currentTopDymo;
+		var depth = currentTopDymo.getLevel();
 		while (depth < maxDepth) {
 			var parts = nextCandidate.getParts();
 			if (parts.length > 0) {
@@ -197,6 +223,8 @@ function DmoManager(scheduler, $scope, $http) {
 					if (parts[i].getFeature("time") <= time) {
 						nextCandidate = parts[i];
 						depth++;
+					} else if (i == 0) {
+						return nextCandidate;
 					} else {
 						break;
 					}

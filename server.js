@@ -7,7 +7,8 @@
 	var app = express();
 	
 	app.use(express["static"](__dirname + '/app'));
-	app.use(bodyParser.json());
+	app.use(bodyParser.json({limit: '50mb'}));
+	//app.use(express.bodyParser({limit: '50mb'}));
 	
 	app.get('/getsourcefilesindir', function(req, res) {
 		var fileTypes = ["m4a", "mp3", "wav"];

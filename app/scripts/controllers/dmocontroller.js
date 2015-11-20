@@ -34,6 +34,9 @@
 			
 			$scope.sourceSelected = function() {
 				$scope.scheduler.addSourceFile($scope.getFullSourcePath());
+				if ($scope.dmo.dymoGraph.nodes.length > 0) {
+					$scope.dmo.setAudioFileChanged();
+				}
 				$http.get('getfeaturefiles/', {params:{source:$scope.selectedSource}}).success(function(data) {
 					$scope.featureFiles = data;
 					$scope.selectedFeature = data[0];
