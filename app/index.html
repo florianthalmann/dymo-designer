@@ -24,6 +24,7 @@
 	<script src="scripts/directives/dmobubbles.js"></script>
 	<script src="scripts/directives/dmograph.js"></script>
 	<script src="scripts/directives/dmocoordinates.js"></script>
+	<script src="scripts/directives/mappingspainter.js"></script>
 </head>
 <body ng-app="dmoDesigner">
 	<div  ng-controller="MainController">
@@ -99,7 +100,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-init="selectedView = views[3]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in dmo.features"></select>
@@ -114,6 +115,9 @@
 			</div>
 			<div ng-if="selectedView == views[2]">
 				<dmo-graph data="dmo.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+			</div>
+			<div ng-if="selectedView == views[3]">
+				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></dmo-coordinates>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
