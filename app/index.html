@@ -3,6 +3,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/dymo-core/math/functioninverter.js"></script>
 	<script src="bower_components/dymo-core/io/globals.js"></script>
 	<script src="bower_components/dymo-core/logic/dymo.js"></script>
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
@@ -14,7 +15,11 @@
 	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
 	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
 	<script src="bower_components/dymo-core/audio/source.js"></script>
+	<script src="bower_components/dymo-core/audio/processor.js"></script>
+	<script src="bower_components/dymo-core/navigators/sequential.js"></script>
+	<script src="bower_components/dymo-core/navigators/similarity.js"></script>
 	<script src="bower_components/dymo-core/lib/AudioSampleLoader.js"></script>
+	<script src="bower_components/dymo-core/lib/soundtouch-js/soundtouch-min.js"></script>
 	<script src="scripts/app.js"></script>
 	<script src="scripts/dmomanager.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
@@ -100,7 +105,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[3]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in dmo.features"></select>
@@ -108,16 +113,16 @@
 				</span>
 			</div>
 			<div ng-if="selectedView == views[0]">
-				<dmo-coordinates data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
+				<dmo-coordinates data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dmoOnClick(item)"></dmo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dmo-graph data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+				<dmo-graph data="dmo.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<div ng-if="selectedView == views[2]">
-				<dmo-graph data="dmo.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
+				<dmo-graph data="dmo.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<div ng-if="selectedView == views[3]">
-				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDmos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></dmo-coordinates>
+				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></dmo-coordinates>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
