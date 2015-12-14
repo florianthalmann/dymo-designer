@@ -24,7 +24,7 @@
 					var height = 600;
 					var padding = 50;
 					
-					var xScale, yScale, sizeScale, colorScale;
+					var xScale, yScale;
 					
 					// Axes. Note the inverted domain for the y-scale: bigger is up!
 					var xAxis = d3.svg.axis().orient("bottom"),
@@ -68,21 +68,8 @@
 						// set the height based on the calculations above
 						svg.attr('height', height);
 						
-						xScale = createScale(scope.viewconfig.xAxis.log, scope.viewconfig.xAxis.param).range([padding, width-padding]),
-						yScale = createScale(scope.viewconfig.yAxis.log, scope.viewconfig.yAxis.param).range([height-padding, padding]),
-						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 40]),
-						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
-						
-						function createScale(log, param) {
-							if (log) {
-								var min = param.min;
-								if (min <= 0) {
-									min = 0.0000001;
-								}
-								return d3.scale.log().base(2).domain([min, param.max]);
-							}
-							return d3.scale.linear().domain([param.min, param.max]);
-						}
+						xScale = d3.scale.linear().domain([0, 1]).range([padding, width-padding]),
+						yScale = d3.scale.linear().domain([0, 1]).range([height-padding, padding]);
 						
 						xAxis.scale(xScale).tickFormat(d3.format(".g"));
 						yAxis.scale(yScale).tickFormat(d3.format(".g"));
@@ -125,7 +112,7 @@
 					}
 					
 					function addPoint(mouse) {
-						var point = {item:[xScale.invert(mouse[0]), yScale.invert(mouse[1])]}
+						var point = {item:[xScale.invert(mouse[0]), yScale.invert(mouse[1])]};
 						scope.addPoint(point);
 					}
 					

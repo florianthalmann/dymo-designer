@@ -105,6 +105,26 @@ function DmoManager(scheduler, $scope, $http) {
 		});
 	}
 	
+	this.createAreasDemo = function(areas) {
+		if (areas.length > 0) {
+			var brownianX = new BrownianControls();
+			var brownianY = new BrownianControls();
+			brownianX.frequency.update(500);
+			brownianY.frequency.update(500);
+			brownianX.maxStepSize.update(0.1);
+			brownianY.maxStepSize.update(0.1);
+			for (var i = 0; i < areas.length; i++) {
+				var currentArea = areas[i];
+				var currentAreaFunction = PolygonTools.getPolygonFunctionString(currentArea);
+				this.dymo.addMapping(new Mapping([brownianX.brownianControl, brownianY.brownianControl], false, currentAreaFunction, [this.dymo.getParts()[i]], PLAY));
+				currentAreaFunction = PolygonTools.getInterpolatedPolygonFunctionString(currentArea);
+				this.dymo.addMapping(new Mapping([brownianX.brownianControl, brownianY.brownianControl], false, currentAreaFunction, [this.dymo.getParts()[i]], AMPLITUDE));
+			}
+		} else {
+			this.createRandomAreasDemo();
+		}
+	}
+	
 	this.createRandomAreasDemo = function() {
 		var brownianX = new BrownianControls();
 		var brownianY = new BrownianControls();

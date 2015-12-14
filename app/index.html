@@ -45,7 +45,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[0]">
 				<button ng-click="dmo.addDmo()">Add Dymo</button>
-				<button ng-click="dmo.createRandomAreasDemo()">Area Demo</button>
+				<button ng-click="dmo.createAreasDemo(areas)">Area Demo</button>
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
 				<span>feature:</span>
@@ -108,7 +108,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-init="selectedView = views[3]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in dmo.features"></select>
@@ -125,7 +125,7 @@
 				<dmo-graph data="dmo.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dmoOnClick(item)"></dmo-graph>
 			</div>
 			<div ng-if="selectedView == views[3]">
-				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></dmo-coordinates>
+				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></mappings-painter>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dmo-bubbles data="dmoList" label="name" on-click="dmoOnClick(item)"></dmo-bubbles>
