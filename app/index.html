@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="bower_components/angular/angular.min.js"></script>
 	<script src="bower_components/dymo-core/math/functioninverter.js"></script>
+	<script src="bower_components/dymo-core/math/polygontools.js"></script>
 	<script src="bower_components/dymo-core/io/globals.js"></script>
 	<script src="bower_components/dymo-core/logic/dymo.js"></script>
 	<script src="bower_components/dymo-core/logic/rendering.js"></script>
@@ -16,6 +17,7 @@
 	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
 	<script src="bower_components/dymo-core/audio/source.js"></script>
 	<script src="bower_components/dymo-core/audio/processor.js"></script>
+	<script src="bower_components/dymo-core/controls/browniancontrols.js"></script>
 	<script src="bower_components/dymo-core/navigators/sequential.js"></script>
 	<script src="bower_components/dymo-core/navigators/similarity.js"></script>
 	<script src="bower_components/dymo-core/lib/AudioSampleLoader.js"></script>
@@ -43,6 +45,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[0]">
 				<button ng-click="dmo.addDmo()">Add Dymo</button>
+				<button ng-click="dmo.createRandomAreasDemo()">Area Demo</button>
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
 				<span>feature:</span>

@@ -105,6 +105,24 @@ function DmoManager(scheduler, $scope, $http) {
 		});
 	}
 	
+	this.createRandomAreasDemo = function() {
+		var brownianX = new BrownianControls();
+		var brownianY = new BrownianControls();
+		brownianX.maxStepSize.update(0.03);
+		brownianY.maxStepSize.update(0.03);
+		for (var i = 0; i < this.dymo.getParts().length; i++) {
+			var currentArea = createRandomTriangle();
+			var currentAreaFunction = PolygonTools.getPolygonFunctionString(currentArea);
+			this.dymo.addMapping(new Mapping([brownianX.brownianControl, brownianY.brownianControl], false, currentAreaFunction, [this.dymo.getParts()[i]], PLAY));
+			currentAreaFunction = PolygonTools.getInterpolatedPolygonFunctionString(currentArea);
+			this.dymo.addMapping(new Mapping([brownianX.brownianControl, brownianY.brownianControl], false, currentAreaFunction, [this.dymo.getParts()[i]], AMPLITUDE));
+		}
+	}
+	
+	function createRandomTriangle() {
+		return [{0:Math.random(),1:Math.random()},{0:Math.random(),1:Math.random()},{0:Math.random(),1:Math.random()}];
+	}
+	
 	function insertTopDymo() {
 		if (self.dymo) {
 			var newDymo = new DynamicMusicObject("dymo" + getDymoCount(), scheduler, PARALLEL);
