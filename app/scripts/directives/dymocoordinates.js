@@ -1,8 +1,8 @@
 (function () {
 	'use strict';
 	
-	angular.module('dmoDesigner.directives')
-		.directive('dmoCoordinates', ['d3', function(d3) {
+	angular.module('dymoDesigner.directives')
+		.directive('dymoCoordinates', ['d3', function(d3) {
 			return {
 				restrict: 'EA',
 				scope: {
@@ -197,21 +197,21 @@
 						return color;
 					}
 					
-					function getVisualValue(dmo, parameter, key) {
+					function getVisualValue(dymo, parameter, key) {
 						if (parameter.name == "random") {
-							if (!prevRandomValues[dmo["@id"]]) {
-								prevRandomValues[dmo["@id"]] = {};
+							if (!prevRandomValues[dymo["@id"]]) {
+								prevRandomValues[dymo["@id"]] = {};
 							}
-							if (!prevRandomValues[dmo["@id"]][key]) {
-								prevRandomValues[dmo["@id"]][key] = Math.random() * parameter.max;
+							if (!prevRandomValues[dymo["@id"]][key]) {
+								prevRandomValues[dymo["@id"]][key] = Math.random() * parameter.max;
 							}
-							return prevRandomValues[dmo["@id"]][key];
+							return prevRandomValues[dymo["@id"]][key];
 						} else {
-							if (prevRandomValues[dmo["@id"]] && prevRandomValues[dmo["@id"]][key]) {
-								delete prevRandomValues[dmo["@id"]][key];
+							if (prevRandomValues[dymo["@id"]] && prevRandomValues[dymo["@id"]][key]) {
+								delete prevRandomValues[dymo["@id"]][key];
 							}
-							if (dmo[parameter.name]) {
-								return dmo[parameter.name].value;
+							if (dymo[parameter.name]) {
+								return dymo[parameter.name].value;
 							}
 							return 0;//0.00000001; //for log scale :(
 						}

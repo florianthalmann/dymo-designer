@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 	
-	angular.module('dmoDesigner.directives')
+	angular.module('dymoDesigner.directives')
 		.directive('mappingsPainter', ['d3', function(d3) {
 			return {
 				restrict: 'EA',

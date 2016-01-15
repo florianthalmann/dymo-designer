@@ -1,12 +1,12 @@
 (function () {
 	'use strict';
 
-	angular.module('dmoDesigner.controllers')
+	angular.module('dymoDesigner.controllers')
 		.controller('RenderingController', ['$scope', '$http', function($scope, $http){
 			
 			initControlsAndParameters();
 			$scope.mappingTypes = [{name:"Feature"}, {name:"Control"}, {name:"New Control"}];
-			$scope.rendering = new Rendering($scope.dmo.dymo);
+			$scope.rendering = new Rendering($scope.generator.dymo);
 			$scope.currentMappings = [];
 			$scope.mappingFunction = "Math.cos(a%12/12*2*Math.PI)";
 			var currentVariables;
@@ -52,7 +52,7 @@
 			}
 			
 			$scope.addMapping = function() {
-				var dmos = getDmos(Number.parseInt($scope.mappingLevel));
+				var dymos = getDymos(Number.parseInt($scope.mappingLevel));
 				var domainDims = $scope.currentDomainDims.map(function (d) {
 					if (d.type.name == "Control" || d.type.name == "New Control") {
 						return d.value;
@@ -61,26 +61,26 @@
 				});
 				if ($scope.selectedParameter.name == PART_ORDER) {
 					//TODO FIND BETTER PLACE AND WAY TO DO THIS!!! (WITH MAPPINGS)
-					for (var i = 0; i < dmos.length; i++) {
-						dmos[i].updatePartOrder(domainDims[0]);
+					for (var i = 0; i < dymos.length; i++) {
+						dymos[i].updatePartOrder(domainDims[0]);
 					}
 				} else {
-					var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dmos, $scope.selectedParameter.name);
+					var newMapping = new Mapping(domainDims, undefined, getFunctionString(), dymos, $scope.selectedParameter.name);
 					$scope.rendering.addMapping(newMapping);
 					$scope.currentMappings.push(newMapping.toJson());
 					reset();	
 				}
 			}
 			
-			function getDmos(level) {
-				var dmos = [];
-				for (var i = 0; i < $scope.dmo.dymoGraph.nodes.length; i++) {
-					var currentDmo = $scope.dmo.getRealDmo($scope.dmo.dymoGraph.nodes[i]);
-					if (isNaN(level) || currentDmo.getLevel() == level) {
-						dmos.push(currentDmo);
+			function getDymos(level) {
+				var dymos = [];
+				for (var i = 0; i < $scope.generator.dymoGraph.nodes.length; i++) {
+					var currentDymo = $scope.generator.getRealDymo($scope.generator.dymoGraph.nodes[i]);
+					if (isNaN(level) || currentDymo.getLevel() == level) {
+						dymos.push(currentDymo);
 					}
 				}
-				return dmos;
+				return dymos;
 			}
 			
 			$scope.save = function() {

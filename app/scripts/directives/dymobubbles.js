@@ -1,8 +1,8 @@
 (function () {
 	'use strict';
 	
-	angular.module('dmoDesigner.directives')
-		.directive('dmoBubbles', ['d3', function(d3) {
+	angular.module('dymoDesigner.directives')
+		.directive('dymoBubbles', ['d3', function(d3) {
 			return {
 				restrict: 'EA',
 				scope: {
