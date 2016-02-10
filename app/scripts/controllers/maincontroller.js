@@ -7,7 +7,7 @@
 			$scope.dymoPath = '/save/test/';
 			$scope.activities = [{name:"Features"}, {name:"Mappings"}, {name:"View"}];
 			
-			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Graph"}, {name:"Similarity Graph"}, {name: "Mappings"}];
+			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Blocks"}, {name:"Dymo Arches"}, {name:"Dymo Graph"}, {name:"Similarity Graph"}, {name: "Mappings"}];
 			$scope.selectedView = $scope.views[0];
 			
 			$scope.areas = [];//[[{0:100,1:100},{0:200,1:200},{0:200,1:100},{0:100,1:100}]];

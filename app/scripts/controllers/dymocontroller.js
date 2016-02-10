@@ -49,15 +49,27 @@
 			}
 			
 			$scope.addDymo = function() {
-				var selectedSourceName = $scope.selectedSource.split('.')[0];
+				/*var selectedSourceName = $scope.selectedSource.split('.')[0];
 				var uris = [];
 				uris[0] = featureFilesDir + selectedSourceName + '_barbeat.json';
 				uris[1] = featureFilesDir + selectedSourceName + '_amplitude.json';
 				uris[2] = featureFilesDir + selectedSourceName + '_centroid.json';
 				$scope.generator.setCondensationMode($scope.selectedFeatureMode.name);
 				$scope.generator.setCurrentSourcePath($scope.selectedSource);
-				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, uris, $scope, $http);
+				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, uris, $scope, $http);*/
+				
+				DymoTemplates.createGratefulDeadDymos($scope.generator, $scope, $http);
+				//DymoTemplates.loadAndSaveMultipleDeadDymos($scope.generator, ['app/features/gd_test/Candyman/_studio/'], 0, $http);
+				
 				//DymoTemplates.createSebastianDymo3($scope.generator, $http);
+			}
+			
+			$scope.loadDymo = function() {
+				var loader = new DymoLoader($scope.scheduler, $scope, $http);
+				loader.loadDymoFromJson('save/test/', 'dead-dymo.json', function(loadedDymo) {
+					$scope.generator.setDymo(loadedDymo[0]);
+					$scope.$apply();
+				}, $http);
 			}
 			
 			$scope.createAreasDemo = function(areas) {

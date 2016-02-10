@@ -3,6 +3,8 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="stylesheets/main.css">
 	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/n3/n3-browser.js"></script>
+	<script src="bower_components/mathjs/dist/math.min.js"></script>
 	<script src="bower_components/dymo-core/math/functioninverter.js"></script>
 	<script src="bower_components/dymo-core/math/polygontools.js"></script>
 	<script src="bower_components/dymo-core/io/globals.js"></script>
@@ -25,12 +27,15 @@
 	<script src="bower_components/dymo-generator/dymo-generator.js"></script>
 	<script src="bower_components/dymo-generator/feature-loader.js"></script>
 	<script src="bower_components/dymo-generator/globals.js"></script>
+	<script src="bower_components/dymo-generator/similarity.js"></script>
 	<script src="scripts/app.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/maincontroller.js"></script>
 	<script src="scripts/controllers/dymocontroller.js"></script>
 	<script src="scripts/controllers/renderingcontroller.js"></script>
 	<script src="scripts/directives/dymobubbles.js"></script>
+	<script src="scripts/directives/dymoblocks.js"></script>
+	<script src="scripts/directives/dymoarcs.js"></script>
 	<script src="scripts/directives/dymograph.js"></script>
 	<script src="scripts/directives/dymocoordinates.js"></script>
 	<script src="scripts/directives/mappingspainter.js"></script>
@@ -47,7 +52,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[0]">
 				<button ng-click="addDymo()">Add Dymo</button>
-				<button ng-click="createAreasDemo(areas)">Area Demo</button>
+				<button ng-click="loadDymo()">Load Dymo</button>
 				<span>source:</span>
 				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
 				<span>feature:</span>
@@ -110,7 +115,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-init="selectedView = views[2]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in generator.features"></select>
@@ -121,12 +126,18 @@
 				<dymo-coordinates data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dymo-graph data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+				<dymo-blocks data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-blocks>
 			</div>
 			<div ng-if="selectedView == views[2]">
-				<dymo-graph data="generator.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+				<dymo-arcs data="generator.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-arcs>
 			</div>
 			<div ng-if="selectedView == views[3]">
+				<dymo-graph data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+			</div>
+			<div ng-if="selectedView == views[4]">
+				<dymo-graph data="generator.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+			</div>
+			<div ng-if="selectedView == views[5]">
 				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></mappings-painter>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">

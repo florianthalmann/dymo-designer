@@ -163,7 +163,12 @@
 								delete prevRandomValues[dymo["@id"]][key];
 							}
 							if (dymo[parameter.name]) {
-								return dymo[parameter.name].value;
+								//not suitable for vectors!! (just takes the first element..)
+								var value = dymo[parameter.name].value;
+								if (value.length) {
+									value = value[0];
+								}
+								return value;
 							}
 							return 0.00000001; //for log scale :(
 						}

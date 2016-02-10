@@ -2,7 +2,7 @@
 	'use strict';
 	
 	angular.module('dymoDesigner.directives')
-		.directive('dymoCoordinates', ['d3', function(d3) {
+		.directive('dymoArcs', ['d3', function(d3) {
 			return {
 				restrict: 'EA',
 				scope: {
@@ -17,12 +17,12 @@
 						.append("svg")
 						.attr("width", "100%");
 					
-					var height = 600;
+					var height = 500;
 					var padding = 50;
 					var previousColors = null;
 					var prevRandomValues = {};
 					
-					var xScale, yScale, sizeScale, colorScale;
+					var xScale, yScale, sizeScale, heightScale, colorScale;
 					
 					// Axes. Note the inverted domain for the y-scale: bigger is up!
 					var xAxis = d3.svg.axis().orient("bottom"),
@@ -59,24 +59,7 @@
 					}, true);
 					
 					scope.$watch('playing', function(newVals, oldVals) {
-						var toSelect = newVals.filter(function(i) {return oldVals.indexOf(i) < 0;});
-						var toDeselect = oldVals.filter(function(i) {return newVals.indexOf(i) < 0;});
 						
-						var lines = svg.selectAll(".edge");
-						lines.filter(function(d) { return toSelect.indexOf(d.target["@id"]) >= 0 })
-							.style("stroke", "black")
-							.style("opacity", 0.4);
-						lines.filter(function(d) { return toDeselect.indexOf(d.target["@id"]) >= 0 })
-							.style("stroke", function(d) { return getHsl(d.target); })
-							.style("opacity", 0.1);
-						
-						var circles = svg.selectAll("circle");
-						circles.filter(function(d) { return toSelect.indexOf(d["@id"]) >= 0 })
-							.style("fill", "black")
-							.style("opacity", 0.6);
-						circles.filter(function(d) { return toDeselect.indexOf(d["@id"]) >= 0 })
-							.style("fill", getHsl)
-							.style("opacity", 0.3);
 					}, true);
 					
 					// define render function
@@ -87,8 +70,9 @@
 						svg.attr('height', height);
 						
 						xScale = createScale(scope.viewconfig.xAxis.log, scope.viewconfig.xAxis.param).range([padding, width-padding]),
-						yScale = createScale(scope.viewconfig.yAxis.log, scope.viewconfig.yAxis.param).range([height-padding, padding]),
-						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 40]),
+						yScale = d3.scale.linear().domain([0, 4]).range([height-padding, padding]),
+						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([5, 40]),
+						heightScale = d3.scale.linear().domain([0, 4]).range([0, height-(2*padding)]),
 						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
@@ -117,7 +101,7 @@
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
 							.style("fill", getHsl)
-							.style("opacity", 0.3)
+							.style("opacity", 0.2)
 							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
@@ -129,44 +113,53 @@
 							.transition()
 								.duration(500) // time of duration
 								.style("fill", getHsl)
-								.style("opacity", 0.3)
+								.style("opacity", 0.2)
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
 						
 						circles.exit().remove();
 						
-						var lines = svg.selectAll(".edge").data(data["links"]);
-						
-						lines.enter()
-							.append("line")
-							.attr("class", "edge")
-							.style("stroke", function(d) { return getHsl(d.target); })
-							.style("opacity", 0.1)
-							.style("stroke-width", 2)
-							//get initial values from animated svg, beautiful hack!
-							.attr("x1", function(d) { return circles.filter(function(c, i) { return c == d.source; })[0][0].cx.baseVal.value; })
-							.attr("y1", function(d) { return circles.filter(function(c, i) { return c == d.source; })[0][0].cy.baseVal.value; })
-							.attr("x2", function(d) { return circles.filter(function(c, i) { return c == d.target; })[0][0].cx.baseVal.value; })
-							.attr("y2", function(d) { return circles.filter(function(c, i) { return c == d.target; })[0][0].cy.baseVal.value; })
-							.transition()
-								.duration(500)
-								.attr("x1", function(d) { return getXValue(d.source); })
-								.attr("y1", function(d) { return getYValue(d.source); })
-								.attr("x2", function(d) { return getXValue(d.target); })
-								.attr("y2", function(d) { return getYValue(d.target); });
-						
-						lines
-							.transition()
-								.duration(500) // time of duration
-								.style("stroke", function(d) { return getHsl(d.target); })
-								.style("opacity", 0.1)
-								.attr("x1", function(d) { return getXValue(d.source); })
-								.attr("y1", function(d) { return getYValue(d.source); })
-								.attr("x2", function(d) { return getXValue(d.target); })
-								.attr("y2", function(d) { return getYValue(d.target); });
-						
-						lines.exit().remove();
+						// scale to generate radians (just for lower-half of circle)
+						var radians = d3.scale.linear().range([-Math.PI / 2, Math.PI / 2]);
+
+		    // path generator for arcs (uses polar coordinates)
+		    var arc = d3.svg.line.radial()
+		        .interpolate("basis")
+		        .tension(0)
+		        .angle(function(d) { return radians(d); });
+
+		    // add links
+						var links = svg.selectAll(".link").data(data["links"]);
+						links.enter()
+		        .append("path")
+		        .attr("class", "link")
+						.style("stroke", function(d, i) {return getHsl(d.source);})
+						//.style("fill", function(d, i) {return getHsl(d.source);})
+						.style("opacity", 0.2)
+		        .attr("transform", function(d, i) {
+		            // arc will always be drawn around (0, 0)
+		            // shift so (0, 0) will be between source and target
+		            var xshift = getXValue(d.source) + (getXValue(d.target) - getXValue(d.source)) / 2;
+		            var yshift = getYValue();
+		            return "translate(" + xshift + ", " + yshift + ")";
+		        })
+		        .attr("d", function(d, i) {
+		            // get x distance between source and target
+		            var xdist = Math.abs(getXValue(d.source) - getXValue(d.target));
+
+		            // set arc radius based on x distance
+		            arc.radius(xdist / 2);
+
+		            // want to generate 1/3 as many points per pixel in x direction
+		            var points = d3.range(0, Math.ceil(xdist / 3));
+
+		            // set radian scale domain
+		            radians.domain([0, points.length - 1]);
+
+		            // return path for arc
+		            return arc(points);
+		        });
 						
 					};
 					
@@ -176,7 +169,7 @@
 					}
 					
 					function getYValue(d, i) {
-						return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
+						return yScale(0);
 					}
 					
 					function getR(d) {

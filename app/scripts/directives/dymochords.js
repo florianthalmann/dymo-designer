@@ -2,7 +2,7 @@
 	'use strict';
 	
 	angular.module('dymoDesigner.directives')
-		.directive('dymoCoordinates', ['d3', function(d3) {
+		.directive('dymoChords', ['d3', function(d3) {
 			return {
 				restrict: 'EA',
 				scope: {
@@ -17,12 +17,12 @@
 						.append("svg")
 						.attr("width", "100%");
 					
-					var height = 600;
+					var height = 300;
 					var padding = 50;
 					var previousColors = null;
 					var prevRandomValues = {};
 					
-					var xScale, yScale, sizeScale, colorScale;
+					var xScale, yScale, sizeScale, heightScale, colorScale;
 					
 					// Axes. Note the inverted domain for the y-scale: bigger is up!
 					var xAxis = d3.svg.axis().orient("bottom"),
@@ -87,8 +87,9 @@
 						svg.attr('height', height);
 						
 						xScale = createScale(scope.viewconfig.xAxis.log, scope.viewconfig.xAxis.param).range([padding, width-padding]),
-						yScale = createScale(scope.viewconfig.yAxis.log, scope.viewconfig.yAxis.param).range([height-padding, padding]),
-						sizeScale = createScale(scope.viewconfig.size.log, scope.viewconfig.size.param).range([10, 40]),
+						yScale = d3.scale.linear().domain([0, 4]).range([height-padding, padding]),
+						sizeScale = d3.scale.linear().domain([0, scope.viewconfig.xAxis.param.max]).range([0, width-(2*padding)]),
+						heightScale = d3.scale.linear().domain([0, 4]).range([0, height-(2*padding)]),
 						colorScale = createScale(scope.viewconfig.color.log, scope.viewconfig.color.param).rangeRound([45, 360]);
 						
 						function createScale(log, param) {
@@ -111,13 +112,13 @@
 						svg.selectAll("g.yaxis")
 							.call(yAxis);
 						
-						var circles = svg.selectAll("circle").data(data["nodes"]);
+						/*var circles = svg.selectAll("circle").data(data["nodes"]);
 						
 						circles.enter()
 							.append("circle")
 							.on("click", function(d, i){return scope.onClick({item: d});})
 							.style("fill", getHsl)
-							.style("opacity", 0.3)
+							.style("opacity", 0.2)
 							.attr("r", 0)
 							.attr("cx", getXValue)
 							.attr("cy", getYValue)
@@ -129,58 +130,66 @@
 							.transition()
 								.duration(500) // time of duration
 								.style("fill", getHsl)
-								.style("opacity", 0.3)
+								.style("opacity", 0.2)
 								.attr("r", getR) // width based on scale
 								.attr("cx", getXValue)
 								.attr("cy", getYValue);
 						
-						circles.exit().remove();
+						circles.exit().remove();*/
 						
-						var lines = svg.selectAll(".edge").data(data["links"]);
+						var ellipses = svg.selectAll("ellipse").data(data["nodes"]);
 						
-						lines.enter()
-							.append("line")
-							.attr("class", "edge")
-							.style("stroke", function(d) { return getHsl(d.target); })
-							.style("opacity", 0.1)
-							.style("stroke-width", 2)
-							//get initial values from animated svg, beautiful hack!
-							.attr("x1", function(d) { return circles.filter(function(c, i) { return c == d.source; })[0][0].cx.baseVal.value; })
-							.attr("y1", function(d) { return circles.filter(function(c, i) { return c == d.source; })[0][0].cy.baseVal.value; })
-							.attr("x2", function(d) { return circles.filter(function(c, i) { return c == d.target; })[0][0].cx.baseVal.value; })
-							.attr("y2", function(d) { return circles.filter(function(c, i) { return c == d.target; })[0][0].cy.baseVal.value; })
-							.transition()
-								.duration(500)
-								.attr("x1", function(d) { return getXValue(d.source); })
-								.attr("y1", function(d) { return getYValue(d.source); })
-								.attr("x2", function(d) { return getXValue(d.target); })
-								.attr("y2", function(d) { return getYValue(d.target); });
-						
-						lines
+						ellipses.enter()
+							.append("ellipse")
+							.on("click", function(d, i){return scope.onClick({item: d});})
+							.style("fill", getHsl)
+							.style("opacity", 0.3)
+							.attr("cx", getXValue)
+							.attr("cy", getYValue)
+							.attr("rx", getWidth)
+							.attr("ry", getHeight)
 							.transition()
 								.duration(500) // time of duration
-								.style("stroke", function(d) { return getHsl(d.target); })
-								.style("opacity", 0.1)
-								.attr("x1", function(d) { return getXValue(d.source); })
-								.attr("y1", function(d) { return getYValue(d.source); })
-								.attr("x2", function(d) { return getXValue(d.target); })
-								.attr("y2", function(d) { return getYValue(d.target); });
+								.attr("height", getHeight); // width based on scale
 						
-						lines.exit().remove();
+						ellipses
+							.transition()
+								.duration(500) // time of duration
+								.style("fill", getHsl)
+								.style("opacity", 0.3)
+								.attr("cx", getXValue)
+								.attr("cy", getYValue)
+								.attr("rx", getWidth)
+								.attr("ry", getHeight);
+						
+						ellipses.exit().remove();
 						
 					};
 					
 					
 					function getXValue(d, i) {
-						return xScale(getVisualValue(d, scope.viewconfig.xAxis.param, "x"));
+						if (d["time"] && d["duration"]) {
+							return xScale(d["time"].value + d["duration"].value/2);
+						}
+						return 0;
 					}
 					
 					function getYValue(d, i) {
-						return yScale(getVisualValue(d, scope.viewconfig.yAxis.param, "y"));
+						return yScale(0);
 					}
 					
-					function getR(d) {
-						return sizeScale(getVisualValue(d, scope.viewconfig.size.param, "size"));
+					function getHeight(d) {
+						if (d["level"]) {
+							return heightScale(4-d["level"].value);
+						}
+						return 0;
+					}
+					
+					function getWidth(d) {
+						if (d["time"] && d["duration"]) {
+							return sizeScale(d["duration"].value/2);
+						}
+						return 0;
 					}
 					
 					function getHsl(d) {

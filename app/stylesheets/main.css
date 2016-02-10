@@ -91,3 +91,8 @@ button:hover {
 	font-family: Avenir Next;
 	font-size: 18px;
 }
+
+.link {
+	fill: none;
+	stroke-weight: 1px;
+}

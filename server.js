@@ -14,10 +14,19 @@
 		var fileTypes = ["m4a", "mp3", "wav"];
 		var directory = req.query.directory;
 		fs.readdir(__dirname + '/app/' + directory, function(err, files) {
-			var files = files.filter(function(f) {
-				//check if right extension
-				return fileTypes.indexOf(f.split('.').slice(-1)[0]) >= 0;
-			});
+			if (files) {
+				var files = files.filter(function(f) {
+					//check if right extension
+					return fileTypes.indexOf(f.split('.').slice(-1)[0]) >= 0;
+				});
+			}
+			res.send(files);
+		});
+	});
+	
+	app.get('/getallfiles', function(req, res) {
+		var directory = req.query.directory;
+		fs.readdir(directory, function(err, files) {
 			res.send(files);
 		});
 	});
