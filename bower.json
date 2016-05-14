@@ -1,0 +1,29 @@
+{
+  "name": "dymo-designer",
+  "version": "0.0.1",
+  "homepage": "https://github.com/florianthalmann/dymo-designer",
+  "description": "A web app for designing dynamic music objects",
+  "main": "server.js",
+  "moduleType": [],
+  "keywords": [
+    "dynamic-music-objects",
+    "music-visualization"
+  ],
+  "authors": [
+    "florian thalmann"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "*",
+    "dymo-core": "*",
+    "dymo-generator": "*",
+    "music-visualization": "*"
+  },
+}
