@@ -58,15 +58,16 @@
 				$scope.generator.setCurrentSourcePath($scope.selectedSource);
 				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, uris, $scope, $http);*/
 				
+				DymoTemplates.createDeadheadDymo($scope.generator, $scope, $http);
 				//DymoTemplates.createGratefulDeadDymos($scope.generator, $scope, $http);
-				DymoTemplates.loadAndSaveMultipleDeadDymos($scope.generator, ['app/features/gd_test/Candyman/_studio/'], 0, $http);
+				//DymoTemplates.loadAndSaveMultipleDeadDymos($scope.generator, ['app/features/gd_test/Candyman/_studio/'], 0, $http);
 				
 				//DymoTemplates.createSebastianDymo3($scope.generator, $http);
 			}
 			
 			$scope.loadDymo = function() {
 				var loader = new DymoLoader($scope.scheduler, $scope, $http);
-				loader.loadDymoFromJson('features/gd_test/Bird_Song/gd81-05-02.dmow.28304.sbeok.flacf/', 'gd81-05-02.dmow.28304.sbeok.flacf.dymo.json', function(loadedDymo) {
+				loader.loadDymoFromJson('features/gd_equal_similarity2/', 'gd88-10-21.aud.ford-bryson.31108.sbeok.flacf.dymo.json', function(loadedDymo) {
 					$scope.generator.setDymo(loadedDymo[0]);
 					$scope.generator.similarityGraph = loadedDymo[0].toJsonSimilarityGraph();
 					$scope.$apply();
