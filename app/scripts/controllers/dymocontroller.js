@@ -4,8 +4,7 @@
 	angular.module('dymoDesigner.controllers')
 		.controller('DymoController', ['$scope', '$http', function($scope, $http){
 			
-			var audioFilesDir = 'audio/';
-			var featureFilesDir = 'features/';
+			var inputDir = 'input/';
 			
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
@@ -14,30 +13,34 @@
 			$scope.featureLoadingThreads = 0;
 			
 			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
-			$scope.scheduler.setDymoBasePath(audioFilesDir);
-			$scope.generator = new DymoGenerator($scope.scheduler, adjustViewConfig, $scope);
+			//$scope.scheduler.setDymoBasePath(audioFilesDir);
+			$scope.generator = new DymoGenerator($scope.scheduler, adjustViewConfig, onGraphsChanged);
 			
 			$scope.featureModes = [{name:MEAN}, {name:MEDIAN}, {name:FIRST}];
 			
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
-				return {name:name, param:$scope.generator.features[1], log:false};
+				return {name:name, param:$scope.generator.getFeatures()[1], log:false};
 			}
 			
 			var maxDepth = 0;
 			
-			$http.get('getsourcefilesindir/', {params:{directory:audioFilesDir}}).success(function(data) {
-				$scope.sourceFiles = data;
-				$scope.selectedSource = data[0];
+			$scope.dymoGraph = {"nodes":[], "links":[]};
+			$scope.similarityGraph = {"nodes":[], "links":[]};
+			$scope.urisOfPlayingDymos = [];
+			
+			$http.get('getfoldersindir/', {params:{directory:inputDir}}).success(function(folders) {
+				$scope.inputFolders = folders;
+				$scope.selectedFolder = folders[0];
 				$scope.sourceSelected();
 			});
 			
 			$scope.sourceSelected = function() {
-				$scope.scheduler.addSourceFile($scope.selectedSource);
-				if ($scope.generator.dymoGraph.nodes.length > 0) {
+				//$scope.scheduler.addSourceFile($scope.selectedSource);
+				if ($scope.generator.getDymoGraph().nodes.length > 0) {
 					$scope.generator.setAudioFileChanged();
 				}
-				$http.get('getfeaturefiles/', {params:{source:$scope.selectedSource}}).success(function(data) {
+				$http.get('getfeaturefilesindir/', {params:{directory:inputDir+$scope.selectedFolder}}).success(function(data) {
 					$scope.featureFiles = data;
 					$scope.selectedFeature = data[0];
 				});
@@ -69,7 +72,6 @@
 				var loader = new DymoLoader($scope.scheduler, $scope, $http);
 				loader.loadDymoFromJson('features/gd_equal_similarity2/', 'gd88-10-21.aud.ford-bryson.31108.sbeok.flacf.dymo.json', function(loadedDymo) {
 					$scope.generator.setDymo(loadedDymo[0]);
-					$scope.generator.similarityGraph = loadedDymo[0].toJsonSimilarityGraph();
 					$scope.$apply();
 				}, $http);
 			}
@@ -81,8 +83,10 @@
 			//TODO delegate to dymo-generator
 			$scope.loadFeature = function() {
 				$scope.generator.setCondensationMode($scope.selectedFeatureMode.name);
-				$scope.generator.setCurrentSourcePath($scope.selectedSource);
-				new FeatureLoader($scope, $http).loadFeature(featureFilesDir + $scope.selectedFeature, $scope.labelCondition, $scope.generator);
+				$scope.generator.setCurrentSourcePath(inputDir+$scope.selectedFolder);
+				new FeatureLoader($scope, $http).loadFeature(inputDir+$scope.selectedFolder+'/' + $scope.selectedFeature, $scope.labelCondition, $scope.generator, function() {
+					
+				});
 			}
 			
 			$scope.save = function() {
@@ -120,20 +124,30 @@
 				}
 			}
 			
+			function onGraphsChanged() {
+				$scope.dymoGraph = $scope.generator.getDymoGraph();
+				$scope.similarityGraph = $scope.generator.getSimilarityGraph();
+				setTimeout(function() {
+					$scope.$apply();
+				}, 10);
+			}
+			
 			function onPlaybackChange() {
+				$scope.urisOfPlayingDymos = scheduler.getUrisOfPlayingDymos();
 				setTimeout(function() {
 					$scope.$apply();
 				}, 10);
 			}
 			
 			function adjustViewConfig(newFeature) {
-				if ($scope.generator.features.length-2 == 1) {
+				$scope.features = $scope.generator.getFeatures();
+				if ($scope.features.length-2 == 1) {
 					$scope.viewConfig.xAxis.param = newFeature;
-				} else if ($scope.generator.features.length-2 == 2) {
+				} else if ($scope.features.length-2 == 2) {
 					$scope.viewConfig.yAxis.param = newFeature;
-				} else if ($scope.generator.features.length-2 == 3) {
+				} else if ($scope.features.length-2 == 3) {
 					$scope.viewConfig.size.param = newFeature;
-				} else if ($scope.generator.features.length-2 == 4) {
+				} else if ($scope.features.length-2 == 4) {
 					$scope.viewConfig.color.param = newFeature;
 				}
 			}

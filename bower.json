@@ -25,5 +25,5 @@
     "dymo-core": "*",
     "dymo-generator": "*",
     "music-visualization": "*"
-  },
+  }
 }

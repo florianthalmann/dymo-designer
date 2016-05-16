@@ -14,10 +14,12 @@ out
 /build
 
 **/.DS_Store
+**/*.mp3
+**/*.m4a
+**/*.wav
 
 node_modules
-
-app/audio
 app/bower_components
-app/save/*
-app/features
+
+app/input
+app/output

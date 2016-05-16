@@ -5,29 +5,8 @@
 	<script src="bower_components/angular/angular.min.js"></script>
 	<script src="bower_components/n3/n3-browser.js"></script>
 	<script src="bower_components/mathjs/dist/math.min.js"></script>
-	<script src="bower_components/dymo-core/math/functioninverter.js"></script>
-	<script src="bower_components/dymo-core/math/polygontools.js"></script>
-	<script src="bower_components/dymo-core/io/globals.js"></script>
-	<script src="bower_components/dymo-core/logic/dymo.js"></script>
-	<script src="bower_components/dymo-core/logic/rendering.js"></script>
-	<script src="bower_components/dymo-core/logic/mapping.js"></script>
-	<script src="bower_components/dymo-core/logic/control.js"></script>
-	<script src="bower_components/dymo-core/logic/parameter.js"></script>
-	<script src="bower_components/dymo-core/io/dymoloader.js"></script>
-	<script src="bower_components/dymo-core/io/dymowriter.js"></script>
-	<script src="bower_components/dymo-core/audio/scheduler.js"></script>
-	<script src="bower_components/dymo-core/audio/source.js"></script>
-	<script src="bower_components/dymo-core/audio/processor.js"></script>
-	<script src="bower_components/dymo-core/controls/browniancontrols.js"></script>
-	<script src="bower_components/dymo-core/navigators/sequential.js"></script>
-	<script src="bower_components/dymo-core/navigators/similarity.js"></script>
-	<script src="bower_components/dymo-core/lib/AudioSampleLoader.js"></script>
-	<script src="bower_components/dymo-core/lib/soundtouch-js/soundtouch-min.js"></script>
-	<script src="bower_components/dymo-generator/dymo-templates.js"></script>
-	<script src="bower_components/dymo-generator/dymo-generator.js"></script>
-	<script src="bower_components/dymo-generator/feature-loader.js"></script>
-	<script src="bower_components/dymo-generator/globals.js"></script>
-	<script src="bower_components/dymo-generator/similarity.js"></script>
+	<script src="bower_components/dymo-core/dist/dymo-core.min.js"></script>
+	<script src="bower_components/dymo-generator/dist/dymo-generator.min.js"></script>
 	<script src="scripts/app.js"></script>
 	<script src="scripts/services/d3.js" charset="utf-8"></script>
 	<script src="scripts/controllers/maincontroller.js"></script>
@@ -53,8 +32,8 @@
 			<div ng-show="selectedActivity == activities[0]">
 				<button ng-click="addDymo()">Add Dymo</button>
 				<button ng-click="loadDymo()">Load Dymo</button>
-				<span>source:</span>
-				<select ng-model="selectedSource" ng-options="s for s in sourceFiles" ng-change="sourceSelected()"></select>
+				<span>folder:</span>
+				<select ng-model="selectedFolder" ng-options="s for s in inputFolders" ng-change="sourceSelected()"></select>
 				<span>feature:</span>
 				<select ng-model="selectedFeature" ng-options="f for f in featureFiles"></select>
 				<span>condition:</span>
@@ -70,7 +49,7 @@
 					<select ng-init="selectedMappingType = mappingTypes[0]" ng-model="selectedMappingType" ng-options="t.name for t in mappingTypes"></select>
 					<span ng-show="selectedMappingType == mappingTypes[0]">
 						feature:
-						<select ng-init="selectedFeature = generator.features[0]" ng-model="selectedFeature" ng-options="p.name for p in generator.features"></select>
+						<select ng-init="selectedFeature = features[0]" ng-model="selectedFeature" ng-options="p.name for p in features"></select>
 					</span>
 					<span ng-show="selectedMappingType == mappingTypes[1]">
 						control:
@@ -115,30 +94,30 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[2]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
-					<select ng-model="v.param" ng-options="p.name for p in generator.features"></select>
+					<select ng-model="v.param" ng-options="p.name for p in features"></select>
 					<input type="checkbox" ng-model="v.log"></input>
 				</span>
 			</div>
 			<div ng-if="selectedView == views[0]">
-				<dymo-coordinates data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-coordinates>
+				<dymo-coordinates data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-coordinates>
 			</div>
 			<div ng-if="selectedView == views[1]">
-				<dymo-blocks data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-blocks>
+				<dymo-blocks data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-blocks>
 			</div>
 			<div ng-if="selectedView == views[2]">
-				<dymo-arcs data="generator.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-arcs>
+				<dymo-arcs data="similarityGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-arcs>
 			</div>
 			<div ng-if="selectedView == views[3]">
-				<dymo-graph data="generator.dymoGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+				<dymo-graph data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
 			</div>
 			<div ng-if="selectedView == views[4]">
-				<dymo-graph data="generator.similarityGraph" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+				<dymo-graph data="similarityGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
 			</div>
 			<div ng-if="selectedView == views[5]">
-				<mappings-painter data="areas" viewconfig="viewConfig" playing="scheduler.urisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></mappings-painter>
+				<mappings-painter data="areas" viewconfig="viewConfig" playing="getUrisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></mappings-painter>
 			</div>
 			<!--div ng-show="selectedVisuals == views[2]">
 				<dymo-bubbles data="dymoList" label="name" on-click="dymoOnClick(item)"></dymo-bubbles>
