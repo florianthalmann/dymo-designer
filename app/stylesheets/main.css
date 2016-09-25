@@ -5,7 +5,8 @@
 
 html, body { height: 100%; }
 
-h1, body, button, input, select {
+/* override ngdialog theme too.. */
+h1, body, button, input, select, .ngdialog.ngdialog-theme-default .ngdialog-content {
 	font-family: Avenir Next;
 	font-size: 16px;
 	text-align: center;
@@ -52,7 +53,7 @@ button:hover {
 	width: 25px;
 	height: 25px;
 	top: 0;
-  	left: 0;
+	left: 0;
 	background: #eee;
 	border:1px solid #ddd;
 }

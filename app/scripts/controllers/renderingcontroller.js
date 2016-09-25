@@ -21,14 +21,14 @@
 			
 			function initControlsAndParameters() {
 				$scope.controls = [];
-				for (var i = 0; i < CONTROLS.length; i++) {
+				/*for (var i = 0; i < CONTROLS.length; i++) {
 					$scope.controls.push({name:CONTROLS[i]});
-				}
+				}*/
 				$scope.uiControls = {};
 				$scope.parameters = [];
-				for (var i = 0; i < PARAMETERS.length; i++) {
+				/*for (var i = 0; i < PARAMETERS.length; i++) {
 					$scope.parameters.push({name:PARAMETERS[i]});
-				}
+				}*/
 			}
 			
 			$scope.addDomainDim = function() {

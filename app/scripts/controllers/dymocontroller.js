@@ -9,12 +9,11 @@
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
-			$scope.labelCondition = '1';
 			$scope.featureLoadingThreads = 0;
 			
-			$scope.scheduler = new Scheduler($scope.audioContext, sourcesReadyCallback, onPlaybackChange);
-			//$scope.scheduler.setDymoBasePath(audioFilesDir);
-			$scope.generator = new DymoGenerator($scope.scheduler, adjustViewConfig, onGraphsChanged);
+			$scope.store = new DymoStore();
+			$scope.manager = new DymoManager($scope.audioContext);
+			$scope.generator = new DymoGenerator($scope.store, adjustViewConfig, onGraphsChanged);
 			
 			$scope.featureModes = [{name:MEAN}, {name:MEDIAN}, {name:FIRST}];
 			
@@ -46,10 +45,48 @@
 				});
 			}
 			
-			function sourcesReadyCallback() {
-				$scope.sourcesReady = true;
-				$scope.$apply();
+			function addDymo(directory, sourceFile, featureFiles, callback) {
+				var orderedFiles = [];
+				var subsetConditions = [];
+				for (var i = 0; i < $scope.availableFeatures.length; i++) {
+					if ($scope.availableFeatures[i].selected) {
+						var currentFeatureFile = featureFiles.filter(function(f){return f.indexOf($scope.availableFeatures[i].name) >= 0;});
+						orderedFiles.push(currentFeatureFile);
+						subsetConditions.push($scope.availableFeatures[i].subset);
+					}
+				}
+				orderedFiles = orderedFiles.map(function(f){return directory+f});
+				DymoTemplates.createSingleSourceDymoFromFeatures($scope.generator, directory+sourceFile, orderedFiles, subsetConditions, function() {
+					callback();
+				});
 			}
+			
+			$scope.fileDropped = function(file) {
+				postAudioFile(file, function() {
+					var directory = 'input/'+file.name.replace(/\./g,'_')+'/'; 
+					//var directory = 'input/25435__insinger__free-jazz-text_wav/'
+					$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
+						addDymo(directory, file.name, featureFiles, function() {
+							$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
+								console.log("DONE")
+							});
+						})
+					});
+				});
+			}
+			
+			/* TEST
+			var directory = 'input/25435__insinger__free-jazz-text_wav/'
+			Benchmarker.startTask("getFiles")
+			$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(data) {
+				var beatFeature = data.filter(function(f){return f.indexOf('beat') >= 0;});
+				var otherFeatures = data.filter(function(f){return f.indexOf('beat') < 0;});
+				var features = beatFeature.concat(otherFeatures);
+				features = features.map(function(f){return directory+f});
+				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, features, function() {
+					//console.log($scope.generator.getDymoGraph())
+				});
+			});*/
 			
 			$scope.addDymo = function() {
 				/*var selectedSourceName = $scope.selectedSource.split('.')[0];
@@ -61,7 +98,12 @@
 				$scope.generator.setCurrentSourcePath($scope.selectedSource);
 				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, uris, $scope, $http);*/
 				
-				DymoTemplates.createDeadheadDymo($scope.generator, $scope, $http);
+				//DymoTemplates.createDeadheadDymo($scope.generator, $scope, $http);
+				
+				var parentUri = $scope.generator.addDymo();
+				var childUri = $scope.generator.addDymo(parentUri);
+				$scope.generator.setDymoFeature(childUri, ONSET_FEATURE, 2);
+				
 				//DymoTemplates.createGratefulDeadDymos($scope.generator, $scope, $http);
 				//DymoTemplates.loadAndSaveMultipleDeadDymos($scope.generator, ['app/features/gd_test/Candyman/_studio/'], 0, $http);
 				
@@ -69,11 +111,14 @@
 			}
 			
 			$scope.loadDymo = function() {
-				var loader = new DymoLoader($scope.scheduler, $scope, $http);
-				loader.loadDymoFromJson('features/gd_equal_similarity2/', 'gd88-10-21.aud.ford-bryson.31108.sbeok.flacf.dymo.json', function(loadedDymo) {
-					$scope.generator.setDymo(loadedDymo[0]);
+				var dymoUri = 'features/gd_equal_similarity2/gd88-10-21.aud.ford-bryson.31108.sbeok.flacf.dymo.json';
+				$scope.manager.loadDymoFromJson(dymoUri, function(loadedDymo) {
+					$scope.generator.setDymo(loadedDymo);
 					$scope.$apply();
-				}, $http);
+					console.log("dymo loaded");
+				}, function() {
+					console.log("audio loaded");
+				});
 			}
 			
 			$scope.createAreasDemo = function(areas) {
@@ -104,10 +149,10 @@
 			$scope.dymoOnClick = function(dymo){
 				if ($scope.selectedDymo != dymo) {
 					$scope.selectedDymo = dymo;
-					playDymo($scope.generator.getRealDymo(dymo));
+					$scope.manager.startPlayingUri(CONTEXT_URI+dymo["@id"]);
 				} else {
 					$scope.selectedDymo = null;
-					stopDymo($scope.generator.getRealDymo(dymo));
+					$scope.manager.stopPlayingUri(CONTEXT_URI+dymo["@id"]);
 				}
 				$scope.$apply();
 			}
@@ -125,10 +170,13 @@
 			}
 			
 			function onGraphsChanged() {
+				Benchmarker.startTask("graphsChanged")
 				$scope.dymoGraph = $scope.generator.getDymoGraph();
 				$scope.similarityGraph = $scope.generator.getSimilarityGraph();
+				console.log($scope.dymoGraph)
 				setTimeout(function() {
 					$scope.$apply();
+					Benchmarker.print()
 				}, 10);
 			}
 			
@@ -140,16 +188,36 @@
 			}
 			
 			function adjustViewConfig(newFeature) {
-				$scope.features = $scope.generator.getFeatures();
-				if ($scope.features.length-2 == 1) {
-					$scope.viewConfig.xAxis.param = newFeature;
-				} else if ($scope.features.length-2 == 2) {
-					$scope.viewConfig.yAxis.param = newFeature;
-				} else if ($scope.features.length-2 == 3) {
-					$scope.viewConfig.size.param = newFeature;
-				} else if ($scope.features.length-2 == 4) {
-					$scope.viewConfig.color.param = newFeature;
+				if ($scope.generator) {
+					$scope.features = $scope.generator.getFeatures();
+					if ($scope.features.length-2 == 1) {
+						$scope.viewConfig.xAxis.param = newFeature;
+					} else if ($scope.features.length-2 == 2) {
+						$scope.viewConfig.yAxis.param = newFeature;
+					} else if ($scope.features.length-2 == 3) {
+						$scope.viewConfig.size.param = newFeature;
+					} else if ($scope.features.length-2 == 4) {
+						$scope.viewConfig.color.param = newFeature;
+					}
 				}
+			}
+			
+			function postAudioFile(file, callback) {
+				var request = new XMLHttpRequest();
+				var formData = new FormData();
+				formData.append('uploads[]', file, file.name);
+				//console.log(formData)
+				request.open('POST', 'postAudioFile', true);
+				request.onload = function() {
+					console.log(this.responseText);
+					if (callback) {
+						callback(this.responseText);
+					}
+				};
+				request.error = function(e){
+					console.log(e);
+				};
+				request.send(formData);
 			}
 			
 		}]);
