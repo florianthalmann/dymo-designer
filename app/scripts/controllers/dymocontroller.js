@@ -11,11 +11,23 @@
 			
 			$scope.featureLoadingThreads = 0;
 			
-			$scope.store = new DymoStore();
-			$scope.manager = new DymoManager($scope.audioContext);
+			$scope.store = new DymoStore(function(){
+				/* TEST
+				var directory = 'input/25435__insinger__free-jazz-text_wav/'
+				var filename = '25435__insinger__free-jazz-text.wav'
+				Benchmarker.startTask("getFiles")
+				$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
+					addDymo(directory, filename, featureFiles, function() {
+						$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
+							console.log("DONE")
+						});
+					})
+				});*/
+			});
+			$scope.manager = new DymoManager($scope.audioContext, undefined, undefined, undefined, onPlaybackChange);
 			$scope.generator = new DymoGenerator($scope.store, adjustViewConfig, onGraphsChanged);
 			
-			$scope.featureModes = [{name:MEAN}, {name:MEDIAN}, {name:FIRST}];
+			$scope.featureModes = [{name:SUMMARY.MEAN}, {name:SUMMARY.MEDIAN}, {name:SUMMARY.FIRST}];
 			
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
@@ -75,19 +87,6 @@
 				});
 			}
 			
-			/* TEST
-			var directory = 'input/25435__insinger__free-jazz-text_wav/'
-			Benchmarker.startTask("getFiles")
-			$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(data) {
-				var beatFeature = data.filter(function(f){return f.indexOf('beat') >= 0;});
-				var otherFeatures = data.filter(function(f){return f.indexOf('beat') < 0;});
-				var features = beatFeature.concat(otherFeatures);
-				features = features.map(function(f){return directory+f});
-				DymoTemplates.createAnnotatedBarAndBeatDymo($scope.generator, features, function() {
-					//console.log($scope.generator.getDymoGraph())
-				});
-			});*/
-			
 			$scope.addDymo = function() {
 				/*var selectedSourceName = $scope.selectedSource.split('.')[0];
 				var uris = [];
@@ -139,11 +138,11 @@
 			}
 			
 			$scope.play = function() {
-				playDymo($scope.generator.dymo);
+				$scope.manager.startPlaying();
 			}
 			
 			$scope.stop = function() {
-				stopDymo($scope.generator.dymo);
+				$scope.manager.stopPlaying();
 			}
 			
 			$scope.dymoOnClick = function(dymo){
@@ -157,18 +156,6 @@
 				$scope.$apply();
 			}
 			
-			function playDymo(dymo) {
-				if (dymo) {
-					$scope.scheduler.play(dymo);
-				}
-			}
-			
-			function stopDymo(dymo) {
-				if (dymo) {
-					$scope.scheduler.stop(dymo);
-				}
-			}
-			
 			function onGraphsChanged() {
 				Benchmarker.startTask("graphsChanged")
 				$scope.dymoGraph = $scope.generator.getDymoGraph();
@@ -180,8 +167,8 @@
 				}, 10);
 			}
 			
-			function onPlaybackChange() {
-				$scope.urisOfPlayingDymos = scheduler.getUrisOfPlayingDymos();
+			function onPlaybackChange(urisOfPlayingDymos) {
+				$scope.urisOfPlayingDymos = urisOfPlayingDymos;
 				setTimeout(function() {
 					$scope.$apply();
 				}, 10);

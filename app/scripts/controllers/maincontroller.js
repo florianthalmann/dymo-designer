@@ -11,7 +11,7 @@
 			$scope.selectedView = $scope.views[0];
 			
 			$scope.availableFeatures = [
-				{name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:false},
+				{name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:true},
 				{name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:false},
 				{name:'onsets', plugin:'vamp:qm-vamp-plugins:qm-onsetdetector:onsets', selected:false},
 				{name:'amplitude', plugin:'vamp:vamp-example-plugins:amplitudefollower:amplitude', selected:true},
