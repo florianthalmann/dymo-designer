@@ -27,8 +27,6 @@
 			$scope.manager = new DymoManager($scope.audioContext, undefined, undefined, undefined, onPlaybackChange);
 			$scope.generator = new DymoGenerator($scope.store, adjustViewConfig, onGraphsChanged);
 			
-			$scope.featureModes = [{name:SUMMARY.MEAN}, {name:SUMMARY.MEDIAN}, {name:SUMMARY.FIRST}];
-			
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
 				return {name:name, param:$scope.generator.getFeatures()[1], log:false};
@@ -62,9 +60,11 @@
 				var subsetConditions = [];
 				for (var i = 0; i < $scope.availableFeatures.length; i++) {
 					if ($scope.availableFeatures[i].selected) {
-						var currentFeatureFile = featureFiles.filter(function(f){return f.indexOf($scope.availableFeatures[i].name) >= 0;});
-						orderedFiles.push(currentFeatureFile);
-						subsetConditions.push($scope.availableFeatures[i].subset);
+						var currentFeatureFile = featureFiles.filter(function(f){return f.indexOf($scope.availableFeatures[i].name) >= 0;})[0];
+						if (currentFeatureFile) {
+							orderedFiles.push(currentFeatureFile);
+							subsetConditions.push($scope.availableFeatures[i].subset);
+						}
 					}
 				}
 				orderedFiles = orderedFiles.map(function(f){return directory+f});
@@ -161,6 +161,7 @@
 				$scope.dymoGraph = $scope.generator.getDymoGraph();
 				$scope.similarityGraph = $scope.generator.getSimilarityGraph();
 				console.log($scope.dymoGraph)
+				console.log($scope.similarityGraph)
 				setTimeout(function() {
 					$scope.$apply();
 					Benchmarker.print()

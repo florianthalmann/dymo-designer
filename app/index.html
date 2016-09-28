@@ -14,6 +14,7 @@
 	<!--script src="bower_components/dymo-generator/dist/dymo-generator.min.js"></script-->
 	<script src="bower_components/dymo-generator/src/dymo-generator.js"></script>
 	<script src="bower_components/dymo-generator/src/dymo-templates.js"></script>
+	<script src="bower_components/dymo-generator/src/similarity.js"></script>
 	<script src="bower_components/dymo-generator/src/feature-loader.js"></script>
 	<script src="bower_components/dymo-generator/src/globals.js"></script>
 	<script src="bower_components/benchmarker/benchmarker.js"></script>
@@ -39,21 +40,20 @@
 				<select ng-init="selectedActivity = activities[0]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
 				<button ng-click="play()">Play</button>
 				<button ng-click="stop()">Stop</button>
-			</div>
-			<div ng-show="selectedActivity == activities[0]">
-				<button ng-click="showFeatureDialog()">Select Features</button>
-				<!--button ng-click="addDymo()">Add Dymo</button>
-				<button ng-click="loadDymo()">Load Dymo</button>
-				<span>folder:</span>
-				<select ng-model="selectedFolder" ng-options="s for s in inputFolders" ng-change="sourceSelected()"></select>
-				<span>feature:</span>
-				<select ng-model="selectedFeature" ng-options="f for f in featureFiles"></select>
-				<span>condition:</span>
-				<input type="text" ng-model="labelCondition" size="2"></input-->
-				<span>mode:</span>
-				<select ng-init="selectedFeatureMode = featureModes[0]" ng-model="selectedFeatureMode" ng-options="m.name for m in featureModes"></select>
-				<!--button ng-click="loadFeature()">Add Features</button-->
-				<button ng-click="save()">Save</button>
+				<div ng-show="selectedActivity == activities[0]">
+					<button ng-click="showFeatureDialog()">Select Features</button>
+					<!--button ng-click="addDymo()">Add Dymo</button>
+					<button ng-click="loadDymo()">Load Dymo</button>
+					<span>folder:</span>
+					<select ng-model="selectedFolder" ng-options="s for s in inputFolders" ng-change="sourceSelected()"></select>
+					<span>feature:</span>
+					<select ng-model="selectedFeature" ng-options="f for f in featureFiles"></select>
+					<span>condition:</span>
+					<input type="text" ng-model="labelCondition" size="2"></input-->
+					<!--button ng-click="loadFeature()">Add Features</button-->
+					<button ng-click="load()">Load</button>
+					<button ng-click="save()">Save</button>
+				</div>
 			</div>
 			<div ng-controller="RenderingController" ng-show="selectedActivity == activities[1]">
 				<div>
@@ -106,7 +106,7 @@
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
 				<span>view:</span>
-				<select ng-init="selectedView = views[0]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<select ng-model="selectedView" ng-options="v.name for v in views"></select>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in features"></select>

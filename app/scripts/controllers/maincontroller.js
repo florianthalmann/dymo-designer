@@ -7,20 +7,24 @@
 			$scope.dymoPath = '/save/test/';
 			$scope.activities = [{name:"Features"}, {name:"Mappings"}, {name:"View"}];
 			
-			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Blocks"}, {name:"Dymo Arches"}, {name:"Dymo Graph"}, {name:"Similarity Graph"}, {name: "Mappings"}];
-			$scope.selectedView = $scope.views[0];
+			$scope.views = [{name:"Dymo Axes"}, {name:"Dymo Blocks"}, {name:"Dymo Arcs"}, {name:"Dymo Graph"}, {name:"Similarity Graph"}, {name:"Mappings"}];
+			$scope.selectedView = $scope.views[2];
 			
 			$scope.availableFeatures = [
+				{name:'sections', plugin:'vamp:qm-vamp-plugins:qm-segmenter:segmentation', selected:false},
 				{name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:true},
 				{name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:false},
 				{name:'onsets', plugin:'vamp:qm-vamp-plugins:qm-onsetdetector:onsets', selected:false},
-				{name:'amplitude', plugin:'vamp:vamp-example-plugins:amplitudefollower:amplitude', selected:true},
-				//{name:'chroma', plugin:'vamp:qm-vamp-plugins:qm-chromagram:chromagram', selected:true},
+				{name:'amplitude', plugin:'vamp:vamp-example-plugins:amplitudefollower:amplitude', selected:false},
+				{name:'chords', plugin:'vamp:nnls-chroma:chordino:simplechord', selected:false},
+				{name:'chroma', plugin:'vamp:qm-vamp-plugins:qm-chromagram:chromagram', selected:true},
 				{name:'logcentroid', plugin:'vamp:vamp-example-plugins:spectralcentroid:logcentroid', selected:true},
-				//{name:'mfcc', plugin:'vamp:qm-vamp-plugins:qm-mfcc:coefficients', selected:true},
+				{name:'mfcc', plugin:'vamp:qm-vamp-plugins:qm-mfcc:coefficients', selected:true},
 				{name:'melody', plugin:'vamp:mtg-melodia:melodia:melody', selected:false},
 				{name:'pitch', plugin:'vamp:vamp-aubio:aubiopitch:frequency', selected:false}
 			];
+			$scope.featureModes = [{name:SUMMARY.MEAN}, {name:SUMMARY.MEDIAN}, {name:SUMMARY.FIRST}];
+			$scope.addSimilarity = {selected:true};
 			
 			$scope.showFeatureDialog = function () {
 				ngDialog.open({ template: '<div>\
@@ -29,8 +33,15 @@
 						{{f.name}}\
 						<input type="checkbox" ng-model="f.selected" ng-change="updateSelectedFeatures()"></input>\
 					</div>\
+					<div>\
+						<span>summarizing mode</span>\
+						<select ng-init="selectedFeatureMode = featureModes[0]" ng-model="selectedFeatureMode" ng-options="m.name for m in featureModes"></select>\
+					</div>\
+					<h1>Add Similarity</h1>\
+					cosine similarity\
+					<input type="checkbox" ng-model="addSimilarity.selected"></input>\
 				</div>',
-				plain:true, 
+				plain:true,
 				scope:$scope});
 			};
 			
