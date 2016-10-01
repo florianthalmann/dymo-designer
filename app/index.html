@@ -30,6 +30,7 @@
 	<script src="bower_components/music-visualization/dymoarcs.js"></script>
 	<script src="bower_components/music-visualization/dymograph.js"></script>
 	<script src="bower_components/music-visualization/dymocoordinates.js"></script>
+	<script src="bower_components/music-visualization/helper.js"></script>
 </head>
 <body ng-app="dymoDesigner">
 	<div ng-controller="MainController">
@@ -37,20 +38,11 @@
 		<div ng-controller="DymoController">
 			<div>
 				<span>activity:</span>
-				<select ng-init="selectedActivity = activities[0]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
+				<select ng-init="selectedActivity = activities[2]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
 				<button ng-click="play()">Play</button>
 				<button ng-click="stop()">Stop</button>
 				<div ng-show="selectedActivity == activities[0]">
 					<button ng-click="showFeatureDialog()">Select Features</button>
-					<!--button ng-click="addDymo()">Add Dymo</button>
-					<button ng-click="loadDymo()">Load Dymo</button>
-					<span>folder:</span>
-					<select ng-model="selectedFolder" ng-options="s for s in inputFolders" ng-change="sourceSelected()"></select>
-					<span>feature:</span>
-					<select ng-model="selectedFeature" ng-options="f for f in featureFiles"></select>
-					<span>condition:</span>
-					<input type="text" ng-model="labelCondition" size="2"></input-->
-					<!--button ng-click="loadFeature()">Add Features</button-->
 					<button ng-click="load()">Load</button>
 					<button ng-click="save()">Save</button>
 				</div>
@@ -105,8 +97,12 @@
 				</div>
 			</div>
 			<div ng-show="selectedActivity == activities[2]">
-				<span>view:</span>
-				<select ng-model="selectedView" ng-options="v.name for v in views"></select>
+				<div>
+					<span>view:</span>
+					<select ng-init="selectedView = views[3]" ng-model="selectedView" ng-options="v.name for v in views"></select>
+					<span>relation:</span>
+					<select ng-init="selectedRelation = relations[0]" ng-model="selectedRelation" ng-options="r.name for r in relations" ng-change="updateGraph()"></select>
+				</div>
 				<span ng-repeat="v in viewConfig">
 					<span>{{v.name}}:</span>
 					<select ng-model="v.param" ng-options="p.name for p in features"></select>
@@ -114,21 +110,17 @@
 				</span>
 			</div>
 			<div dropzone>
-			<!--div class="fileDropper" file-dropzone="[image/png, image/jpeg, image/gif]" file="image" file-name="imageFileName" data-max-file-size="3"-->
 				<div ng-if="selectedView == views[0]">
-					<dymo-coordinates data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-coordinates>
+					<dymo-coordinates data="currentGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-coordinates>
 				</div>
 				<div ng-if="selectedView == views[1]">
-					<dymo-blocks data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-blocks>
+					<dymo-arcs data="currentGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-arcs>
 				</div>
 				<div ng-if="selectedView == views[2]">
-					<dymo-arcs data="similarityGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-arcs>
+					<dymo-blocks data="currentGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-blocks>
 				</div>
 				<div ng-if="selectedView == views[3]">
-					<dymo-graph data="dymoGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
-				</div>
-				<div ng-if="selectedView == views[4]">
-					<dymo-graph data="similarityGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
+					<dymo-graph data="currentGraph" viewconfig="viewConfig" playing="urisOfPlayingDymos" label="name" on-click="dymoOnClick(item)"></dymo-graph>
 				</div>
 				<div ng-if="selectedView == views[5]">
 					<mappings-painter data="areas" viewconfig="viewConfig" playing="getUrisOfPlayingDymos" label="name" on-click="areaOnClick(item)" add-point="addPointToArea(item)" finish-area="finishArea()"></mappings-painter>

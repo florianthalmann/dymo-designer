@@ -9,36 +9,50 @@
 			window.AudioContext = window.AudioContext || window.webkitAudioContext;
 			$scope.audioContext = new AudioContext();
 			
-			$scope.featureLoadingThreads = 0;
-			
-			$scope.store = new DymoStore(function(){
-				/* TEST
-				var directory = 'input/25435__insinger__free-jazz-text_wav/'
-				var filename = '25435__insinger__free-jazz-text.wav'
-				Benchmarker.startTask("getFiles")
-				$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
-					addDymo(directory, filename, featureFiles, function() {
-						$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
-							console.log("DONE")
-						});
-					})
-				});*/
+			$scope.store = new DymoStore(function() {
+				init();
+				initTest();
 			});
 			$scope.manager = new DymoManager($scope.audioContext, undefined, undefined, undefined, onPlaybackChange);
-			$scope.generator = new DymoGenerator($scope.store, adjustViewConfig, onGraphsChanged);
+			$scope.generator = new DymoGenerator($scope.store, adjustViewConfig);
 			
 			$scope.viewConfig = {xAxis:createConfig("x-axis"), yAxis:createConfig("y-axis"), size:createConfig("size"), color:createConfig("color")};
 			function createConfig(name) {
 				return {name:name, param:$scope.generator.getFeatures()[1], log:false};
 			}
 			
-			var maxDepth = 0;
-			
-			$scope.dymoGraph = {"nodes":[], "links":[]};
-			$scope.similarityGraph = {"nodes":[], "links":[]};
+			$scope.currentGraph = {"nodes":[], "edges":[]};
 			$scope.urisOfPlayingDymos = [];
 			
-			$http.get('getfoldersindir/', {params:{directory:inputDir}}).success(function(folders) {
+			function init() {
+				updateRelations([HAS_PART, HAS_SIMILAR, HAS_SUCCESSOR]);
+				setTimeout(function() {
+					$scope.$apply();
+				}, 10);
+			}
+			
+			function updateRelations(uris) {
+				$scope.relations = [];
+				for (var i = 0; i < uris.length; i++) {
+					$scope.relations.push({name:uris[i].slice(uris[i].lastIndexOf('#')+1), uri:uris[i]});
+				}
+				$scope.selectedRelation = $scope.relations[0];
+			}
+			
+			function initTest() {
+				var directory = 'input/fugue_m4a/';//'input/25435__insinger__free-jazz-text_wav/'
+				var filename = 'fugue.m4a';//'25435__insinger__free-jazz-text.wav'
+				Benchmarker.startTask("getFiles")
+				$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
+					addDymo(directory, filename, featureFiles, function() {
+						$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
+							$scope.updateGraph();
+						});
+					})
+				});
+			}
+			
+			/*$http.get('getfoldersindir/', {params:{directory:inputDir}}).success(function(folders) {
 				$scope.inputFolders = folders;
 				$scope.selectedFolder = folders[0];
 				$scope.sourceSelected();
@@ -53,7 +67,7 @@
 					$scope.featureFiles = data;
 					$scope.selectedFeature = data[0];
 				});
-			}
+			}*/
 			
 			function addDymo(directory, sourceFile, featureFiles, callback) {
 				var orderedFiles = [];
@@ -68,7 +82,7 @@
 					}
 				}
 				orderedFiles = orderedFiles.map(function(f){return directory+f});
-				DymoTemplates.createSingleSourceDymoFromFeatures($scope.generator, directory+sourceFile, orderedFiles, subsetConditions, function() {
+				DymoTemplates.createSimilaritySuccessorDymoFromFeatures($scope.generator, directory+sourceFile, orderedFiles, subsetConditions, function() {
 					callback();
 				});
 			}
@@ -80,7 +94,7 @@
 					$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
 						addDymo(directory, file.name, featureFiles, function() {
 							$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
-								console.log("DONE")
+								
 							});
 						})
 					});
@@ -156,16 +170,16 @@
 				$scope.$apply();
 			}
 			
-			function onGraphsChanged() {
+			$scope.updateGraph = function() {
 				Benchmarker.startTask("graphsChanged")
-				$scope.dymoGraph = $scope.generator.getDymoGraph();
-				$scope.similarityGraph = $scope.generator.getSimilarityGraph();
-				console.log($scope.dymoGraph)
-				console.log($scope.similarityGraph)
-				setTimeout(function() {
-					$scope.$apply();
-					Benchmarker.print()
-				}, 10);
+				$scope.store.toJsonGraph(DYMO, $scope.selectedRelation.uri, function(graph) {
+					$scope.currentGraph = graph;
+					console.log($scope.currentGraph)
+					setTimeout(function() {
+						$scope.$apply();
+						Benchmarker.print();
+					}, 10);
+				});
 			}
 			
 			function onPlaybackChange(urisOfPlayingDymos) {
