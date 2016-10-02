@@ -5,22 +5,22 @@
 		.controller('MainController', ['$scope', '$http', 'ngDialog', function($scope, $http, ngDialog) {
 			
 			$scope.dymoPath = '/save/test/';
-			$scope.activities = [{name:"Structure"}, {name:"Mapping"}, {name:"Visualization"}];
+			$scope.activities = [{name:"Structure"}, {name:"Mapping"}, {name:"Visualization"}, {name:"Rendering"}];
 			
 			$scope.views = [{name:"Axes"}, {name:"Arcs"}, {name:"Blocks"}, {name:"Graph"}, {name:"Mappings"}];
 			
 			$scope.availableFeatures = [
 				{name:'sections', plugin:'vamp:qm-vamp-plugins:qm-segmenter:segmentation', selected:true},
-				{name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:false},
-				{name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:false},
+				{name:'bars', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', subset:'1', selected:true},
+				{name:'beats', plugin:'vamp:qm-vamp-plugins:qm-barbeattracker:beats', selected:true},
 				{name:'onsets', plugin:'vamp:qm-vamp-plugins:qm-onsetdetector:onsets', selected:false},
-				{name:'logcentroid', plugin:'vamp:vamp-example-plugins:spectralcentroid:logcentroid', selected:false},
+				{name:'logcentroid', plugin:'vamp:vamp-example-plugins:spectralcentroid:logcentroid', selected:true},
 				{name:'melody', plugin:'vamp:mtg-melodia:melodia:melody', selected:false},
-				{name:'pitch', plugin:'vamp:vamp-aubio:aubiopitch:frequency', selected:false},
-				{name:'mfcc', plugin:'vamp:qm-vamp-plugins:qm-mfcc:coefficients', selected:true},
+				{name:'pitch', plugin:'vamp:vamp-aubio:aubiopitch:frequency', selected:true},
+				{name:'mfcc', plugin:'vamp:qm-vamp-plugins:qm-mfcc:coefficients', selected:false},
 				{name:'amplitude', plugin:'vamp:vamp-example-plugins:amplitudefollower:amplitude', selected:true},
-				{name:'chroma', plugin:'vamp:qm-vamp-plugins:qm-chromagram:chromagram', selected:true},
-				{name:'chords', plugin:'vamp:nnls-chroma:chordino:simplechord', selected:true}
+				{name:'chroma', plugin:'vamp:qm-vamp-plugins:qm-chromagram:chromagram', selected:false},
+				{name:'chords', plugin:'vamp:nnls-chroma:chordino:simplechord', selected:false}
 			];
 			$scope.featureModes = [{name:SUMMARY.MEAN}, {name:SUMMARY.MEDIAN}, {name:SUMMARY.FIRST}];
 			$scope.addSimilarity = {selected:true};

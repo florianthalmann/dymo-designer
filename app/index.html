@@ -37,8 +37,8 @@
 		<h1>Dymo Designer</h1>
 		<div ng-controller="DymoController">
 			<div>
-				<span>activity:</span>
-				<select ng-init="selectedActivity = activities[2]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
+				<span>mode:</span>
+				<select ng-init="selectedActivity = activities[1]" ng-model="selectedActivity" ng-options="a.name for a in activities"></select>
 				<button ng-click="play()">Play</button>
 				<button ng-click="stop()">Stop</button>
 				<div ng-show="selectedActivity == activities[0]">
@@ -48,52 +48,21 @@
 				</div>
 			</div>
 			<div ng-controller="RenderingController" ng-show="selectedActivity == activities[1]">
+				<button ng-click="showMappingDialog()">Add Mapping</button>
+				<button ng-click="save()">Save</button>
 				<div>
-					<span>type:</span>
-					<select ng-init="selectedMappingType = mappingTypes[0]" ng-model="selectedMappingType" ng-options="t.name for t in mappingTypes"></select>
-					<span ng-show="selectedMappingType == mappingTypes[0]">
-						feature:
-						<select ng-init="selectedFeature = features[0]" ng-model="selectedFeature" ng-options="p.name for p in features"></select>
-					</span>
-					<span ng-show="selectedMappingType == mappingTypes[1]">
-						control:
-						<select ng-model="selectedControl" ng-options="c.name for c in uiControls"></select>
-					</span>
-					<span ng-show="selectedMappingType == mappingTypes[2]">
-						control:
-						<select ng-init="selectedControlType = controls[0]" ng-model="selectedControlType" ng-options="c.name for c in controls"></select>
-						name:
-						<input type="text" ng-model="controlName" size="10"></input>
-					</span>
-					<button ng-click="addDomainDim()">Add Domain Dimension</button>
-					<span>available: </span>
-					<span ng-repeat="d in currentDomainDims">
-						<span>{{d.variable}} = {{d.name}}{{$last ? '' : ', '}}</span>
-					</span>
-				</div>
-				<div>
-					<span>function: y = </span>
-					<input type="text" ng-model="mappingFunction" size="20"></input>
-					<span>parameter:</span>
-					<select ng-init="selectedParameter = parameters[0]" ng-model="selectedParameter" ng-options="p.name for p in parameters"></select>
-					<span>level:</span>
-					<input type="text" ng-init="mappingLevel = 1" ng-model="mappingLevel" size="2"></input>
-					<button ng-click="addMapping()">Add Mapping</button>
-					<button ng-click="save()">Save</button>
-				</div>
-				<div>
-					Mappings: 
 					<span ng-repeat="m in currentMappings">
-						{{getFunctionReturnString(m.function)}} :
+						{{m.functionJson.body}} :
 						<span ng-repeat="d in m.domainDims">
-							{{d.name}}{{$last ? '' : ', '}}
+							{{d.name ? d.name : d.slice(d.lastIndexOf('#')+1)}}{{$last ? '' : ', '}}
 						</span>
-						-> {{m.parameter}}{{$last ? '' : ', '}}
+						-> {{m.parameterName.slice(m.parameterName.lastIndexOf('#')+1)}}
+						<br>
 					</span>
 				</div>
 				<div ng-repeat="u in uiControls">
-					{{u.name}}
-					<input type="range" name="slider" min="0" max="1" step=".001" ng-model="u.value" ng-change="u.updateMappings()">
+					{{u.getName()}}
+					<input type="range" name="slider" min="0" max="1" step=".001" ng-model="u.value" ng-change="u.update()">
 				</div>
 			</div>
 			<div ng-show="selectedActivity == activities[2]">

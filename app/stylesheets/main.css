@@ -17,6 +17,8 @@ h1, body, button, input, select, .ngdialog.ngdialog-theme-default .ngdialog-cont
 
 h1 { font-size: 200%; }
 
+p {white-space: pre-wrap; font-size: 100%; text-align: left; padding:0px 0px}
+
 button, input, select {
 	-moz-border-radius:12px;
 	-webkit-border-radius:12px;

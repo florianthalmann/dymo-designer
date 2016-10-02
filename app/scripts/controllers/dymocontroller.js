@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular.module('dymoDesigner.controllers')
-		.controller('DymoController', ['$scope', '$http', function($scope, $http){
+		.controller('DymoController', ['$scope', '$http', 'ngDialog', function($scope, $http, ngDialog) {
 			
 			var inputDir = 'input/';
 			
@@ -25,18 +25,38 @@
 			$scope.urisOfPlayingDymos = [];
 			
 			function init() {
-				updateRelations([HAS_PART, HAS_SIMILAR, HAS_SUCCESSOR]);
+				updateRelations();
+				initControlsAndParameters();
 				setTimeout(function() {
 					$scope.$apply();
 				}, 10);
 			}
 			
-			function updateRelations(uris) {
-				$scope.relations = [];
-				for (var i = 0; i < uris.length; i++) {
-					$scope.relations.push({name:uris[i].slice(uris[i].lastIndexOf('#')+1), uri:uris[i]});
-				}
+			function updateRelations() {
+				$scope.relations = createItemsFromUris($scope.store.findDymoRelations());
 				$scope.selectedRelation = $scope.relations[0];
+			}
+			
+			function initControlsAndParameters() {
+				$scope.controls = [];
+				var controlClasses = $scope.store.findAllSubClasses(MOBILE_CONTROL).reverse();
+				for (var i = 0; i < controlClasses.length; i++) {
+					$scope.controls = $scope.controls.concat(createItemsFromUris($scope.store.findAllSubClasses(controlClasses[i])).reverse());
+				}
+				$scope.uiControls = {};
+				$scope.parameters = [];
+				var parameterClasses = $scope.store.findAllSubClasses(PARAMETER_TYPE).reverse();
+				for (var i = 0; i < parameterClasses.length; i++) {
+					$scope.parameters = $scope.parameters.concat(createItemsFromUris($scope.store.findAllSubjectUris(TYPE, parameterClasses[i])).reverse());
+				}
+			}
+			
+			function createItemsFromUris(uris) {
+				var items = [];
+				for (var i = 0; i < uris.length; i++) {
+					items.push({name:uris[i].slice(uris[i].lastIndexOf('#')+1), uri:uris[i]});
+				}
+				return items;
 			}
 			
 			function initTest() {
@@ -51,23 +71,6 @@
 					})
 				});
 			}
-			
-			/*$http.get('getfoldersindir/', {params:{directory:inputDir}}).success(function(folders) {
-				$scope.inputFolders = folders;
-				$scope.selectedFolder = folders[0];
-				$scope.sourceSelected();
-			});
-			
-			$scope.sourceSelected = function() {
-				//$scope.scheduler.addSourceFile($scope.selectedSource);
-				if ($scope.generator.getDymoGraph().nodes.length > 0) {
-					$scope.generator.setAudioFileChanged();
-				}
-				$http.get('getfeaturefilesindir/', {params:{directory:inputDir+$scope.selectedFolder}}).success(function(data) {
-					$scope.featureFiles = data;
-					$scope.selectedFeature = data[0];
-				});
-			}*/
 			
 			function addDymo(directory, sourceFile, featureFiles, callback) {
 				var orderedFiles = [];
@@ -94,10 +97,19 @@
 					$http.get('getfeaturefilesindir/', {params:{directory:directory}}).success(function(featureFiles) {
 						addDymo(directory, file.name, featureFiles, function() {
 							$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
-								
+								$scope.updateGraph();
 							});
 						})
 					});
+				});
+			}
+			
+			$scope.reloadFromStore = function() {
+				$scope.manager.loadDymoAndRenderingFromStore($scope.store, function() {
+					$scope.currentMappings = $scope.manager.getRendering().getMappings();
+					$scope.uiControls = $scope.manager.getUIControls();
+					//console.log($scope.uiControls)
+					//$scope.updateGraph();
 				});
 			}
 			
@@ -160,15 +172,29 @@
 			}
 			
 			$scope.dymoOnClick = function(dymo){
-				if ($scope.selectedDymo != dymo) {
-					$scope.selectedDymo = dymo;
+				if ($scope.selectedActivity.name == "Rendering") {
 					$scope.manager.startPlayingUri(CONTEXT_URI+dymo["@id"]);
 				} else {
-					$scope.selectedDymo = null;
-					$scope.manager.stopPlayingUri(CONTEXT_URI+dymo["@id"]);
+					showDymoDialog(dymo);
 				}
 				$scope.$apply();
 			}
+			
+			function showDymoDialog(dymoCode) {
+				ngDialog.open({ template: '<p>'+JSON.stringify(dymoCode, removeVisualAttributes, 6)+'</p>',
+					plain:true,
+					scope:$scope
+				});
+			};
+			
+			function removeVisualAttributes(key, value) {
+				// Filtering out properties
+				if (["index","weight","x","y","px","py","fixed","parts"].indexOf(key) >= 0) {
+					return undefined;
+				}
+				return value;
+			}
+			
 			
 			$scope.updateGraph = function() {
 				Benchmarker.startTask("graphsChanged")
